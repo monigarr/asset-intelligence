@@ -1,253 +1,141 @@
-<div id="top"></div>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
+# Asset Intelligence
 
+**Open-source multimodal AI for infrastructure asset intelligence.**
 
+> **Status: Work in Progress · Initial Repository Commit**
+>
+> This repository is at the beginning of development. The project scope, architecture, implementation, and evaluation are evolving. Features described below are planned, not claims of completed functionality.
 
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+## Overview
 
+Asset Intelligence is an open-source project exploring how multimodal AI can help turn infrastructure inspection evidence into structured, reviewable asset information.
 
+The intended workflow combines inspection photographs, maintenance notes, and relevant asset context to produce structured observations, identify missing information, and prepare draft maintenance findings for human review.
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
+The goal is to go beyond image captioning by exploring a verifiable, multi-step AI workflow with structured outputs, validation, traceable evidence, and human oversight.
 
-  <h3 align="center">Best-README-Template</h3>
+Development will use **Meta AI models** as a core part of the workflow.
 
-  <p align="center">
-    An awesome README template to jumpstart your projects!
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
-    ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Request Feature</a>
-  </p>
-</div>
+## Project Goals
 
+- **Multimodal interpretation:** Explore how AI can connect visual inspection evidence with written maintenance notes.
+- **Structured extraction:** Convert relevant observations into consistent, machine-readable data.
+- **Evidence traceability:** Keep findings linked to their supporting inputs and distinguish observations from assumptions.
+- **Validation and uncertainty:** Check required fields, identify missing context, and flag results that need further review.
+- **Human oversight:** Prepare draft findings and maintenance actions for review rather than treating model output as authoritative.
+- **Integration:** Explore a clearly separated integration layer for connecting to asset-management systems through authenticated APIs.
 
+## Development Status
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
+This is the first public repository commit. The project is under active development, and the following items represent the intended development direction.
 
+- [ ] Define the initial use case and data schema.
+- [ ] Establish the application architecture and API boundaries.
+- [ ] Integrate a Meta model for the selected multimodal workflow.
+- [ ] Build an initial inspection-evidence processing pipeline.
+- [ ] Add structured-output validation and missing-evidence checks.
+- [ ] Implement a human-review step.
+- [ ] Create synthetic sample data and reproducible tests.
+- [ ] Demonstrate the workflow from input evidence to a reviewable result.
+- [ ] Evaluate output quality, traceability, and failure cases.
+- [ ] Document setup, configuration, and usage as the implementation develops.
 
+The checklist will be updated as work is completed. Planned features should not be interpreted as implemented or production-ready.
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
+## Architecture Direction
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+The intended workflow is:
 
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+1. **Input:** Receive an inspection photograph, maintenance note, or other authorized asset evidence.
+2. **Interpretation:** Use a Meta model to analyze the relevant input.
+3. **Context:** Associate the evidence with relevant asset information when available and authorized.
+4. **Validation:** Check the output against a defined schema and identify missing or uncertain information.
+5. **Review:** Present evidence-linked findings and draft actions for human review.
+6. **Integration:** Where configured, pass approved data through an authenticated integration boundary.
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should implement DRY principles to the rest of your life :smile:
+This workflow is a design direction, not a description of a completed implementation. The specific models, interfaces, and processing steps will be documented as they are built and tested.
 
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
+## Relationship to Manage Assets
 
-Use the `BLANK_README.md` to get started.
+Asset Intelligence is a separate, public-facing development project intended to explore AI capabilities that may integrate with **Manage Assets**, a proprietary asset-management platform.
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+The separation is deliberate:
 
+- This repository is intended for the open-source AI workflow, integration interfaces, tests, examples, and documentation released here.
+- The proprietary Manage Assets application and its private implementation are outside the scope of this repository.
+- Any connection to Manage Assets will use an explicitly configured, authenticated API boundary where supported.
+- Private source code, credentials, production records, and confidential data must not be committed to this repository.
 
+No access to the proprietary platform is implied by cloning this project. Integration capabilities will be documented once implemented and available for testing.
 
-### Built With
+## Technology
 
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
+**Planned core dependency:** Meta AI models, accessed through an appropriate supported API or model deployment.
 
-* [Next.js](https://nextjs.org/)
-* [React.js](https://reactjs.org/)
-* [Vue.js](https://vuejs.org/)
-* [Angular](https://angular.io/)
-* [Svelte](https://svelte.dev/)
-* [Laravel](https://laravel.com)
-* [Bootstrap](https://getbootstrap.com)
-* [JQuery](https://jquery.com)
+Additional languages, libraries, infrastructure, and model-serving options will be selected and documented as implementation requirements become clear.
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+This initial README does not imply that any particular model, API, framework, or deployment target has already been integrated.
 
-
-
-<!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+The repository is being established. Installation and execution instructions will be added when the initial working implementation and its dependencies are available.
 
-### Prerequisites
+For now, you can:
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+1. Review the project goals and development checklist.
+2. Follow the repository for implementation updates.
+3. Open an issue to discuss a specific technical question or proposed improvement.
 
-### Installation
+No working application, API credentials, or production deployment is promised by this initial commit.
 
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
+## Responsible Use
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/your_username_/Project-Name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
+Infrastructure information can affect operational decisions. Model-generated observations are not verified facts merely because they are presented in structured form.
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+The project intends to emphasize:
 
+- Human review of generated findings.
+- Clear separation between observed evidence and model interpretation.
+- Validation of structured outputs.
+- Explicit handling of missing information and uncertainty.
+- Use of authorized data and appropriately protected credentials.
+- Testing and documentation of limitations.
 
+The project is not intended to replace qualified inspections, engineering judgment, safety procedures, or established maintenance protocols.
 
-<!-- USAGE EXAMPLES -->
-## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- ROADMAP -->
-## Roadmap
-
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-- [ ] Multi-language Support
-    - [ ] Chinese
-    - [ ] Spanish
-
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Early contributions, technical discussion, and focused feedback are welcome as the project takes shape.
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
+Please open an issue before submitting a substantial change so the proposed work can be discussed in the context of the project's scope and architecture.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Contributions must respect the repository's license, data permissions, security requirements, and the separation between this public project and proprietary systems.
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+By submitting a contribution, you agree that it may be distributed under
+the terms of the Apache License, Version 2.0.
 
-
-
-<!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+This project is licensed under the **Apache License, Version 2.0**.
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+- Full license text: [`LICENSE`](LICENSE)
+- Copyright and attribution: [`NOTICE`](NOTICE)
 
+Copyright 2026 Monica Peters.
 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations
+under the License.
 
-<!-- CONTACT -->
-## Contact
+## Project Information
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
+- **Project:** Asset Intelligence
+- **Focus:** Multimodal AI, infrastructure asset intelligence, structured data extraction, and verifiable workflows
+- **Development stage:** Initial public commit
+- **Primary model ecosystem:** Meta AI
 
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
+---
 
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
+*Built as an evolving exploration of practical, evidence-grounded AI for physical infrastructure. Implementation details, evaluation results, and supported integrations will be published as they become available.*
