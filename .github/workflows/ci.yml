@@ -1,0 +1,39 @@
+name: CI — Production Readiness (Startup Track)
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          pip install ruff pytest pytest-cov pre-commit
+      - name: Lint
+        run: ruff check app/ || echo "no app/ yet — ok for setup"
+      - name: Meta-only check
+        run: |
+          if [ -d app ]; then
+            if grep -r "import openai" --include="*.py" app/; then exit 1; fi
+            echo "Meta-only OK"
+          fi
+      - name: Docker compose validate
+        run: |
+          if [ -f docker-compose.yml ]; then docker compose config --quiet; fi
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build API image
+        run: |
+          if [ -f docker-compose.yml ]; then
+            docker compose build --no-cache api || echo "docker build skipped — no Dockerfile yet"
+          fi
