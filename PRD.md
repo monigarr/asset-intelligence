@@ -1,4 +1,4 @@
-# Asset Intelligence — PRD (Hackathon Winner Edition)
+# Asset Intelligence — PRD
 
 - **Project:** Asset Intelligence — Production Multimodal Infrastructure Intelligence Platform
 - **Hackathon:** Meta Global AI Developer Hackathon — Oct 26-Nov 4, 2026
@@ -39,7 +39,7 @@ Asset Intelligence is a Meta-native, verifiable workflow engine:
 - **Pipeline:** SAM 3.1 → Llama 4 Maverick Vision → Muse Spark → Muse Wonder → Validator → Human Review
 - **Output:** Evidence-linked JSON with SAM masks, uncertainty, missing info, and draft next steps — never an auto-executed work order.
 
-### Why Only Meta Can Do This (No OpenAI Needed)
+### Why Only Meta Can Do This
 
 | Capability | Meta Model | Why Meta, Not Competitor |
 | --- | --- | --- |

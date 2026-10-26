@@ -6,8 +6,10 @@ Built 100% with Meta: Muse Spark 1.3 • Muse Wonder • SAM 3.1 • Llama 4 Mav
 
 **One-liner:** We give machines the ability to see infrastructure defects (SAM 3.1), understand field notes (Llama 4 Maverick Vision), reason with evidence (Muse Spark 1.3), and plan safe next steps (Muse Wonder) — turning photos + notes into auditable maintenance intelligence in <8s.
 
+**Not an Anti-Project** This repo is NOT a simple image analyzer or RAG — 5-model verifiable pipeline: SAM 3.1 segmentation masks + Llama 4 Maverick fusion + Muse Spark evidence-linked JSON + Muse Wonder discrepancy detection + Muse Image synthetic eval, fail-closed validator, human review gate.
+
 - [Meta Model API](https://ai.meta.com)
-- [Track]()
+- [Track: Push the Frontier]()
 - [Production Ready]()
 - [Meta Only]()
 
@@ -45,7 +47,7 @@ Full diagram: see `ARCHITECTURE_OPTIMIZED.md`
 **Live:**
 
 ```bash
-git clone https://github.com/your-org/asset-intelligence
+git clone https://github.com/monigarr/asset-intelligence
 cd asset-intelligence
 cp .env.example .env  # add META_API_KEY
 docker compose up --build
