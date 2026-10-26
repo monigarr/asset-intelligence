@@ -1,0 +1,219 @@
+# =============================================================================
+# Asset Intelligence — .gitignore
+#
+# Purpose: keep secrets, credentials, local tooling state, and generated
+# artifacts out of version control. This repository is a public, open-core
+# project; anything committed here is effectively public forever.
+#
+# Order matters: later rules override earlier ones. Negations (!) re-include.
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# 1. Secrets, keys, and credentials — NEVER COMMIT
+# -----------------------------------------------------------------------------
+# Environment files (the only tracked env file should be .env.example)
+.env
+.env.*
+!.env.example
+*.env
+.envrc
+.direnv/
+
+# API keys and tokens stored as files
+*.key
+*.keys
+*.pem
+*.p8
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.csr
+*.srl
+*.cer
+*.der
+*.crt
+
+# Cloud and service credentials
+.aws/
+.gcloud/
+.azure/
+.docker/config.json
+credentials.json
+credentials*.json
+service-account*.json
+*.kdbx
+secrets/
+.secrets/
+*.secret
+*.secrets
+
+# TLS/mTLS material for the optional Manage Assets adapter
+certs/
+certs/**
+*.ovpn
+
+# SSH material, if ever generated inside the workspace
+id_rsa*
+id_ed25519*
+.ssh/
+
+
+# -----------------------------------------------------------------------------
+# 2. Python
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+.python-version
+
+# Test, type-check, and lint caches
+.pytest_cache/
+.tox/
+.nox/
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+.pylint.d/
+.cache/
+*.pyc
+
+# Coverage and test reports
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.cover
+nosetests.xml
+*.mo
+
+
+# -----------------------------------------------------------------------------
+# 3. Node / Vite / React (review UI)
+# -----------------------------------------------------------------------------
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.vite/
+dist-ssr/
+*.local
+.eslintcache
+.stylelintcache
+.cache-loader/
+
+
+# -----------------------------------------------------------------------------
+# 4. Runtime data and local service state
+# -----------------------------------------------------------------------------
+# SQLite demo store, MinIO mask storage, Prometheus/OTEL local state
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+minio-data/
+.minio/
+prometheus-data/
+otel-data/
+data/
+tmp/
+temp/
+
+
+# -----------------------------------------------------------------------------
+# 5. Model weights and large binary artifacts
+# -----------------------------------------------------------------------------
+*.onnx
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+weights/
+models/
+checkpoints/
+
+
+# -----------------------------------------------------------------------------
+# 6. Generated reports and build output
+# -----------------------------------------------------------------------------
+# NOTE: eval/report.json, eval/report.html, and eval/cases/ are intentionally
+# NOT ignored — the hackathon submission checklist requires a committed eval
+# report, and the sample/eval fixtures are synthetic (no PII).
+sbom.txt
+*.local.json
+build-info.json
+
+
+# -----------------------------------------------------------------------------
+# 7. Logs and OS noise
+# -----------------------------------------------------------------------------
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+
+# -----------------------------------------------------------------------------
+# 8. Editors and IDEs
+# -----------------------------------------------------------------------------
+# Keep shared workspace settings if the team standardizes on them; ignore
+# per-user state only.
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*~
+*.code-workspace
