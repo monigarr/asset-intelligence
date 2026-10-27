@@ -11,10 +11,11 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from collections.abc import Sequence
 from typing import Any
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from app.gateway import MetaClient, Settings
 from app.gateway.errors import MetaResponseError
@@ -29,7 +30,11 @@ SPARK_SYSTEM_PROMPT = (
     "Return ONLY valid JSON per schema. "
     "Every observation must cite evidence: image index + mask_id or note span. "
     "Never invent measurements. "
-    "Evidence before inference. Explicit uncertainty over false precision."
+    "Evidence before inference. Explicit uncertainty over false precision. "
+    "List missing_information as short snake_case keys "
+    "(e.g. crack_dimensions, inspection_date), never sentences. "
+    "If no SAM masks exist, cite maintenance_note spans only — never a bare "
+    'image source without a mask_id."'
 )
 
 OBSERVATION_JSON_SCHEMA: dict[str, Any] = {
@@ -72,7 +77,10 @@ OBSERVATION_JSON_SCHEMA: dict[str, Any] = {
                     },
                 },
             },
-            "missing_information": {"type": "array", "items": {"type": "string"}},
+            "missing_information": {
+                "type": "array",
+                "items": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+            },
         },
         "additionalProperties": False,
     },
@@ -91,12 +99,23 @@ class DraftObservation(BaseModel):
     uncertainty: float = Field(ge=0.0, le=1.0)
 
 
+_MISSING_KEY_RE = re.compile(r"^[a-z0-9_]+$")
+
+
 class SparkDraft(BaseModel):
     asset_type: str | None = None
     observations: list[DraftObservation]
     missing_information: list[str] = []
     usage: ChatUsage = ChatUsage()
     model_id: str
+
+    @field_validator("missing_information")
+    @classmethod
+    def _keys_snake_case(cls, items: list[str]) -> list[str]:
+        bad = [s for s in items if not _MISSING_KEY_RE.match(s)]
+        if bad:
+            raise ValueError(f"missing_information keys must be snake_case: {bad}")
+        return items
 
 
 class SparkReasoner:

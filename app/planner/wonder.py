@@ -47,7 +47,10 @@ WONDER_JSON_SCHEMA: dict[str, Any] = {
         "required": ["discrepancies", "missing_information", "recommended_next_step"],
         "properties": {
             "discrepancies": {"type": "array", "items": {"type": "string"}},
-            "missing_information": {"type": "array", "items": {"type": "string"}},
+            "missing_information": {
+                "type": "array",
+                "items": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+            },
             "recommended_next_step": {"type": "string", "minLength": 1},
         },
         "additionalProperties": False,
