@@ -1,0 +1,19 @@
+# Asset Intelligence — runtime dependencies (Meta-only: no openai/anthropic/cohere).
+# Floor pins; sbom.txt freeze lands Day 9 per PRIVATE_DEV_GUIDE.md.
+# NOTE: opentelemetry-instrumentation-fastapi is intentionally unpinned —
+# its 0.x line ships beta tags that a floor pin would exclude from resolution.
+httpx>=0.27
+tenacity>=9.0
+pydantic>=2.0
+python-dotenv>=1.0
+numpy>=1.26
+pillow>=10.0
+fastapi>=0.115
+python-multipart>=0.0.12
+uvicorn>=0.30
+slowapi>=0.1.9
+opentelemetry-api>=1.28
+opentelemetry-sdk>=1.28
+opentelemetry-exporter-otlp-proto-http>=1.28
+opentelemetry-instrumentation-fastapi
+prometheus-client>=0.20

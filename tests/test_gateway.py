@@ -1,0 +1,314 @@
+"""Gateway tests with mocked Meta Model API transport (no network, no key)."""
+
+from __future__ import annotations
+
+import base64
+import json
+import logging
+
+import httpx
+import pytest
+
+from app.gateway.config import Settings
+from app.gateway.errors import (
+    MetaAPIError,
+    MetaAuthError,
+    MetaClientError,
+    MetaResponseError,
+    MetaServerError,
+    MetaTimeoutError,
+)
+from app.gateway.meta_client import MetaClient, parse_retry_after
+
+LOGGER = "asset_intel.gateway"
+JPEG = b"\xff\xd8\xff" + b"\x00" * 100  # minimal JPEG magic
+PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 100
+
+
+def _settings(**overrides: object) -> Settings:
+    kwargs: dict[str, object] = {
+        "api_key": "test-key",
+        "base_url": "https://api.test/v1",
+        "timeout_s": 5.0,
+        "max_retries": 2,
+    }
+    kwargs.update(overrides)
+    return Settings(**kwargs)  # type: ignore[arg-type]
+
+
+def _client(handler: object, **overrides: object) -> MetaClient:
+    return MetaClient(
+        settings=_settings(),
+        transport=httpx.MockTransport(handler),  # type: ignore[arg-type]
+        retry_wait=lambda _state: 0,  # never sleep in tests
+        **overrides,  # type: ignore[arg-type]
+    )
+
+
+def _call_record(caplog: pytest.LogCaptureFixture, status: str = "ok"):
+    records = [
+        r
+        for r in caplog.records
+        if r.name == LOGGER and getattr(r, "status", None) == status
+    ]
+    assert len(records) == 1, f"expected one {status} record, got {len(records)}"
+    return records[0]
+
+
+@pytest.fixture(autouse=True)
+def _capture_gateway_logs(caplog: pytest.LogCaptureFixture):
+    caplog.set_level(logging.INFO, logger=LOGGER)
+
+
+# -- chat ---------------------------------------------------------------
+
+
+def test_chat_success_logs_structured_fields(caplog: pytest.LogCaptureFixture) -> None:
+    seen: dict[str, object] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["auth"] = request.headers["Authorization"]
+        seen["path"] = request.url.path
+        seen["request_id"] = request.headers["X-Request-ID"]
+        return httpx.Response(
+            200,
+            json={
+                "choices": [{"message": {"content": "crack observed"}}],
+                "usage": {
+                    "prompt_tokens": 100,
+                    "completion_tokens": 20,
+                    "total_tokens": 120,
+                },
+            },
+        )
+
+    result = _client(handler).chat(
+        "muse-spark-1.3", [{"role": "user", "content": "hi"}], request_id="req_test1"
+    )
+    assert result.text == "crack observed"
+    assert result.usage.total_tokens == 120
+    assert seen["auth"] == "Bearer test-key"
+    assert seen["path"] == "/v1/chat/completions"
+    assert seen["request_id"] == "req_test1"
+
+    rec = _call_record(caplog)
+    assert rec.request_id == "req_test1"
+    assert rec.model_id == "muse-spark-1.3"
+    assert rec.operation == "chat"
+    assert rec.attempts == 1
+    assert rec.latency_ms >= 0
+    assert rec.total_tokens == 120
+    assert rec.cost_priced is False  # placeholder pricing (pricing.py)
+
+
+def test_chat_with_images_json_format_and_extra() -> None:
+    seen: dict[str, object] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["body"] = json.loads(request.content.decode())
+        return httpx.Response(
+            200, json={"choices": [{"message": {"content": '{"ok": true}'}}]}
+        )
+
+    result = _client(handler).chat(
+        "muse-spark-1.3",
+        [{"role": "user", "content": "describe"}],
+        images=[JPEG],
+        response_format={"type": "json_schema", "json_schema": {"name": "s"}},
+        extra={"sam_masks": [{"mask_id": "mask_1"}]},
+    )
+    assert result.data == {"ok": True}
+
+    body = seen["body"]
+    assert isinstance(body, dict)
+    assert body["response_format"]["type"] == "json_schema"
+    assert body["sam_masks"] == [{"mask_id": "mask_1"}]
+    content = body["messages"][0]["content"]
+    assert content[0] == {"type": "text", "text": "describe"}
+    assert content[1]["image_url"]["url"].startswith("data:image/jpeg;base64,")
+
+
+def test_chat_invalid_json_content_fails_closed_single_attempt() -> None:
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        return httpx.Response(200, json={"choices": [{"message": {"content": "nope"}}]})
+
+    with pytest.raises(MetaResponseError):
+        _client(handler).chat(
+            "muse-spark-1.3",
+            [{"role": "user", "content": "hi"}],
+            response_format={"type": "json_object"},
+        )
+    assert len(calls) == 1  # deterministic failure: no retry
+
+
+def test_chat_non_dict_json_fails_closed() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"choices": [{"message": {"content": "[1]"}}]})
+
+    with pytest.raises(MetaResponseError):
+        _client(handler).chat(
+            "muse-spark-1.3",
+            [{"role": "user", "content": "hi"}],
+            response_format={"type": "json_object"},
+        )
+
+
+# -- retry behavior -----------------------------------------------------
+
+
+def test_rate_limit_then_success(caplog: pytest.LogCaptureFixture) -> None:
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        if len(calls) == 1:
+            return httpx.Response(429, headers={"Retry-After": "0"}, text="slow down")
+        return httpx.Response(200, json={"choices": [{"message": {"content": "ok"}}]})
+
+    result = _client(handler).chat("muse-spark-1.3", [{"role": "user", "content": "hi"}])
+    assert result.text == "ok"
+    assert len(calls) == 2
+    assert _call_record(caplog).attempts == 2
+
+
+def test_persistent_500_retries_twice_then_raises(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        return httpx.Response(500, text="boom")
+
+    with pytest.raises(MetaServerError):
+        _client(handler).chat("muse-spark-1.3", [{"role": "user", "content": "hi"}])
+    assert len(calls) == 3  # initial + 2 retries (ARCHITECTURE.md max 2 retries)
+    rec = _call_record(caplog, status="error")
+    assert rec.error_type == "MetaServerError"
+    assert rec.attempts == 3
+
+
+def test_unauthorized_not_retried() -> None:
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        return httpx.Response(401, text="bad key")
+
+    with pytest.raises(MetaAuthError):
+        _client(handler).chat("muse-spark-1.3", [{"role": "user", "content": "hi"}])
+    assert len(calls) == 1
+
+
+def test_bad_request_not_retried() -> None:
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        return httpx.Response(400, text="bad model")
+
+    with pytest.raises(MetaClientError):
+        _client(handler).chat("nope", [{"role": "user", "content": "hi"}])
+    assert len(calls) == 1
+
+
+def test_timeout_retried_then_raises() -> None:
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        raise httpx.ConnectTimeout("connect timed out")
+
+    with pytest.raises(MetaTimeoutError):
+        _client(handler).chat("muse-spark-1.3", [{"role": "user", "content": "hi"}])
+    assert len(calls) == 3
+
+
+# -- segment / generate_image -------------------------------------------
+
+
+def test_segment_success(caplog: pytest.LogCaptureFixture) -> None:
+    seen: dict[str, object] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["body"] = json.loads(request.content.decode())
+        return httpx.Response(
+            200,
+            json={
+                "masks": [
+                    {
+                        "mask_id": "mask_1",
+                        "label": "crack",
+                        "bbox": [120, 80, 340, 150],
+                        "confidence": 0.87,
+                        "source_image": "image_0",
+                    }
+                ]
+            },
+        )
+
+    masks = _client(handler).segment("sam-3.1", JPEG, ["crack", "corrosion"])
+    assert len(masks) == 1
+    assert masks[0].mask_id == "mask_1"
+    assert masks[0].confidence == 0.87
+    body = seen["body"]
+    assert isinstance(body, dict)
+    assert body["text_prompts"] == ["crack", "corrosion"]
+    assert body["image_mime"] == "image/jpeg"
+    assert _call_record(caplog).mask_count == 1
+
+
+def test_segment_rejects_bad_payload_single_attempt() -> None:
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        return httpx.Response(200, json={"masks": [{"mask_id": "m1"}]})
+
+    with pytest.raises(MetaResponseError):
+        _client(handler).segment("sam-3.1", JPEG, ["crack"])
+    assert len(calls) == 1
+
+
+def test_generate_image_success() -> None:
+    payload = base64.b64encode(PNG).decode("ascii")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/v1/images/generations"
+        return httpx.Response(200, json={"data": [{"b64_json": payload}]})
+
+    result = _client(handler).generate_image("muse-image", "culvert crack")
+    assert result.image_bytes == PNG
+    assert result.mime_type == "image/png"
+
+
+# -- config / helpers ---------------------------------------------------
+
+
+def test_missing_api_key_fails_fast() -> None:
+    with pytest.raises(MetaAuthError, match="META_API_KEY not configured"):
+        Settings.from_env({})
+    with pytest.raises(MetaAuthError, match="META_API_KEY not configured"):
+        Settings.from_env({"META_API_KEY": "sk-meta-REPLACE_ME"})
+    assert isinstance(MetaAuthError("x"), MetaAPIError)
+
+
+def test_parse_retry_after() -> None:
+    assert parse_retry_after(None) is None
+    assert parse_retry_after("  ") is None
+    assert parse_retry_after("3") == 3.0
+    assert parse_retry_after("garbage") is None
+    assert parse_retry_after("Sun, 06 Nov 1994 08:49:37 GMT") == 0.0  # past
+    future = parse_retry_after("Sun, 06 Nov 2034 08:49:37 GMT")
+    assert future is not None and future > 0
+
+
+def test_no_secret_leak_in_logs(caplog: pytest.LogCaptureFixture) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"choices": [{"message": {"content": "ok"}}]})
+
+    _client(handler).chat("muse-spark-1.3", [{"role": "user", "content": "hi"}])
+    assert "test-key" not in caplog.text
