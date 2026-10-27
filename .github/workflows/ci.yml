@@ -16,11 +16,18 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
           pip install pre-commit
       - name: Lint
-        run: ruff check app/ tests/
+        run: ruff check app/ eval/ tests/
       - name: Test with coverage gate
         run: pytest tests/ -q --cov=app --cov-fail-under=70
       - name: Meta-only check
         run: make verify-meta-only
+      - name: SBOM
+        run: pip freeze > sbom.txt
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.txt
 
   ui:
     runs-on: ubuntu-latest
