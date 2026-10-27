@@ -19,7 +19,6 @@ Exit 2 on usage/config errors (bad dir, missing key).
 from __future__ import annotations
 
 import argparse
-import base64
 import json
 import logging
 import math
@@ -39,6 +38,7 @@ from pydantic import ValidationError
 
 from app.gateway import MetaClient, Settings
 from app.gateway.errors import MetaAPIError, MetaAuthError
+from app.gateway.sam_responses import parse_segmentation_output
 from app.orchestrator import InspectionPipeline
 from app.sam_service import decode_coco_rle
 from app.synthetic import EvalCase, build_case_roster
@@ -47,6 +47,11 @@ logger = logging.getLogger("asset_intel.eval")
 
 MOCK_IMAGE_SIZE = (64, 48)
 MOCK_USAGE = {"prompt_tokens": 100, "completion_tokens": 20, "total_tokens": 120}
+# Tiny one_bit mock grammar (85 chars): the mock SAM response. Shaped like
+# the live wire format but trivial to decode, so mocked latency measures
+# pipeline plumbing instead of codec time. Adapter tests use the full-size
+# live capture in tests/fixtures/sam_crack.txt.
+_MOCK_GRAMMAR = (Path(__file__).parent / "mock_grammar.txt").read_text()
 
 GATE_MISSING_F1 = 0.70
 GATE_CONFLICT_F1 = 0.60
@@ -207,24 +212,6 @@ def mock_image_bytes(case_index: int) -> bytes:
     return buf.getvalue()
 
 
-def _mask_for_image_b64(image_b64: str, key: str) -> dict[str, Any]:
-    try:
-        with Image.open(BytesIO(base64.b64decode(image_b64))) as img:
-            img.load()
-            width, height = img.size
-    except (ValueError, OSError):
-        width, height = MOCK_IMAGE_SIZE
-    total = width * height
-    return {
-        "mask_id": f"mask_{key}",
-        "label": "crack",
-        "bbox": [1, 1, max(2, min(5, width - 1)), max(2, min(5, height - 1))],
-        "confidence": 0.9,
-        "rle": {"size": [height, width], "counts": [total]},
-        "source_image": "image_0",
-    }
-
-
 def _chat_response(content: dict[str, Any]) -> httpx.Response:
     return httpx.Response(
         200,
@@ -241,8 +228,33 @@ _MOCK_MISSING = {
 }
 
 
+def _has_image_parts(body: dict[str, Any]) -> bool:
+    """True when a chat payload carries image parts (vision vs reasoning)."""
+    for message in body.get("messages", []):
+        content = message.get("content", [])
+        if isinstance(content, list):
+            for part in content:
+                if isinstance(part, dict) and part.get("type") == "image_url":
+                    return True
+    return False
+
+
 class MockedModelServer:
     """Canned Meta API. Routes by eval request id; unknown ids get clear-suite."""
+
+    def _grammar_response(self) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "status": "completed",
+                "output": [
+                    {
+                        "type": "message",
+                        "content": [{"type": "output_text", "text": _MOCK_GRAMMAR}],
+                    }
+                ],
+            },
+        )
 
     def __init__(self, roster: Sequence[EvalCase]) -> None:
         self._suites = {c.case_id: c.suite for c in roster}
@@ -252,21 +264,20 @@ class MockedModelServer:
         case_id = rid[len("eval-") :] if rid.startswith("eval-") else "default"
         suite = self._suites.get(case_id, "clear")
         key = case_id
-        if request.url.path.endswith("/segment"):
+        if request.url.path.endswith("/responses"):
             try:
                 body = json.loads(request.content.decode())
             except ValueError:
                 return httpx.Response(400, json={"error": "mock: bad json"})
-            return httpx.Response(
-                200, json={"masks": [_mask_for_image_b64(body.get("image", ""), key)]}
-            )
+            if body.get("model") != "sam-3.1":
+                return httpx.Response(
+                    400, json={"error": f"mock: unknown model {body.get('model')}"}
+                )
+            return self._grammar_response()
         if request.url.path.endswith("/chat/completions"):
             body = json.loads(request.content.decode())
             model = body.get("model", "")
-            if model in (
-                "llama-4-maverick-17b-128e-vision",
-                "llama-4-scout-17b-16e-vision",
-            ):
+            if model == "muse-spark-1.3" and _has_image_parts(body):
                 return _chat_response(
                     {
                         "asset_type": "drainage_structure",
@@ -275,7 +286,7 @@ class MockedModelServer:
                             {
                                 "text": f"mock symptom for {key}",
                                 "evidence": [
-                                    {"source": "image_0", "mask_id": f"mask_{key}"},
+                                    {"source": "image_0", "mask_id": "mask_1"},
                                     {"source": "maintenance_note", "span": [0, 5]},
                                 ],
                                 "uncertainty": 0.3,
@@ -291,7 +302,7 @@ class MockedModelServer:
                             {
                                 "text": f"mock observation for {key}",
                                 "evidence": [
-                                    {"source": "image_0", "mask_id": f"mask_{key}"},
+                                    {"source": "image_0", "mask_id": "mask_1"},
                                     {"source": "maintenance_note", "span": [0, 5]},
                                 ],
                                 "uncertainty": 0.3,
@@ -300,7 +311,7 @@ class MockedModelServer:
                         "missing_information": list(_MOCK_MISSING.get(suite, [])),
                     }
                 )
-            if model == "muse-wonder":
+            if model == "muse-wonder-1.0":
                 return _chat_response(
                     {
                         "discrepancies": (
@@ -422,7 +433,8 @@ def _run_case(
         }
     latency_ms = round((time.perf_counter() - started) * 1000, 1)
     dumped = result.model_dump(mode="json")
-    truth = (f"mask_{case.case_id}", truth_rle) if truth_rle is not None else None
+    first_id = dumped["segmentations"][0]["mask_id"] if dumped["segmentations"] else None
+    truth = (first_id, truth_rle) if truth_rle is not None and first_id else None
     return {
         "case_id": case.case_id, "suite": case.suite, "outcome": "ok",
         "latency_ms": latency_ms, "cost_cents": result.cost_cents,
@@ -570,9 +582,11 @@ def run_eval(
         for i, c in enumerate(roster):
             images = [mock_image_bytes(i)]
             cases.append(LoadedCase(c.case_id, c.suite, images, c.note, c.asset_meta, c.expected))
-            truth_rles[c.case_id] = _mask_for_image_b64(
-                base64.b64encode(images[0]).decode(), c.case_id
-            )["rle"]
+        mock_truth = parse_segmentation_output(
+            _MOCK_GRAMMAR, image_size=MOCK_IMAGE_SIZE, label="crack"
+        )[0].rle
+        for c in roster:
+            truth_rles[c.case_id] = mock_truth
     elif mode == "live":
         if cases_dir is None:
             raise ValueError("live mode needs cases_dir")
