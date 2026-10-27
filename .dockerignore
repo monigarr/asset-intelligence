@@ -1,0 +1,16 @@
+# Keep the API image lean: no venv, git history, caches, data, or secrets.
+.venv/
+.git/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+eval/
+samples/
+data/
+*.log
+.env
+node_modules/
+app/ui/node_modules/
+app/ui/dist/

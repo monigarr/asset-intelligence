@@ -13,27 +13,36 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-          pip install ruff pytest pytest-cov pre-commit
+          pip install -r requirements.txt -r requirements-dev.txt
+          pip install pre-commit
       - name: Lint
-        run: ruff check app/ || echo "no app/ yet — ok for setup"
+        run: ruff check app/ tests/
+      - name: Test with coverage gate
+        run: pytest tests/ -q --cov=app --cov-fail-under=70
       - name: Meta-only check
+        run: make verify-meta-only
+
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/ui/package-lock.json
+      - name: Build and test UI
         run: |
-          if [ -d app ]; then
-            if grep -r "import openai" --include="*.py" app/; then exit 1; fi
-            echo "Meta-only OK"
-          fi
-      - name: Docker compose validate
-        run: |
-          if [ -f docker-compose.yml ]; then docker compose config --quiet; fi
+          cd app/ui
+          npm ci
+          npm run build
+          npm test
 
   docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Validate compose
+        run: docker compose config --quiet
       - name: Build API image
-        run: |
-          if [ -f docker-compose.yml ]; then
-            docker compose build --no-cache api || echo "docker build skipped — no Dockerfile yet"
-          fi
+        run: docker compose build api

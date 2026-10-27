@@ -1,0 +1,56 @@
+# Asset Intelligence — local demo stack (ARCH §8).
+# Start: cp .env.example .env  (add META_API_KEY)  &&  docker compose up --build
+# UI :3000 · API :8000 · Prometheus :9090 · OTLP :4317/:4318
+
+services:
+  api:
+    build: .
+    env_file:
+      - .env
+    environment:
+      STORE_PATH: /data/inspections.db
+      # Full path: the OTLP/HTTP exporter posts exactly here (bare host 404s).
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+    depends_on:
+      - otel-collector
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  ui:
+    build: ./app/ui
+    ports:
+      - "3000:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.110.0
+    command: ["--config=/etc/otelcol.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "13133:13133"
+      - "8889:8889"
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    command: ["--config.file=/etc/prometheus/prometheus.yml"]
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  # NOTE: MinIO (ARCH §8) returns with M3 production persistence.
+  # Omitted: Docker Hub now gates minio/minio pulls, and Day-7 storage
+  # is SQLite by design — nothing in this stack calls object storage.
