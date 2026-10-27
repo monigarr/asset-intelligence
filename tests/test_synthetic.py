@@ -66,12 +66,12 @@ def test_generate_all_writes_cases_and_manifest(tmp_path: Path) -> None:
     gen = SyntheticGenerator(client=client, settings=Settings(api_key="t"))  # type: ignore[arg-type]
     manifest_path = gen.generate_all(tmp_path, limit=2)
     assert len(client.calls) == 2
-    assert client.calls[0]["model_id"] == "muse-image"
+    assert client.calls[0]["model_id"] == "muse-image-1.0"
     assert client.calls[0]["request_id"] == "syn-clear-01"
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["generated"] == 2 and manifest["skipped"] == 0
-    assert manifest["model"] == "muse-image"
+    assert manifest["model"] == "muse-image-1.0"
     assert len(manifest["cases"]) == 2
 
     case_file = tmp_path / "clear-01.json"

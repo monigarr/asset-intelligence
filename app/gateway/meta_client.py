@@ -1,15 +1,16 @@
 """Meta Model API gateway client.
 
-Transport contract (ASSUMPTION — GAP: PRD.md / ARCHITECTURE.md do not pin the
-HTTP wire format):
+Transport contract (live-verified 2026-10-27 against api.meta.ai/v1, plus
+dev.meta.ai/docs for protocol shapes):
   - OpenAI-compatible REST rooted at ``META_API_BASE_URL`` (default
-    ``https://api.meta.ai/v1``): ``POST /chat/completions``,
-    ``POST /images/generations``, ``POST /segment``.
-  - Auth via ``Authorization: Bearer <META_API_KEY>``.
+    ``https://api.meta.ai/v1``): ``POST /chat/completions``
+    (docs-confirmed), ``POST /images/generations`` (live),
+    ``POST /responses`` for SAM 3.1 (live).
+  - Auth via ``Authorization: Bearer <META_API_KEY>`` (live).
   - Usage reported as ``{"prompt_tokens", "completion_tokens",
-    "total_tokens"}``.
-Day-2 live-key check MUST verify: auth scheme, endpoint paths, usage field
-names. Only this module's paths/payload builders should need to change.
+    "total_tokens"}`` (live shapes are OpenAI-compatible).
+  - SAM output is the Responses output-text record grammar, decoded with
+    the official ``meta_sam_parser`` package (see ``sam_responses.py``).
 
 Retry policy: max_retries=2 (3 attempts). CONFLICT resolved per AGENTS.md §2
 priority — ARCHITECTURE.md §4.4 ("bounded retry (2)") and §11 ("max 2
@@ -31,10 +32,12 @@ import time
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
+from io import BytesIO
 from typing import Any, Self
 from uuid import uuid4
 
 import httpx
+from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field, ValidationError
 from tenacity import RetryCallState, Retrying, retry_if_exception, stop_after_attempt
 from tenacity import wait_exponential as _wait_exponential
@@ -50,6 +53,7 @@ from app.gateway.errors import (
     MetaTimeoutError,
 )
 from app.gateway.pricing import estimate_chat_cost_cents, estimate_per_image_cost_cents
+from app.gateway.sam_responses import parse_segmentation_output
 
 logger = logging.getLogger("asset_intel.gateway")
 
@@ -130,6 +134,16 @@ def _mime_for_bytes(data: bytes) -> str:
         return "image/webp"
     # Gateway is transport only; the Day-7 InputAdapter validates/sanitizes.
     return "application/octet-stream"
+
+
+def _image_size(data: bytes) -> tuple[int, int]:
+    """Pixel (width, height) of encoded image bytes (PIL convention)."""
+    try:
+        with Image.open(BytesIO(data)) as img:
+            img.load()
+            return img.size
+    except (UnidentifiedImageError, OSError) as exc:
+        raise MetaResponseError(f"segment got unreadable image bytes: {exc}") from exc
 
 
 def _new_request_id() -> str:
@@ -225,27 +239,61 @@ class MetaClient:
         self,
         model_id: str,
         image_bytes: bytes,
-        text_prompts: Sequence[str],
+        prompt: str,
         *,
         source_image: str = "image_0",
         request_id: str | None = None,
     ) -> list[Segmentation]:
-        """Zero-shot defect segmentation (SAM). Returns validated masks."""
+        """Zero-shot defect segmentation (SAM 3.1 via Responses API).
+
+        One noun-phrase prompt per call; the service fans out over prompts.
+        Returns image-pixel masks (uncompressed COCO RLE).
+        """
         rid = request_id or _new_request_id()
+        width, height = _image_size(image_bytes)
         payload = {
             "model": model_id,
-            "image": base64.b64encode(image_bytes).decode("ascii"),
-            "image_mime": _mime_for_bytes(image_bytes),
-            "text_prompts": list(text_prompts),
-            "source_image": source_image,
+            "input": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "input_text", "text": prompt},
+                        {
+                            "type": "input_image",
+                            "image_url": (
+                                f"data:{_mime_for_bytes(image_bytes)};base64,"
+                                f"{base64.b64encode(image_bytes).decode('ascii')}"
+                            ),
+                        },
+                    ],
+                }
+            ],
         }
 
         def parse(response: httpx.Response) -> tuple[list[Segmentation], dict[str, Any]]:
             data = _as_json("segment", response)
-            try:
-                masks = [Segmentation(**m) for m in data["masks"]]
-            except (KeyError, TypeError, ValidationError) as exc:
-                raise MetaResponseError(f"segment returned invalid masks: {exc}") from exc
+            if data.get("status") != "completed":
+                detail = data.get("incomplete_details") or data.get("error") or {}
+                raise MetaResponseError(
+                    f"segment response not completed: {data.get('status')!r} {detail}"
+                )
+            parts = [
+                part
+                for item in data.get("output", [])
+                if isinstance(item, dict)
+                for part in item.get("content", [])
+                if isinstance(part, dict) and part.get("type") == "output_text"
+            ]
+            if not parts:
+                raise MetaResponseError("segment response has no output text")
+            # Present-but-empty text is a genuine no-match: the adapter maps
+            # it to zero masks (verified live: completed + output_text "").
+            masks = parse_segmentation_output(
+                "\n".join(p.get("text") or "" for p in parts),
+                image_size=(width, height),
+                label=prompt,
+                source_image=source_image,
+            )
             cost_cents, priced = estimate_per_image_cost_cents(model_id)
             return masks, {
                 "mask_count": len(masks),
@@ -256,7 +304,7 @@ class MetaClient:
         return self._post(
             operation="segment",
             model_id=model_id,
-            path="/segment",
+            path="/responses",
             payload=payload,
             request_id=rid,
             parse=parse,

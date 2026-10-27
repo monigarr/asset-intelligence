@@ -47,8 +47,10 @@ def _decoded(mask_id: str = "mask_1", conf: float = 0.87) -> DecodedMask:
     )
 
 
-def _extractor(handler: Any) -> VisionExtractor:
-    settings = Settings(api_key="test", base_url="https://api.test/v1")
+def _extractor(handler: Any, **overrides: Any) -> VisionExtractor:
+    params: dict[str, Any] = {"api_key": "test", "base_url": "https://api.test/v1"}
+    params.update(overrides)
+    settings = Settings(**params)  # type: ignore[arg-type]
     client = MetaClient(
         settings=settings,
         transport=httpx.MockTransport(handler),
@@ -87,12 +89,12 @@ def test_extract_happy_path() -> None:
     )
     assert obs.asset_type == "drainage_structure"
     assert obs.symptoms[0].evidence[1].span == [0, 20]
-    assert obs.model_id == "llama-4-maverick-17b-128e-vision"
+    assert obs.model_id == "muse-spark-1.3"
     assert obs.fallback_used is False
     assert obs.usage.prompt_tokens == 500
 
     body = seen["body"]
-    assert body["model"] == "llama-4-maverick-17b-128e-vision"
+    assert body["model"] == "muse-spark-1.3"
     assert body["response_format"]["type"] == "json_schema"
     user_content = body["messages"][1]["content"]
     # gateway packs text + images as content parts; text is always first
@@ -104,23 +106,25 @@ def test_extract_happy_path() -> None:
     assert sum(1 for p in parts if p.get("type") == "image_url") == 2
 
 
-def test_extract_falls_back_to_scout_once() -> None:
+def test_extract_falls_back_once() -> None:
     calls: list[str] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content.decode())
         calls.append(body["model"])
-        if body["model"] == "llama-4-maverick-17b-128e-vision":
+        if body["model"] == "vis-primary":
             return httpx.Response(500, text="down")
         return httpx.Response(
             200, json={"choices": [{"message": {"content": json.dumps(VISION_JSON)}}]}
         )
 
-    obs = _extractor(handler).extract([JPEG], [[_decoded()]])
-    assert obs.model_id == "llama-4-scout-17b-16e-vision"
+    obs = _extractor(
+        handler, vision_model_id="vis-primary", fallback_vision_model_id="vis-fallback"
+    ).extract([JPEG], [[_decoded()]])
+    assert obs.model_id == "vis-fallback"
     assert obs.fallback_used is True
-    assert calls.count("llama-4-maverick-17b-128e-vision") == 3  # gateway retries
-    assert calls.count("llama-4-scout-17b-16e-vision") == 1
+    assert calls.count("vis-primary") == 3  # gateway retries
+    assert calls.count("vis-fallback") == 1
 
 
 def test_extract_no_fallback_on_auth_error() -> None:
@@ -132,7 +136,7 @@ def test_extract_no_fallback_on_auth_error() -> None:
 
     with pytest.raises(MetaAuthError):
         _extractor(handler).extract([JPEG], [[_decoded()]])
-    assert calls == ["llama-4-maverick-17b-128e-vision"]  # deterministic: no fallback
+    assert calls == ["muse-spark-1.3"]  # deterministic: no fallback
 
 
 def test_extract_rejects_invalid_observation() -> None:

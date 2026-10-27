@@ -5,9 +5,12 @@ from __future__ import annotations
 import base64
 import json
 import logging
+from io import BytesIO
+from pathlib import Path
 
 import httpx
 import pytest
+from PIL import Image
 
 from app.gateway.config import Settings
 from app.gateway.errors import (
@@ -230,34 +233,54 @@ def test_timeout_retried_then_raises() -> None:
 # -- segment / generate_image -------------------------------------------
 
 
+def _grammar() -> str:
+    return (Path(__file__).parent / "fixtures" / "sam_crack.txt").read_text(
+        encoding="utf-8"
+    )
+
+
+def _tiny_png(w: int = 64, h: int = 48) -> bytes:
+    img = Image.new("RGB", (w, h), (200, 200, 200))
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
+
+
 def test_segment_success(caplog: pytest.LogCaptureFixture) -> None:
     seen: dict[str, object] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
         seen["body"] = json.loads(request.content.decode())
+        seen["path"] = request.url.path
         return httpx.Response(
             200,
             json={
-                "masks": [
+                "status": "completed",
+                "output": [
                     {
-                        "mask_id": "mask_1",
-                        "label": "crack",
-                        "bbox": [120, 80, 340, 150],
-                        "confidence": 0.87,
-                        "source_image": "image_0",
+                        "type": "message",
+                        "content": [{"type": "output_text", "text": _grammar()}],
                     }
-                ]
+                ],
             },
         )
 
-    masks = _client(handler).segment("sam-3.1", JPEG, ["crack", "corrosion"])
+    masks = _client(handler).segment("sam-3.1", _tiny_png(), "crack")
     assert len(masks) == 1
-    assert masks[0].mask_id == "mask_1"
-    assert masks[0].confidence == 0.87
+    mask = masks[0]
+    assert (mask.mask_id, mask.label, mask.source_image) == ("mask-1", "crack", "image_0")
+    assert mask.confidence == 0.5  # live grammar omits c (unscored default)
+    assert mask.bbox == [27, 4, 42, 20]
+    assert isinstance(mask.rle, dict)
+    assert mask.rle["size"] == [48, 64]
+    assert sum(mask.rle["counts"]) == 64 * 48
     body = seen["body"]
     assert isinstance(body, dict)
-    assert body["text_prompts"] == ["crack", "corrosion"]
-    assert body["image_mime"] == "image/jpeg"
+    assert seen["path"] == "/v1/responses"
+    assert body["model"] == "sam-3.1"
+    content = body["input"][0]["content"]
+    assert content[0] == {"type": "input_text", "text": "crack"}
+    assert content[1]["image_url"].startswith("data:image/png;base64,")
     assert _call_record(caplog).mask_count == 1
 
 
@@ -266,11 +289,30 @@ def test_segment_rejects_bad_payload_single_attempt() -> None:
 
     def handler(request: httpx.Request) -> httpx.Response:
         calls.append(request)
-        return httpx.Response(200, json={"masks": [{"mask_id": "m1"}]})
+        return httpx.Response(200, json={"status": "completed", "output": []})
 
     with pytest.raises(MetaResponseError):
-        _client(handler).segment("sam-3.1", JPEG, ["crack"])
+        _client(handler).segment("sam-3.1", _tiny_png(), "crack")
     assert len(calls) == 1
+
+
+def test_segment_empty_output_text_is_no_match() -> None:
+    # Live shape for "prompt found nothing": completed + output_text "".
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "status": "completed",
+                "output": [
+                    {
+                        "type": "message",
+                        "content": [{"type": "output_text", "text": ""}],
+                    }
+                ],
+            },
+        )
+
+    assert _client(handler).segment("sam-3.1", _tiny_png(), "water seepage") == []
 
 
 def test_generate_image_success() -> None:

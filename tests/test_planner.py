@@ -46,7 +46,7 @@ def _draft() -> DraftResult:
         missing_information=["weather"],
         model_trace=ModelTrace(
             sam="sam-3.1",
-            vision="llama-4-maverick-17b-128e-vision",
+            vision="muse-spark-1.3",
             reasoning="muse-spark-1.3",
             timestamp="2026-10-26T00:00:00+00:00",
         ),
@@ -58,7 +58,7 @@ def _vision() -> VisionObservation:
         asset_type="drainage_structure",
         condition_tags=["crack"],
         symptoms=[],
-        model_id="llama-4-maverick-17b-128e-vision",
+        model_id="muse-spark-1.3",
         usage=ChatUsage(prompt_tokens=10, completion_tokens=5, total_tokens=15),
     )
 
@@ -89,10 +89,10 @@ def test_plan_prompt_contract() -> None:
     )
     assert plan.missing_information == ["crack_dimensions", "inspection_date"]
     assert plan.usage.completion_tokens == 90
-    assert plan.model_id == "muse-wonder"
+    assert plan.model_id == "muse-wonder-1.0"
 
     body = seen["body"]
-    assert body["model"] == "muse-wonder"
+    assert body["model"] == "muse-wonder-1.0"
     assert body["response_format"]["json_schema"]["name"] == "wonder_plan"
     assert "NEVER certify" in body["messages"][0]["content"]
     user_text = body["messages"][1]["content"]

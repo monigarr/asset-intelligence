@@ -10,10 +10,10 @@ export const DEMO_RESULT = {
   asset_type: 'drainage_structure',
   model_trace: {
     sam: 'sam-3.1',
-    vision: 'llama-4-maverick-17b-128e-vision',
+    vision: 'muse-spark-1.3',
     vision_fallback_used: false,
     reasoning: 'muse-spark-1.3',
-    planning: 'muse-wonder',
+    planning: 'muse-wonder-1.0',
     timestamp: '2026-10-26T00:00:00+00:00',
   },
   segmentations: [

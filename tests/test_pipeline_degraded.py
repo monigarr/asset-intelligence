@@ -34,7 +34,7 @@ class _FailingSam:
 class _FakeVision:
     def extract(self, *a: Any, **k: Any) -> VisionObservation:
         return VisionObservation(
-            model_id="llama-4-maverick-17b-128e-vision",
+            model_id="muse-spark-1.3",
             usage=ChatUsage(prompt_tokens=10, completion_tokens=5, total_tokens=15),
         )
 
@@ -66,7 +66,7 @@ class _FakeWonder:
             discrepancies=[],
             missing_information=[],
             recommended_next_step="Request qualified inspection.",
-            model_id="muse-wonder",
+            model_id="muse-wonder-1.0",
         )
 
 

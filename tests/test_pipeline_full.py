@@ -69,7 +69,7 @@ class _FakeVision:
     def extract(self, *a: Any, **kw: Any) -> VisionObservation:
         return VisionObservation(
             asset_type="drainage_structure",
-            model_id="llama-4-maverick-17b-128e-vision",
+            model_id="muse-spark-1.3",
             usage=ChatUsage(prompt_tokens=1000, completion_tokens=500, total_tokens=1500),
         )
 
@@ -105,8 +105,18 @@ def _plan(**over: Any) -> WonderPlan:
     base: dict[str, Any] = dict(WONDER_DICT)
     base.update(over)
     base.setdefault("usage", ChatUsage(prompt_tokens=700, completion_tokens=80))
-    base.setdefault("model_id", "muse-wonder")
+    base.setdefault("model_id", "muse-wonder-1.0")
     return WonderPlan(**base)
+
+
+def _has_image_parts(body: dict[str, Any]) -> bool:
+    for message in body.get("messages", []):
+        content = message.get("content", [])
+        if isinstance(content, list):
+            for part in content:
+                if isinstance(part, dict) and part.get("type") == "image_url":
+                    return True
+    return False
 
 
 def test_run_full_returns_validated_result() -> None:
@@ -121,7 +131,7 @@ def test_run_full_returns_validated_result() -> None:
     )
     out = pipe.run_full([JPEG], note="Crack seen", asset_meta={"asset_id": "F-1"})
     assert out.asset_id == "F-1"
-    assert out.model_trace.planning == "muse-wonder"
+    assert out.model_trace.planning == "muse-wonder-1.0"
     assert out.missing_information == ["crack_dimensions", "inspection_date"]
     assert out.recommended_next_step.startswith("Request qualified inspection")
     assert out.human_review_required is True
@@ -173,7 +183,7 @@ def test_run_full_rejects_invalid_draft() -> None:
 def test_run_full_cost_includes_wonder(monkeypatch: pytest.MonkeyPatch) -> None:
     from app.orchestrator.spark import SparkReasoner
 
-    monkeypatch.setenv("META_PRICE_PER_1K_CENTS_MUSE_WONDER", "3.0")
+    monkeypatch.setenv("META_PRICE_PER_1K_CENTS_MUSE_WONDER_1_0", "3.0")
     pipe = InspectionPipeline(
         sam=_FakeSam(),  # type: ignore[arg-type]
         vision=_FakeVision(),  # type: ignore[arg-type]
@@ -192,7 +202,6 @@ def test_full_chain_all_real_components() -> None:
     buf = BytesIO()
     img.save(buf, format="JPEG")
     image_bytes = buf.getvalue()
-    total = 32 * 24
     vision_json = {
         "asset_type": "drainage_structure",
         "condition_tags": ["crack"],
@@ -206,24 +215,24 @@ def test_full_chain_all_real_components() -> None:
     }
 
     def handler(request: httpx.Request) -> httpx.Response:
-        if request.url.path == "/v1/segment":
+        if request.url.path == "/v1/responses":
+            from pathlib import Path
+
+            grammar = (Path(__file__).parent / "fixtures" / "sam_crack.txt").read_text()
             return httpx.Response(
                 200,
                 json={
-                    "masks": [
+                    "status": "completed",
+                    "output": [
                         {
-                            "mask_id": "mask_1",
-                            "label": "crack",
-                            "bbox": [2, 2, 10, 10],
-                            "confidence": 0.9,
-                            "rle": {"size": [24, 32], "counts": [total]},
-                            "source_image": "image_0",
+                            "type": "message",
+                            "content": [{"type": "output_text", "text": grammar}],
                         }
-                    ]
+                    ],
                 },
             )
         body = json.loads(request.content.decode())
-        if body["model"] == "llama-4-maverick-17b-128e-vision":
+        if body["model"] == "muse-spark-1.3" and _has_image_parts(body):
             return httpx.Response(
                 200, json={"choices": [{"message": {"content": json.dumps(vision_json)}}]}
             )
@@ -231,7 +240,7 @@ def test_full_chain_all_real_components() -> None:
             return httpx.Response(
                 200, json={"choices": [{"message": {"content": json.dumps(SPARK_JSON)}}]}
             )
-        assert body["model"] == "muse-wonder"
+        assert body["model"] == "muse-wonder-1.0"
         return httpx.Response(
             200, json={"choices": [{"message": {"content": json.dumps(WONDER_DICT)}}]}
         )
@@ -252,6 +261,6 @@ def test_full_chain_all_real_components() -> None:
     )
     out = pipe.run_full([image_bytes], note="Crack seen", asset_meta={"asset_id": "E2E-5"})
     assert out.asset_id == "E2E-5"
-    assert out.model_trace.planning == "muse-wonder"
+    assert out.model_trace.planning == "muse-wonder-1.0"
     assert out.observations[0].evidence[0].mask_id == "mask_1"
     assert out.missing_information == ["crack_dimensions", "inspection_date"]

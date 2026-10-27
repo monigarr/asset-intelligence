@@ -40,11 +40,16 @@ class Settings:
     timeout_s: float = 15.0
     max_retries: int = 2
     sam_model_id: str = "sam-3.1"
-    vision_model_id: str = "llama-4-maverick-17b-128e-vision"
-    fallback_vision_model_id: str = "llama-4-scout-17b-16e-vision"
+    # Live-verified 2026-10-27: the Meta Model API serves no Llama vision
+    # models (GET /v1/models: 9 entries, none Llama). Vision uses the
+    # API-native multimodal reader instead — a deliberate deviation from
+    # ARCHITECTURE.md §4.3, blessed by the owner. Fallback intentionally
+    # equals primary: no cheaper multimodal model exists on this API.
+    vision_model_id: str = "muse-spark-1.3"
+    fallback_vision_model_id: str = "muse-spark-1.3"
     reasoning_model_id: str = "muse-spark-1.3"
-    planning_model_id: str = "muse-wonder"
-    image_model_id: str = "muse-image"
+    planning_model_id: str = "muse-wonder-1.0"
+    image_model_id: str = "muse-image-1.0"
 
     @classmethod
     def from_env(cls, environ: Mapping[str, str] | None = None) -> Settings:

@@ -58,12 +58,16 @@ def _mask(**over: Any) -> Segmentation:
 class _StubClient:
     """Fake MetaClient: records calls, returns canned masks."""
 
-    def __init__(self, masks: list[Segmentation]) -> None:
+    def __init__(
+        self, masks: list[Segmentation] | dict[str, list[Segmentation]]
+    ) -> None:
         self.masks = masks
         self.calls: list[dict[str, Any]] = []
 
-    def segment(self, model_id: str, image_bytes: bytes, text_prompts: Any, **kw: Any):
-        self.calls.append({"model_id": model_id, "prompts": list(text_prompts), **kw})
+    def segment(self, model_id: str, image_bytes: bytes, prompt: str, **kw: Any):
+        self.calls.append({"model_id": model_id, "prompt": prompt, **kw})
+        if isinstance(self.masks, dict):
+            return self.masks[prompt]
         return self.masks
 
 
@@ -131,13 +135,25 @@ def test_segment_happy_path_flags_low_confidence() -> None:
     assert out[1].low_confidence is True
     assert out[1].bitmap is None  # bbox-only passes through
     assert stub.calls[0]["model_id"] == "sam-3.1"
-    assert stub.calls[0]["prompts"] == ["crack"]
+    assert stub.calls[0]["prompt"] == "crack"
 
 
 def test_segment_uses_default_prompts() -> None:
     svc, stub = _service([_mask()])
     svc.segment_image(_image_bytes())
-    assert stub.calls[0]["prompts"] == ["crack", "corrosion", "water seepage"]
+    assert [c["prompt"] for c in stub.calls] == ["crack", "corrosion", "water seepage"]
+
+
+def test_segment_fans_out_prompts_and_renumbers() -> None:
+    stub_masks = {
+        "b-prompt": [_mask(mask_id="x", label="bee")],
+        "a-prompt": [_mask(mask_id="y", label="aye")],
+    }
+    svc, stub = _service(stub_masks)  # type: ignore[arg-type]
+    out = svc.segment_image(_image_bytes(), ["b-prompt", "a-prompt"])
+    assert [c["prompt"] for c in stub.calls] == ["b-prompt", "a-prompt"]
+    assert [d.mask.mask_id for d in out] == ["mask_1", "mask_2"]
+    assert [d.mask.label for d in out] == ["bee", "aye"]
 
 
 def test_segment_caches_by_image_and_prompts() -> None:
@@ -193,8 +209,8 @@ def test_service_logs_summary(caplog: pytest.LogCaptureFixture) -> None:
     svc.segment_image(_image_bytes(), request_id="req_sam1")
     recs = [r for r in caplog.records if r.name == "asset_intel.sam"]
     assert len(recs) == 1
-    assert recs[0].mask_count == 2
-    assert recs[0].low_confidence_count == 1
+    assert recs[0].mask_count == 6  # 2 canned masks x 3 default prompts
+    assert recs[0].low_confidence_count == 3
     assert recs[0].request_id == "req_sam1"
 
 

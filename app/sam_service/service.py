@@ -3,13 +3,14 @@
 Wraps `MetaClient.segment` with input validation, COCO RLE decoding, an
 in-memory LRU mask cache (ARCHITECTURE.md §12), and low-confidence flagging.
 
-GAP defaults applied (ARCHITECTURE.md is silent on wire details):
-  - RLE payloads are COCO-style ``{"size": [height, width], "counts": [...]}``
-    with uncompressed integer runs in column-major order. Compressed-string
-    counts are rejected with a named error until the live API shape is seen.
-  - `bbox` is corners ``[x1, y1, x2, y2]`` in pixels (PRD.md §6's example is
-    consistent with this). Bounds-checked against the image; violations fail
-    closed. Revisit on the Day-3 live-key check.
+Live wire format (verified 2026-10-27): SAM 3.1 is served over the
+Responses API with one noun-phrase prompt per call. This service fans out
+over prompts concurrently and merges in prompt order. RLE payloads stay
+COCO-style ``{"size": [height, width], "counts": [...]}`` with
+uncompressed integer runs in column-major order — now OUR encoding of the
+decoded raster, so the flavor holds by construction. `bbox` is corners
+``[x1, y1, x2, y2]`` in image pixels (rescaled from SAM source-media
+coordinates); bounds violations fail closed.
   - Low-confidence masks (< 0.4) are KEPT and flagged, never dropped
     (ARCHITECTURE.md §4.2, §11).
 """
@@ -20,6 +21,7 @@ import hashlib
 import logging
 from collections import OrderedDict
 from collections.abc import Sequence
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from io import BytesIO
 from typing import Any
@@ -153,9 +155,13 @@ class SamService:
             return cached
 
         model_id = self._settings.sam_model_id
-        masks = self._client.segment(
+        masks = self._segment_prompts(
             model_id, image_bytes, prompts, source_image=source_image, request_id=rid
         )
+        masks = [
+            mask.model_copy(update={"mask_id": f"mask_{i}"})
+            for i, mask in enumerate(masks, 1)
+        ]
         decoded = [self._decode_one(m, width, height) for m in masks]
         self._cache[key] = decoded
         while len(self._cache) > self._cache_size:
@@ -174,6 +180,38 @@ class SamService:
             },
         )
         return decoded
+
+    def _segment_prompts(
+        self,
+        model_id: str,
+        image_bytes: bytes,
+        prompts: tuple[str, ...],
+        *,
+        source_image: str,
+        request_id: str,
+    ) -> list[Segmentation]:
+        """One Responses call per prompt (concurrent), merged in prompt order."""
+        if len(prompts) == 1:
+            return self._client.segment(
+                model_id, image_bytes, prompts[0],
+                source_image=source_image, request_id=request_id,
+            )
+        with ThreadPoolExecutor(max_workers=min(len(prompts), 4)) as pool:
+            futures = [
+                pool.submit(
+                    self._client.segment,
+                    model_id,
+                    image_bytes,
+                    prompt,
+                    source_image=source_image,
+                    request_id=request_id,
+                )
+                for prompt in prompts
+            ]
+            merged: list[Segmentation] = []
+            for future in futures:
+                merged.extend(future.result())
+            return merged
 
     def _decode_one(self, mask: Segmentation, width: int, height: int) -> DecodedMask:
         bitmap = decode_mask_rle(mask.rle, (width, height))

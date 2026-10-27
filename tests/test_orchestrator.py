@@ -59,7 +59,7 @@ def _vision_obs() -> VisionObservation:
         asset_type="drainage_structure",
         condition_tags=["crack"],
         symptoms=[],
-        model_id="llama-4-maverick-17b-128e-vision",
+        model_id="muse-spark-1.3",
         usage=ChatUsage(prompt_tokens=1000, completion_tokens=500, total_tokens=1500),
     )
 
@@ -172,7 +172,7 @@ def test_pipeline_assembles_draft() -> None:
     assert out.missing_information == ["crack_dimensions", "inspection_date"]
     assert out.human_review_required is True
     assert out.model_trace.sam == "sam-3.1"
-    assert out.model_trace.vision == "llama-4-maverick-17b-128e-vision"
+    assert out.model_trace.vision == "muse-spark-1.3"
     assert out.model_trace.reasoning == "muse-spark-1.3"
     datetime.fromisoformat(out.model_trace.timestamp)  # parses
     assert out.cost_priced is False  # placeholder pricing
@@ -181,12 +181,11 @@ def test_pipeline_assembles_draft() -> None:
 
 def test_pipeline_cost_math_with_priced_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("META_PRICE_PER_IMAGE_CENTS_SAM_3_1", "2.0")
-    monkeypatch.setenv("META_PRICE_PER_1K_CENTS_LLAMA_4_MAVERICK_17B_128E_VISION", "1.0")
     monkeypatch.setenv("META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3", "4.0")
     pipe = _pipeline(_spark_ok, {"image_0": [_decoded()]})
     out = pipe.run([JPEG])
-    # sam 2.0 + vision (1500/1000*1.0)=1.5 + spark (920/1000*4.0)=3.68
-    assert out.cost_cents == pytest.approx(2.0 + 1.5 + 3.68)
+    # sam 2.0 + vision-as-spark (1500/1000*4.0)=6.0 + spark (920/1000*4.0)=3.68
+    assert out.cost_cents == pytest.approx(2.0 + 6.0 + 3.68)
     assert out.cost_priced is True
 
 
@@ -232,9 +231,18 @@ def _real_jpeg(w: int = 32, h: int = 24) -> bytes:
     return buf.getvalue()
 
 
+def _has_image_parts(body: dict[str, Any]) -> bool:
+    for message in body.get("messages", []):
+        content = message.get("content", [])
+        if isinstance(content, list):
+            for part in content:
+                if isinstance(part, dict) and part.get("type") == "image_url":
+                    return True
+    return False
+
+
 def test_full_flow_sam_vision_spark() -> None:
     img = _real_jpeg()
-    total = 32 * 24
     vision_json = {
         "asset_type": "drainage_structure",
         "condition_tags": ["crack"],
@@ -248,24 +256,24 @@ def test_full_flow_sam_vision_spark() -> None:
     }
 
     def handler(request: httpx.Request) -> httpx.Response:
-        if request.url.path == "/v1/segment":
+        if request.url.path == "/v1/responses":
+            from pathlib import Path
+
+            grammar = (Path(__file__).parent / "fixtures" / "sam_crack.txt").read_text()
             return httpx.Response(
                 200,
                 json={
-                    "masks": [
+                    "status": "completed",
+                    "output": [
                         {
-                            "mask_id": "mask_1",
-                            "label": "crack",
-                            "bbox": [2, 2, 10, 10],
-                            "confidence": 0.9,
-                            "rle": {"size": [24, 32], "counts": [total]},
-                            "source_image": "image_0",
+                            "type": "message",
+                            "content": [{"type": "output_text", "text": grammar}],
                         }
-                    ]
+                    ],
                 },
             )
         body = json.loads(request.content.decode())
-        if body["model"] == "llama-4-maverick-17b-128e-vision":
+        if body["model"] == "muse-spark-1.3" and _has_image_parts(body):
             return httpx.Response(
                 200, json={"choices": [{"message": {"content": json.dumps(vision_json)}}]}
             )
@@ -287,6 +295,7 @@ def test_full_flow_sam_vision_spark() -> None:
     )
     out = pipe.run([img], note="crack", asset_meta={"asset_id": "E2E-1"})
     assert out.asset_id == "E2E-1"
-    assert len(out.segmentations) == 1
-    assert out.segmentations[0].rle == {"size": [24, 32], "counts": [total]}
+    assert len(out.segmentations) == 3  # one mask per default prompt
+    assert out.segmentations[0].rle["size"] == [24, 32]
+    assert sum(out.segmentations[0].rle["counts"]) == 32 * 24
     assert out.observations[0].evidence[0].mask_id == "mask_1"
