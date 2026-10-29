@@ -291,7 +291,7 @@ def test_jwt_compose_escaped_hash(tmp_path) -> None:
     app = create_app(
         api_key="k",
         store_path=str(tmp_path / "t.db"),
-        jwt_secret="test-secret-1234567890",
+        jwt_secret="unittest-jwt-secret",  # gitleaks:allow - unit-test fixture, not a credential
         ui_username="u",
         ui_password_hash=pwd_hash.replace("$", "$$"),
     )
@@ -310,7 +310,7 @@ def test_jwt_issue_refresh_and_bearer_access(tmp_path) -> None:
     app = create_app(
         api_key="k",
         store_path=str(tmp_path / "t.db"),
-        jwt_secret="test-secret-1234567890",
+        jwt_secret="unittest-jwt-secret",  # gitleaks:allow - unit-test fixture, not a credential
         ui_username="u",
         ui_password_hash=pwd_hash,
     )
