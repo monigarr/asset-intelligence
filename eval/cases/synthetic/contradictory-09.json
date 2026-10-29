@@ -1,0 +1,24 @@
+{
+  "case_id": "contradictory-09",
+  "suite": "contradictory",
+  "image_file": "images/contradictory-09.png",
+  "image_prompt": "culvert headwall with undermining erosion at footing, void visible, municipal inspection photo, overcast daylight",
+  "note": "No defects observed. Surface dry and sound.",
+  "asset_meta": {
+    "asset_id": "SYN-contradictory-09",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "contradictory",
+      "drainage_structure"
+    ],
+    "severity": "high"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": true,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

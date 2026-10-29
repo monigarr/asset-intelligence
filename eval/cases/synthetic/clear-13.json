@@ -1,0 +1,29 @@
+{
+  "case_id": "clear-13",
+  "suite": "clear",
+  "image_file": "images/clear-13.png",
+  "image_prompt": "bridge pier with exposed corroded rebar, section loss, scaling concrete, close-up view, municipal inspection photo, overcast daylight",
+  "note": "Close-up. Exposed rebar with heavy corrosion and section loss over 12in length. Inspected 2026-10-20.",
+  "asset_meta": {
+    "asset_id": "SYN-clear-13",
+    "asset_type": "bridge_component"
+  },
+  "metadata": {
+    "tags": [
+      "clear",
+      "bridge_component",
+      "rebar",
+      "corrosion"
+    ],
+    "severity": "low"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false,
+    "dimensions_mm": [
+      304.8
+    ]
+  }
+}

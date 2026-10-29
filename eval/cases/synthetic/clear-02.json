@@ -1,0 +1,29 @@
+{
+  "case_id": "clear-02",
+  "suite": "clear",
+  "image_file": "images/clear-02.png",
+  "image_prompt": "concrete headwall with spalled patch exposing aggregate, rust staining below, municipal inspection photo, overcast daylight",
+  "note": "Spalled concrete patch roughly 8in across with rust staining below. Inspected 2026-10-20.",
+  "asset_meta": {
+    "asset_id": "SYN-clear-02",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "clear",
+      "drainage_structure",
+      "spall",
+      "corrosion"
+    ],
+    "severity": "low"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false,
+    "dimensions_mm": [
+      203.2
+    ]
+  }
+}

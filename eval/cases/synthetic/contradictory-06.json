@@ -1,0 +1,27 @@
+{
+  "case_id": "contradictory-06",
+  "suite": "contradictory",
+  "image_file": "images/contradictory-06.png",
+  "image_prompt": "asphalt pavement with alligator cracking and pothole forming at intersection, municipal inspection photo, overcast daylight",
+  "note": "No defects observed. Surface dry and sound.",
+  "asset_meta": {
+    "asset_id": "SYN-contradictory-06",
+    "asset_type": "pavement_section"
+  },
+  "metadata": {
+    "tags": [
+      "contradictory",
+      "pavement_section",
+      "alligator_cracking",
+      "pothole",
+      "crack"
+    ],
+    "severity": "high"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": true,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

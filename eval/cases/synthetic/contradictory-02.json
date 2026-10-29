@@ -1,0 +1,26 @@
+{
+  "case_id": "contradictory-02",
+  "suite": "contradictory",
+  "image_file": "images/contradictory-02.png",
+  "image_prompt": "concrete headwall with spalled patch exposing aggregate, rust staining below, municipal inspection photo, overcast daylight",
+  "note": "No defects observed. Surface dry and sound.",
+  "asset_meta": {
+    "asset_id": "SYN-contradictory-02",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "contradictory",
+      "drainage_structure",
+      "spall",
+      "corrosion"
+    ],
+    "severity": "high"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": true,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

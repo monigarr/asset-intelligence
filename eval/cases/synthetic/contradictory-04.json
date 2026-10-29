@@ -1,0 +1,26 @@
+{
+  "case_id": "contradictory-04",
+  "suite": "contradictory",
+  "image_file": "images/contradictory-04.png",
+  "image_prompt": "concrete wall with active water seepage through cold joint, mineral deposits, municipal inspection photo, overcast daylight",
+  "note": "No defects observed. Surface dry and sound.",
+  "asset_meta": {
+    "asset_id": "SYN-contradictory-04",
+    "asset_type": "retaining_wall"
+  },
+  "metadata": {
+    "tags": [
+      "contradictory",
+      "retaining_wall",
+      "seepage",
+      "moisture"
+    ],
+    "severity": "high"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": true,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

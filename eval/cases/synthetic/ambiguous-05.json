@@ -1,0 +1,25 @@
+{
+  "case_id": "ambiguous-05",
+  "suite": "ambiguous",
+  "image_file": "images/ambiguous-05.png",
+  "image_prompt": "storm drain channel with vegetation intrusion and sediment buildup blocking flow, dim low-light conditions, slight motion blur, municipal inspection photo, overcast daylight",
+  "note": "Something looks off in low light, hard to tell.",
+  "asset_meta": {
+    "asset_id": "SYN-ambiguous-05",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "ambiguous",
+      "drainage_structure",
+      "vegetation"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "expect_discrepancy": false,
+    "expect_uncertain": true,
+    "adversarial": false
+  }
+}

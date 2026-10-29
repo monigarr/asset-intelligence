@@ -1,0 +1,31 @@
+{
+  "case_id": "incomplete-02",
+  "suite": "incomplete",
+  "image_file": "images/incomplete-02.png",
+  "image_prompt": "concrete headwall with spalled patch exposing aggregate, rust staining below, municipal inspection photo, overcast daylight",
+  "note": "Spall with staining.",
+  "asset_meta": {
+    "asset_id": "SYN-incomplete-02",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "incomplete",
+      "drainage_structure",
+      "spall",
+      "corrosion"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "missing_keys": [
+      "defect_dimensions",
+      "inspection_date",
+      "scale_reference"
+    ],
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

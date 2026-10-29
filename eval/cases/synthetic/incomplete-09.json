@@ -1,0 +1,29 @@
+{
+  "case_id": "incomplete-09",
+  "suite": "incomplete",
+  "image_file": "images/incomplete-09.png",
+  "image_prompt": "culvert headwall with undermining erosion at footing, void visible, municipal inspection photo, overcast daylight",
+  "note": "Undermining at footing.",
+  "asset_meta": {
+    "asset_id": "SYN-incomplete-09",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "incomplete",
+      "drainage_structure"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "missing_keys": [
+      "defect_dimensions",
+      "inspection_date",
+      "scale_reference"
+    ],
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "case_id": "incomplete-01",
+  "suite": "incomplete",
+  "image_file": "images/incomplete-01.png",
+  "image_prompt": "concrete drainage culvert interior with a longitudinal crack near the top edge, damp concrete, municipal inspection photo, overcast daylight",
+  "note": "Crack near top edge.",
+  "asset_meta": {
+    "asset_id": "SYN-incomplete-01",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "incomplete",
+      "drainage_structure",
+      "crack",
+      "moisture"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "missing_keys": [
+      "defect_dimensions",
+      "inspection_date",
+      "scale_reference"
+    ],
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

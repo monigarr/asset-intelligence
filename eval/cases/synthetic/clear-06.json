@@ -1,0 +1,30 @@
+{
+  "case_id": "clear-06",
+  "suite": "clear",
+  "image_file": "images/clear-06.png",
+  "image_prompt": "asphalt pavement with alligator cracking and pothole forming at intersection, municipal inspection photo, overcast daylight",
+  "note": "Alligator cracking over 6ft area with pothole forming. Inspected 2026-10-20.",
+  "asset_meta": {
+    "asset_id": "SYN-clear-06",
+    "asset_type": "pavement_section"
+  },
+  "metadata": {
+    "tags": [
+      "clear",
+      "pavement_section",
+      "alligator_cracking",
+      "pothole",
+      "crack"
+    ],
+    "severity": "low"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false,
+    "dimensions_mm": [
+      1828.8
+    ]
+  }
+}

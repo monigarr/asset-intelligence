@@ -1,0 +1,31 @@
+{
+  "case_id": "incomplete-04",
+  "suite": "incomplete",
+  "image_file": "images/incomplete-04.png",
+  "image_prompt": "concrete wall with active water seepage through cold joint, mineral deposits, municipal inspection photo, overcast daylight",
+  "note": "Seepage at joint.",
+  "asset_meta": {
+    "asset_id": "SYN-incomplete-04",
+    "asset_type": "retaining_wall"
+  },
+  "metadata": {
+    "tags": [
+      "incomplete",
+      "retaining_wall",
+      "seepage",
+      "moisture"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "missing_keys": [
+      "defect_dimensions",
+      "inspection_date",
+      "scale_reference"
+    ],
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

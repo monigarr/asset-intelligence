@@ -1,0 +1,30 @@
+{
+  "case_id": "clear-11",
+  "suite": "clear",
+  "image_file": "images/clear-11.png",
+  "image_prompt": "concrete drainage culvert interior with a longitudinal crack near the top edge, damp concrete, close-up view, municipal inspection photo, overcast daylight",
+  "note": "Close-up. Longitudinal crack near top edge, about 2ft long, water seeping through. Inspected 2026-10-20.",
+  "asset_meta": {
+    "asset_id": "SYN-clear-11",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "clear",
+      "drainage_structure",
+      "crack",
+      "seepage",
+      "moisture"
+    ],
+    "severity": "low"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false,
+    "dimensions_mm": [
+      609.6
+    ]
+  }
+}

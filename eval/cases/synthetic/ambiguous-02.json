@@ -1,0 +1,26 @@
+{
+  "case_id": "ambiguous-02",
+  "suite": "ambiguous",
+  "image_file": "images/ambiguous-02.png",
+  "image_prompt": "concrete headwall with spalled patch exposing aggregate, rust staining below, dim low-light conditions, slight motion blur, municipal inspection photo, overcast daylight",
+  "note": "Something looks off in low light, hard to tell.",
+  "asset_meta": {
+    "asset_id": "SYN-ambiguous-02",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "ambiguous",
+      "drainage_structure",
+      "spall",
+      "corrosion"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "expect_discrepancy": false,
+    "expect_uncertain": true,
+    "adversarial": false
+  }
+}

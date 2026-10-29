@@ -1,0 +1,29 @@
+{
+  "case_id": "incomplete-08",
+  "suite": "incomplete",
+  "image_file": "images/incomplete-08.png",
+  "image_prompt": "concrete storm pipe joint with offset and infiltration, misaligned segments, municipal inspection photo, overcast daylight",
+  "note": "Offset joint.",
+  "asset_meta": {
+    "asset_id": "SYN-incomplete-08",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "incomplete",
+      "drainage_structure"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "missing_keys": [
+      "defect_dimensions",
+      "inspection_date",
+      "scale_reference"
+    ],
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

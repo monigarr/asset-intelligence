@@ -1,0 +1,26 @@
+{
+  "case_id": "ambiguous-04",
+  "suite": "ambiguous",
+  "image_file": "images/ambiguous-04.png",
+  "image_prompt": "concrete wall with active water seepage through cold joint, mineral deposits, dim low-light conditions, slight motion blur, municipal inspection photo, overcast daylight",
+  "note": "Something looks off in low light, hard to tell.",
+  "asset_meta": {
+    "asset_id": "SYN-ambiguous-04",
+    "asset_type": "retaining_wall"
+  },
+  "metadata": {
+    "tags": [
+      "ambiguous",
+      "retaining_wall",
+      "seepage",
+      "moisture"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "expect_discrepancy": false,
+    "expect_uncertain": true,
+    "adversarial": false
+  }
+}

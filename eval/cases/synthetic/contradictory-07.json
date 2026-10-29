@@ -1,0 +1,26 @@
+{
+  "case_id": "contradictory-07",
+  "suite": "contradictory",
+  "image_file": "images/contradictory-07.png",
+  "image_prompt": "bridge bearing assembly with corrosion and displaced elastomeric pad, municipal inspection photo, overcast daylight",
+  "note": "No defects observed. Surface dry and sound.",
+  "asset_meta": {
+    "asset_id": "SYN-contradictory-07",
+    "asset_type": "bridge_component"
+  },
+  "metadata": {
+    "tags": [
+      "contradictory",
+      "bridge_component",
+      "corrosion",
+      "bearing"
+    ],
+    "severity": "high"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": true,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "case_id": "incomplete-05",
+  "suite": "incomplete",
+  "image_file": "images/incomplete-05.png",
+  "image_prompt": "storm drain channel with vegetation intrusion and sediment buildup blocking flow, municipal inspection photo, overcast daylight",
+  "note": "Vegetation blocking channel.",
+  "asset_meta": {
+    "asset_id": "SYN-incomplete-05",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "incomplete",
+      "drainage_structure",
+      "vegetation"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "missing_keys": [
+      "defect_dimensions",
+      "inspection_date",
+      "scale_reference"
+    ],
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

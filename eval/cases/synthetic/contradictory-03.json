@@ -1,0 +1,25 @@
+{
+  "case_id": "contradictory-03",
+  "suite": "contradictory",
+  "image_file": "images/contradictory-03.png",
+  "image_prompt": "bridge pier with exposed corroded rebar, section loss, scaling concrete, municipal inspection photo, overcast daylight",
+  "note": "No defects observed. Surface dry and sound.",
+  "asset_meta": {
+    "asset_id": "SYN-contradictory-03",
+    "asset_type": "bridge_component"
+  },
+  "metadata": {
+    "tags": [
+      "contradictory",
+      "bridge_component",
+      "rebar"
+    ],
+    "severity": "high"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": true,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

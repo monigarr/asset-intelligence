@@ -1,0 +1,30 @@
+{
+  "case_id": "incomplete-10",
+  "suite": "incomplete",
+  "image_file": "images/incomplete-10.png",
+  "image_prompt": "precast manhole with circumferential crack and infiltration staining, municipal inspection photo, overcast daylight",
+  "note": "Crack with staining.",
+  "asset_meta": {
+    "asset_id": "SYN-incomplete-10",
+    "asset_type": "access_structure"
+  },
+  "metadata": {
+    "tags": [
+      "incomplete",
+      "access_structure",
+      "crack"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "missing_keys": [
+      "defect_dimensions",
+      "inspection_date",
+      "scale_reference"
+    ],
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

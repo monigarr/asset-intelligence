@@ -1,0 +1,25 @@
+{
+  "case_id": "clear-15",
+  "suite": "clear",
+  "image_file": "images/clear-15.png",
+  "image_prompt": "storm drain channel with vegetation intrusion and sediment buildup blocking flow, close-up view, municipal inspection photo, overcast daylight",
+  "note": "Close-up. Vegetation and sediment blocking roughly half the channel width. Inspected 2026-10-20.",
+  "asset_meta": {
+    "asset_id": "SYN-clear-15",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "clear",
+      "drainage_structure",
+      "vegetation"
+    ],
+    "severity": "low"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

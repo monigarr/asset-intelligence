@@ -1,0 +1,24 @@
+{
+  "case_id": "ambiguous-08",
+  "suite": "ambiguous",
+  "image_file": "images/ambiguous-08.png",
+  "image_prompt": "concrete storm pipe joint with offset and infiltration, misaligned segments, dim low-light conditions, slight motion blur, municipal inspection photo, overcast daylight",
+  "note": "Something looks off in low light, hard to tell.",
+  "asset_meta": {
+    "asset_id": "SYN-ambiguous-08",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "ambiguous",
+      "drainage_structure"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "expect_discrepancy": false,
+    "expect_uncertain": true,
+    "adversarial": false
+  }
+}

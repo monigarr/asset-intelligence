@@ -1,0 +1,27 @@
+{
+  "case_id": "ambiguous-06",
+  "suite": "ambiguous",
+  "image_file": "images/ambiguous-06.png",
+  "image_prompt": "asphalt pavement with alligator cracking and pothole forming at intersection, dim low-light conditions, slight motion blur, municipal inspection photo, overcast daylight",
+  "note": "Something looks off in low light, hard to tell.",
+  "asset_meta": {
+    "asset_id": "SYN-ambiguous-06",
+    "asset_type": "pavement_section"
+  },
+  "metadata": {
+    "tags": [
+      "ambiguous",
+      "pavement_section",
+      "alligator_cracking",
+      "pothole",
+      "crack"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "expect_discrepancy": false,
+    "expect_uncertain": true,
+    "adversarial": false
+  }
+}

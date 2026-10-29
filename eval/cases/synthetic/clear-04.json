@@ -1,0 +1,29 @@
+{
+  "case_id": "clear-04",
+  "suite": "clear",
+  "image_file": "images/clear-04.png",
+  "image_prompt": "concrete wall with active water seepage through cold joint, mineral deposits, municipal inspection photo, overcast daylight",
+  "note": "Active seepage through cold joint, mineral deposits, damp 3ft wide area. Inspected 2026-10-20.",
+  "asset_meta": {
+    "asset_id": "SYN-clear-04",
+    "asset_type": "retaining_wall"
+  },
+  "metadata": {
+    "tags": [
+      "clear",
+      "retaining_wall",
+      "seepage",
+      "moisture"
+    ],
+    "severity": "low"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false,
+    "dimensions_mm": [
+      914.4
+    ]
+  }
+}

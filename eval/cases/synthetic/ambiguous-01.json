@@ -1,0 +1,26 @@
+{
+  "case_id": "ambiguous-01",
+  "suite": "ambiguous",
+  "image_file": "images/ambiguous-01.png",
+  "image_prompt": "concrete drainage culvert interior with a longitudinal crack near the top edge, damp concrete, dim low-light conditions, slight motion blur, municipal inspection photo, overcast daylight",
+  "note": "Something looks off in low light, hard to tell.",
+  "asset_meta": {
+    "asset_id": "SYN-ambiguous-01",
+    "asset_type": "drainage_structure"
+  },
+  "metadata": {
+    "tags": [
+      "ambiguous",
+      "drainage_structure",
+      "crack",
+      "moisture"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "expect_discrepancy": false,
+    "expect_uncertain": true,
+    "adversarial": false
+  }
+}

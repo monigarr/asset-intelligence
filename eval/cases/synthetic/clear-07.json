@@ -1,0 +1,29 @@
+{
+  "case_id": "clear-07",
+  "suite": "clear",
+  "image_file": "images/clear-07.png",
+  "image_prompt": "bridge bearing assembly with corrosion and displaced elastomeric pad, municipal inspection photo, overcast daylight",
+  "note": "Bearing corrosion with pad displacement about 1in. Inspected 2026-10-20.",
+  "asset_meta": {
+    "asset_id": "SYN-clear-07",
+    "asset_type": "bridge_component"
+  },
+  "metadata": {
+    "tags": [
+      "clear",
+      "bridge_component",
+      "corrosion",
+      "bearing"
+    ],
+    "severity": "low"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false,
+    "dimensions_mm": [
+      25.4
+    ]
+  }
+}

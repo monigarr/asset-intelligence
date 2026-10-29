@@ -1,0 +1,309 @@
+{
+  "generated_at": "2026-10-27T18:28:14.884094+00:00",
+  "model": "muse-image-1.0",
+  "image_size": "1024x1024",
+  "generated": 43,
+  "skipped": 7,
+  "cases": [
+    {
+      "case_id": "clear-01",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-01.png",
+      "case_file": "eval\\cases\\synthetic\\clear-01.json"
+    },
+    {
+      "case_id": "clear-02",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-02.png",
+      "case_file": "eval\\cases\\synthetic\\clear-02.json"
+    },
+    {
+      "case_id": "clear-03",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-03.png",
+      "case_file": "eval\\cases\\synthetic\\clear-03.json"
+    },
+    {
+      "case_id": "clear-04",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-04.png",
+      "case_file": "eval\\cases\\synthetic\\clear-04.json"
+    },
+    {
+      "case_id": "clear-05",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-05.png",
+      "case_file": "eval\\cases\\synthetic\\clear-05.json"
+    },
+    {
+      "case_id": "clear-06",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-06.png",
+      "case_file": "eval\\cases\\synthetic\\clear-06.json"
+    },
+    {
+      "case_id": "clear-07",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-07.png",
+      "case_file": "eval\\cases\\synthetic\\clear-07.json"
+    },
+    {
+      "case_id": "clear-08",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-08.png",
+      "case_file": "eval\\cases\\synthetic\\clear-08.json"
+    },
+    {
+      "case_id": "clear-09",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-09.png",
+      "case_file": "eval\\cases\\synthetic\\clear-09.json"
+    },
+    {
+      "case_id": "clear-10",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-10.png",
+      "case_file": "eval\\cases\\synthetic\\clear-10.json"
+    },
+    {
+      "case_id": "clear-11",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-11.png",
+      "case_file": "eval\\cases\\synthetic\\clear-11.json"
+    },
+    {
+      "case_id": "clear-12",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-12.png",
+      "case_file": "eval\\cases\\synthetic\\clear-12.json"
+    },
+    {
+      "case_id": "clear-13",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-13.png",
+      "case_file": "eval\\cases\\synthetic\\clear-13.json"
+    },
+    {
+      "case_id": "clear-14",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-14.png",
+      "case_file": "eval\\cases\\synthetic\\clear-14.json"
+    },
+    {
+      "case_id": "clear-15",
+      "suite": "clear",
+      "image": "eval\\cases\\synthetic\\images\\clear-15.png",
+      "case_file": "eval\\cases\\synthetic\\clear-15.json"
+    },
+    {
+      "case_id": "incomplete-01",
+      "suite": "incomplete",
+      "image": "eval\\cases\\synthetic\\images\\incomplete-01.png",
+      "case_file": "eval\\cases\\synthetic\\incomplete-01.json"
+    },
+    {
+      "case_id": "incomplete-02",
+      "suite": "incomplete",
+      "image": "eval\\cases\\synthetic\\images\\incomplete-02.png",
+      "case_file": "eval\\cases\\synthetic\\incomplete-02.json"
+    },
+    {
+      "case_id": "incomplete-03",
+      "suite": "incomplete",
+      "image": "eval\\cases\\synthetic\\images\\incomplete-03.png",
+      "case_file": "eval\\cases\\synthetic\\incomplete-03.json"
+    },
+    {
+      "case_id": "incomplete-04",
+      "suite": "incomplete",
+      "image": "eval\\cases\\synthetic\\images\\incomplete-04.png",
+      "case_file": "eval\\cases\\synthetic\\incomplete-04.json"
+    },
+    {
+      "case_id": "incomplete-05",
+      "suite": "incomplete",
+      "image": "eval\\cases\\synthetic\\images\\incomplete-05.png",
+      "case_file": "eval\\cases\\synthetic\\incomplete-05.json"
+    },
+    {
+      "case_id": "incomplete-06",
+      "suite": "incomplete",
+      "image": "eval\\cases\\synthetic\\images\\incomplete-06.png",
+      "case_file": "eval\\cases\\synthetic\\incomplete-06.json"
+    },
+    {
+      "case_id": "incomplete-07",
+      "suite": "incomplete",
+      "image": "eval\\cases\\synthetic\\images\\incomplete-07.png",
+      "case_file": "eval\\cases\\synthetic\\incomplete-07.json"
+    },
+    {
+      "case_id": "incomplete-08",
+      "suite": "incomplete",
+      "image": "eval\\cases\\synthetic\\images\\incomplete-08.png",
+      "case_file": "eval\\cases\\synthetic\\incomplete-08.json"
+    },
+    {
+      "case_id": "incomplete-09",
+      "suite": "incomplete",
+      "image": "eval\\cases\\synthetic\\images\\incomplete-09.png",
+      "case_file": "eval\\cases\\synthetic\\incomplete-09.json"
+    },
+    {
+      "case_id": "incomplete-10",
+      "suite": "incomplete",
+      "image": "eval\\cases\\synthetic\\images\\incomplete-10.png",
+      "case_file": "eval\\cases\\synthetic\\incomplete-10.json"
+    },
+    {
+      "case_id": "contradictory-01",
+      "suite": "contradictory",
+      "image": "eval\\cases\\synthetic\\images\\contradictory-01.png",
+      "case_file": "eval\\cases\\synthetic\\contradictory-01.json"
+    },
+    {
+      "case_id": "contradictory-02",
+      "suite": "contradictory",
+      "image": "eval\\cases\\synthetic\\images\\contradictory-02.png",
+      "case_file": "eval\\cases\\synthetic\\contradictory-02.json"
+    },
+    {
+      "case_id": "contradictory-03",
+      "suite": "contradictory",
+      "image": "eval\\cases\\synthetic\\images\\contradictory-03.png",
+      "case_file": "eval\\cases\\synthetic\\contradictory-03.json"
+    },
+    {
+      "case_id": "contradictory-04",
+      "suite": "contradictory",
+      "image": "eval\\cases\\synthetic\\images\\contradictory-04.png",
+      "case_file": "eval\\cases\\synthetic\\contradictory-04.json"
+    },
+    {
+      "case_id": "contradictory-05",
+      "suite": "contradictory",
+      "image": "eval\\cases\\synthetic\\images\\contradictory-05.png",
+      "case_file": "eval\\cases\\synthetic\\contradictory-05.json"
+    },
+    {
+      "case_id": "contradictory-06",
+      "suite": "contradictory",
+      "image": "eval\\cases\\synthetic\\images\\contradictory-06.png",
+      "case_file": "eval\\cases\\synthetic\\contradictory-06.json"
+    },
+    {
+      "case_id": "contradictory-07",
+      "suite": "contradictory",
+      "image": "eval\\cases\\synthetic\\images\\contradictory-07.png",
+      "case_file": "eval\\cases\\synthetic\\contradictory-07.json"
+    },
+    {
+      "case_id": "contradictory-08",
+      "suite": "contradictory",
+      "image": "eval\\cases\\synthetic\\images\\contradictory-08.png",
+      "case_file": "eval\\cases\\synthetic\\contradictory-08.json"
+    },
+    {
+      "case_id": "contradictory-09",
+      "suite": "contradictory",
+      "image": "eval\\cases\\synthetic\\images\\contradictory-09.png",
+      "case_file": "eval\\cases\\synthetic\\contradictory-09.json"
+    },
+    {
+      "case_id": "contradictory-10",
+      "suite": "contradictory",
+      "image": "eval\\cases\\synthetic\\images\\contradictory-10.png",
+      "case_file": "eval\\cases\\synthetic\\contradictory-10.json"
+    },
+    {
+      "case_id": "ambiguous-01",
+      "suite": "ambiguous",
+      "image": "eval\\cases\\synthetic\\images\\ambiguous-01.png",
+      "case_file": "eval\\cases\\synthetic\\ambiguous-01.json"
+    },
+    {
+      "case_id": "ambiguous-02",
+      "suite": "ambiguous",
+      "image": "eval\\cases\\synthetic\\images\\ambiguous-02.png",
+      "case_file": "eval\\cases\\synthetic\\ambiguous-02.json"
+    },
+    {
+      "case_id": "ambiguous-03",
+      "suite": "ambiguous",
+      "image": "eval\\cases\\synthetic\\images\\ambiguous-03.png",
+      "case_file": "eval\\cases\\synthetic\\ambiguous-03.json"
+    },
+    {
+      "case_id": "ambiguous-04",
+      "suite": "ambiguous",
+      "image": "eval\\cases\\synthetic\\images\\ambiguous-04.png",
+      "case_file": "eval\\cases\\synthetic\\ambiguous-04.json"
+    },
+    {
+      "case_id": "ambiguous-05",
+      "suite": "ambiguous",
+      "image": "eval\\cases\\synthetic\\images\\ambiguous-05.png",
+      "case_file": "eval\\cases\\synthetic\\ambiguous-05.json"
+    },
+    {
+      "case_id": "ambiguous-06",
+      "suite": "ambiguous",
+      "image": "eval\\cases\\synthetic\\images\\ambiguous-06.png",
+      "case_file": "eval\\cases\\synthetic\\ambiguous-06.json"
+    },
+    {
+      "case_id": "ambiguous-07",
+      "suite": "ambiguous",
+      "image": "eval\\cases\\synthetic\\images\\ambiguous-07.png",
+      "case_file": "eval\\cases\\synthetic\\ambiguous-07.json"
+    },
+    {
+      "case_id": "ambiguous-08",
+      "suite": "ambiguous",
+      "image": "eval\\cases\\synthetic\\images\\ambiguous-08.png",
+      "case_file": "eval\\cases\\synthetic\\ambiguous-08.json"
+    },
+    {
+      "case_id": "ambiguous-09",
+      "suite": "ambiguous",
+      "image": "eval\\cases\\synthetic\\images\\ambiguous-09.png",
+      "case_file": "eval\\cases\\synthetic\\ambiguous-09.json"
+    },
+    {
+      "case_id": "ambiguous-10",
+      "suite": "ambiguous",
+      "image": "eval\\cases\\synthetic\\images\\ambiguous-10.png",
+      "case_file": "eval\\cases\\synthetic\\ambiguous-10.json"
+    },
+    {
+      "case_id": "adversarial-01",
+      "suite": "adversarial",
+      "image": "eval\\cases\\synthetic\\images\\adversarial-01.png",
+      "case_file": "eval\\cases\\synthetic\\adversarial-01.json"
+    },
+    {
+      "case_id": "adversarial-02",
+      "suite": "adversarial",
+      "image": "eval\\cases\\synthetic\\images\\adversarial-02.png",
+      "case_file": "eval\\cases\\synthetic\\adversarial-02.json"
+    },
+    {
+      "case_id": "adversarial-03",
+      "suite": "adversarial",
+      "image": "eval\\cases\\synthetic\\images\\adversarial-03.png",
+      "case_file": "eval\\cases\\synthetic\\adversarial-03.json"
+    },
+    {
+      "case_id": "adversarial-04",
+      "suite": "adversarial",
+      "image": "eval\\cases\\synthetic\\images\\adversarial-04.png",
+      "case_file": "eval\\cases\\synthetic\\adversarial-04.json"
+    },
+    {
+      "case_id": "adversarial-05",
+      "suite": "adversarial",
+      "image": "eval\\cases\\synthetic\\images\\adversarial-05.png",
+      "case_file": "eval\\cases\\synthetic\\adversarial-05.json"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "case_id": "incomplete-06",
+  "suite": "incomplete",
+  "image_file": "images/incomplete-06.png",
+  "image_prompt": "asphalt pavement with alligator cracking and pothole forming at intersection, municipal inspection photo, overcast daylight",
+  "note": "Alligator cracking.",
+  "asset_meta": {
+    "asset_id": "SYN-incomplete-06",
+    "asset_type": "pavement_section"
+  },
+  "metadata": {
+    "tags": [
+      "incomplete",
+      "pavement_section",
+      "alligator_cracking",
+      "pothole",
+      "crack"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "missing_keys": [
+      "defect_dimensions",
+      "inspection_date",
+      "scale_reference"
+    ],
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

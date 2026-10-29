@@ -1,0 +1,25 @@
+{
+  "case_id": "clear-10",
+  "suite": "clear",
+  "image_file": "images/clear-10.png",
+  "image_prompt": "precast manhole with circumferential crack and infiltration staining, municipal inspection photo, overcast daylight",
+  "note": "Circumferential crack with infiltration staining around full perimeter. Inspected 2026-10-20.",
+  "asset_meta": {
+    "asset_id": "SYN-clear-10",
+    "asset_type": "access_structure"
+  },
+  "metadata": {
+    "tags": [
+      "clear",
+      "access_structure",
+      "crack"
+    ],
+    "severity": "low"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": false,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

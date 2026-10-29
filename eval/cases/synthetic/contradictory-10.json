@@ -1,0 +1,25 @@
+{
+  "case_id": "contradictory-10",
+  "suite": "contradictory",
+  "image_file": "images/contradictory-10.png",
+  "image_prompt": "precast manhole with circumferential crack and infiltration staining, municipal inspection photo, overcast daylight",
+  "note": "No defects observed. Surface dry and sound.",
+  "asset_meta": {
+    "asset_id": "SYN-contradictory-10",
+    "asset_type": "access_structure"
+  },
+  "metadata": {
+    "tags": [
+      "contradictory",
+      "access_structure",
+      "crack"
+    ],
+    "severity": "high"
+  },
+  "expected": {
+    "missing_any": false,
+    "expect_discrepancy": true,
+    "expect_uncertain": false,
+    "adversarial": false
+  }
+}

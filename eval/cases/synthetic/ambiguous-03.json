@@ -1,0 +1,25 @@
+{
+  "case_id": "ambiguous-03",
+  "suite": "ambiguous",
+  "image_file": "images/ambiguous-03.png",
+  "image_prompt": "bridge pier with exposed corroded rebar, section loss, scaling concrete, dim low-light conditions, slight motion blur, municipal inspection photo, overcast daylight",
+  "note": "Something looks off in low light, hard to tell.",
+  "asset_meta": {
+    "asset_id": "SYN-ambiguous-03",
+    "asset_type": "bridge_component"
+  },
+  "metadata": {
+    "tags": [
+      "ambiguous",
+      "bridge_component",
+      "rebar"
+    ],
+    "severity": "medium"
+  },
+  "expected": {
+    "missing_any": true,
+    "expect_discrepancy": false,
+    "expect_uncertain": true,
+    "adversarial": false
+  }
+}
