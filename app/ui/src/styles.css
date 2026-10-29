@@ -321,3 +321,7 @@ button.nav-icon { font: inherit; }
 }
 .stage-fill { display: block; height: 100%; background: var(--accent); }
 .stage-ms { text-align: right; }
+.overlay-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.overlay-row img { max-width: 100%; height: auto; }
+.review-note { display: block; margin: 8px 0; }
+.review-note textarea { width: 100%; box-sizing: border-box; }

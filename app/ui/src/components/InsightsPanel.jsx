@@ -1,5 +1,14 @@
 ﻿import { useCallback, useEffect, useState } from 'react';
-import { fetchInspection, fetchInspections, fetchStats } from '../api.js';
+import {
+  fetchInspection,
+  fetchInspections,
+  fetchOverlays,
+  fetchStats,
+  submitReview,
+} from '../api.js';
+import JsonViewer from './JsonViewer.jsx';
+import MissingChecklist from './MissingChecklist.jsx';
+import ReviewActions from './ReviewActions.jsx';
 import {
   costText,
   formatLatency,
@@ -57,44 +66,113 @@ function CostLine({ item }) {
   );
 }
 
-function DetailCard({ record, onClose }) {
+function DetailCard({ record, onClose, apiKey, onReviewed }) {
   const status = statusOf({ review_status: record.review_status });
   const sum = summarize(record);
   const trace = record.model_trace || {};
   const usage = record.usage || {};
+  const [overlays, setOverlays] = useState([]);
+  const [overlayNote, setOverlayNote] = useState('');
+  const [reviewStatus, setReviewStatus] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    setOverlays([]);
+    setOverlayNote('');
+    fetchOverlays(record.request_id, apiKey)
+      .then((items) => {
+        if (cancelled) {
+          items.forEach((o) => URL.revokeObjectURL(o.url));
+          return;
+        }
+        setOverlays(items);
+        if (items.length === 0) {
+          setOverlayNote('No overlay images stored for this inspection.');
+        }
+      })
+      .catch((e) => {
+        if (!cancelled) setOverlayNote('Overlays unavailable: ' + (e.message || e));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [record.request_id, apiKey]);
+
+  useEffect(
+    () => () => {
+      overlays.forEach((o) => URL.revokeObjectURL(o.url));
+    },
+    [overlays],
+  );
+
+  async function handleReview(decision, note) {
+    setReviewStatus('');
+    try {
+      const res = await submitReview(record.request_id, decision, note, apiKey);
+      setReviewStatus('Saved: ' + res.review_status + ' (reviewed ' + (res.reviewed_at || 'just now') + ').');
+      if (onReviewed) onReviewed();
+    } catch (e) {
+      setReviewStatus('Review failed: ' + (e.message || e));
+    }
+  }
+
+  const hasPayload = Array.isArray(record.observations);
+
   return (
     <div className="panel">
       <h2>
         Inspection detail <span className="muted">({record.request_id})</span>
       </h2>
       <p>
-        <span className={`status-chip ${toneClass(status.tone)}`}>{status.word}</span>
+        <span className={'status-chip ' + toneClass(status.tone)}>{status.word}</span>
       </p>
       <p>
         {sum.obs} observations, {sum.disc} discrepancies, {sum.miss} missing items.
         {sum.slowest ? (
-          <>
+          <span>
             {' '}
             Slowest stage: {stageLabel(sum.slowest.stage)} (
             {formatLatency(sum.slowest.ms)}).
-          </>
+          </span>
         ) : null}
       </p>
       <h3>Stage timeline</h3>
       <StageTimeline durations={record.durations_ms || {}} />
-      <h3>Cost &amp; usage</h3>
+      <h3>Cost and usage</h3>
       <p>
         <CostLine item={record} />
-        {' · '}
+        {' - '}
         {usage.total_tokens || 0} tokens
-        {' · '}
+        {' - '}
         models: {trace.sam}, {trace.vision}
         {trace.vision_fallback_used ? ' (fallback)' : ''}, {trace.reasoning},{' '}
         {trace.planning}
       </p>
-      <button type="button" onClick={onClose}>
-        Close detail
-      </button>
+      {overlays.length > 0 && (
+        <div>
+          <h3>Segmentation overlays</h3>
+          <div className="overlay-row">
+            {overlays.map((o) => (
+              <img key={o.index} src={o.url} alt={'Overlay for image ' + (o.index + 1)} />
+            ))}
+          </div>
+        </div>
+      )}
+      {overlayNote && <p className="hint">{overlayNote}</p>}
+      <h3>Missing information</h3>
+      <MissingChecklist items={record.missing || []} />
+      {hasPayload ? (
+        <JsonViewer result={record} note={record.field_note} />
+      ) : (
+        <p className="hint">Full result payload is not available for this record.</p>
+      )}
+      <h3>Review decision</h3>
+      <ReviewActions onReview={handleReview} status={reviewStatus} />
+      <p>
+        <button type="button" onClick={onClose}>
+          Close detail
+        </button>
+      </p>
     </div>
   );
 }
@@ -352,9 +430,14 @@ export default function InsightsPanel({ apiKey, onApiKey }) {
       {detail && (
         <DetailCard
           record={detail}
+          apiKey={apiKey}
           onClose={() => {
             setDetail(null);
             setSelectedId(null);
+          }}
+          onReviewed={() => {
+            selectRow(detail.request_id);
+            load();
           }}
         />
       )}

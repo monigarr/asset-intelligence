@@ -39,14 +39,14 @@ export function overlayUrl(requestId, imageIndex) {
   return `/v1/inspections/${encodeURIComponent(requestId)}/overlay?image=${imageIndex}`;
 }
 
-export async function submitReview(requestId, decision, edits, apiKey) {
+export async function submitReview(requestId, decision, note, apiKey) {
   const res = await fetch(`/v1/inspections/${encodeURIComponent(requestId)}/review`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       ...(apiKey ? { 'X-API-Key': apiKey } : {}),
     },
-    body: JSON.stringify({ decision, edits: edits || null }),
+    body: JSON.stringify({ decision, note: note || null }),
   });
   if (!res.ok) throw new Error(`review failed: ${res.status} ${await res.text()}`);
   return res.json();
@@ -77,4 +77,17 @@ export async function fetchInspection(requestId, apiKey) {
   });
   if (!res.ok) throw new Error(`inspection failed: ${res.status} ${await res.text()}`);
   return res.json();
+}
+
+export async function fetchOverlays(requestId, apiKey, maxImages = 5) {
+  const out = [];
+  for (let i = 0; i < maxImages; i += 1) {
+    const res = await fetch(`/v1/inspections/${encodeURIComponent(requestId)}/overlay?image=${i}`, {
+      headers: apiKey ? { 'X-API-Key': apiKey } : {},
+    });
+    if (!res.ok) break; // indices are contiguous; first miss ends the set
+    const blob = await res.blob();
+    out.push({ index: i, url: URL.createObjectURL(blob) });
+  }
+  return out;
 }

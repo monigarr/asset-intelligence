@@ -151,9 +151,9 @@ export default function App() {
     setSelectedSpan(ev.span || null);
   }
 
-  async function onReview(decision) {
+  async function onReview(decision, note) {
     if (!result) return;
-    const res = await submitReview(result.request_id, decision, null, apiKey);
+    const res = await submitReview(result.request_id, decision, note, apiKey);
     setReviewStatus(`Recorded: ${res.status || decision}`);
   }
 

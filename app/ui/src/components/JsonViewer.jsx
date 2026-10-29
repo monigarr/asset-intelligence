@@ -3,6 +3,13 @@ function EvidenceChip({ ev, active, onClick }) {
     ev.source === 'maintenance_note'
       ? `note [${ev.span ? ev.span.join(':') : '?'}]`
       : `${ev.source}${ev.mask_id ? ` · ${ev.mask_id}` : ''}`;
+  if (!onClick) {
+    return (
+      <span className={`chip${active ? ' active' : ''}`} title="Evidence reference">
+        {label}
+      </span>
+    );
+  }
   return (
     <button className={`chip${active ? ' active' : ''}`} onClick={onClick} title="Highlight evidence">
       {label}
@@ -11,6 +18,7 @@ function EvidenceChip({ ev, active, onClick }) {
 }
 
 function NoteView({ note, span }) {
+  if (!note) return <div className="hint">Field note is not stored after validation.</div>;
   if (!span) return <div className="note-view">{note}</div>;
   const [start, end] = span;
   return (
@@ -51,7 +59,7 @@ export default function JsonViewer({
                   key={j}
                   ev={ev}
                   active={active}
-                  onClick={() => onEvidenceClick(ev)}
+                  onClick={onEvidenceClick ? () => onEvidenceClick(ev) : null}
                 />
               );
             })}
