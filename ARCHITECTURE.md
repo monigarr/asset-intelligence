@@ -2,8 +2,8 @@
 
 - **Status:** Production-Ready Prototype for Meta Global AI Hackathon
 - **Track:** Startup / Push the Frontier
-- **Version:** 1.1 (2026-10-27: Wave-3 conformance sync)
-- **Date:** 2026-10-27
+- **Version:** 1.2 (2026-10-29: Valkey/request-id errata; see §16)
+- **Date:** 2026-10-29
 - **Mandate:** Meta-Only Stack — Zero OpenAI Dependency
 
 ## 1. Purpose & Hackathon Fit
@@ -165,7 +165,7 @@ TASK: Produce JSON matching schema. If dimension missing, list in missing_inform
 
 ## 5. Detailed Request Flow — 8 Steps, 5 Meta Models
 
-- **Ingress:** POST /v1/inspections → Auth (API key) → Rate limit (Valkey/memory) → InputAdapter validates → generates request_id (ULID)
+- **Ingress:** POST /v1/inspections → Auth (API key) → Rate limit (Valkey/memory) → InputAdapter validates → generates request_id (`req_` + 24 hex)
 - **SAM:** Images → SAM 3.1 → masks + bboxes (parallel per image; 11 s p95 measured live 2026-10-27, see live_reports/)
 - **Vision:** Images + masks + note → Muse Spark 1.3 Vision → vision_observations
 - **Reasoning:** vision_observations + masks → Muse Spark 1.3 → draft JSON (JSON mode)
@@ -185,13 +185,13 @@ TASK: Produce JSON matching schema. If dimension missing, list in missing_inform
 | Validation | Pydantic v2, JSON Schema | Fail-closed |
 | Auth | X-API-Key + JWT issue/refresh (HS256, Argon2) | Bearer or key; SSO post-hackathon |
 | Storage | SQLite + overlay BLOBs (demo); Postgres/MinIO M3 | Zero cloud dep for local |
-| Queue (future) | Modal Queues or Redis | Batch inspections |
+| Queue (future) | Modal Queues or Valkey | Batch inspections |
 | Observability | OpenTelemetry, Prometheus, stdlib logging | OTEL traces per model call |
 | Packaging | Docker, docker-compose, Makefile | docker compose up wins |
 | CI | lint, test+coverage, meta-only, SBOM, UI, compose, live slice (keyed) | Startup track demands CI |
 | Code Gen | Muse Code agent | Build faster, required by hackathon |
 
-No OpenAI SDK: requirements.txt has httpx, tenacity, pydantic, fastapi (plus pyjwt, argon2-cffi, redis for auth/limits) — NOT openai.
+No OpenAI SDK: requirements.txt has httpx, tenacity, pydantic, fastapi (plus pyjwt, argon2-cffi, and the redis client library, which talks to Valkey, for auth/limits) — NOT openai.
 
 ## 7. Data Schemas
 
@@ -342,6 +342,7 @@ docker compose up
 
 ## 16. Changelog
 
+- **v1.2 (2026-10-29):** Valkey queue-store erratum (§6), `redis` client-package clarification, `req_`-prefixed request-id format (§5).
 - **v1.1 (2026-10-27, Wave-3 audit):** vision is Muse Spark 1.3 (no live Llama
   model); `-1.0` model IDs; `/v1` routes; httpx gateway (no meta-ai-sdk); stdlib
   logging; Valkey (not Redis) rate-limit storage; SQLite + BLOB persistence

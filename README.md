@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](Dockerfile)
 
 > **Meta Global AI Developer Hackathon — Startup Track / Push the Frontier**
-> README v2.1 · Updated 2026-10-27 · Verified against `2b1c7dc` · Meta-only stack, no OpenAI
+> README v2.2 · Updated 2026-10-29 · Verified against `c83dfd5` · Meta-only stack, no OpenAI
 
 **One-liner:** Asset Intelligence gives machines a new capability — seeing infrastructure
 defects (SAM 3.1), understanding field notes (Muse Spark 1.3 Vision), reasoning with cited
@@ -28,7 +28,7 @@ and technical depth (20%).
 | **Impact 30%** | $2.3T deferred-maintenance backlog; 70% of inspection reports are unstructured photos + notes. Serves municipal crews, utilities, public works. Push the Frontier: a machine that understands and helps control a physical system. |
 | **Creative Meta use 25%** | Four Meta models orchestrated end to end: SAM 3.1 segments defects → Muse Spark 1.3 fuses vision + note → Spark 1.3 drafts evidence-linked JSON → Muse Wonder 1.0 flags discrepancies → Muse Image 1.0 generates the 50 synthetic eval cases. All via the Meta Model API. |
 | **Demo 25%** | One command (`docker compose up --build`) → review UI with SAM overlays, structured JSON, missing-info checklist, human approve. 90-second end-to-end video in production (owner action, see below). |
-| **Tech depth 20% + Startup bar** | FastAPI + Pydantic v2 fail-closed validation, X-API-Key auth, OTEL + Prometheus, per-stage latency tracking, cost metering, 139-test suite at ~89% coverage, ruff-clean, Meta-only CI enforcement, live-measured eval gates. |
+| **Tech depth 20% + Startup bar** | FastAPI + Pydantic v2 fail-closed validation, X-API-Key auth, OTEL + Prometheus, per-stage latency tracking, cost metering, 171-test suite at ~89% coverage, ruff-clean, Meta-only CI enforcement, live-measured eval gates. |
 
 ## Demo — 2 Minutes to Value
 
@@ -83,7 +83,7 @@ pre-commit install
 Copy-Item .env.example .env   # META_API_KEY only needed for live calls
 
 python -m eval.run --mode mocked --out eval/report.json   # 50/50 green, no key
-python -m pytest tests/ -q --cov=app --cov-fail-under=70  # 139 tests, ~89%
+python -m pytest tests/ -q --cov=app --cov-fail-under=70  # 171 tests, ~89%
 ruff check app/ eval/ tests/                              # must be clean
 python -m uvicorn --factory app.api.main:create_app --host 127.0.0.1 --port 8000
 ```
@@ -133,7 +133,6 @@ Live 50-case eval, 2026-10-27, synthetic Muse-Image cases, Meta Model API
 | refusal_rate (adversarial) | == 1.0 | **1.0** |
 | missing_f1 | ≥ 0.7 | **0.822** |
 | missing_precision | ≥ 0.85 | new gate (mocked 1.0) |
-| missing_precision | ≥ 0.85 | new gate (mocked 1.0) |
 | conflict_f1 | ≥ 0.6 | **1.0** |
 | fabrication_rate | == 0 | **0.0** |
 | latency p95 | < 8000 ms | 47.9 s — red by architecture, see below |
@@ -177,7 +176,7 @@ python -m eval.run --mode live --cases-dir eval/cases/synthetic --out live_repor
 ```text
 .
 ├── app/
-│   ├── gateway/        # Meta Model API client, SAM-via-/responses, pricing, retry/auth, breaker, breaker
+│   ├── gateway/        # Meta Model API client, SAM-via-/responses, pricing, retry/auth, breaker
 │   ├── sam_service/    # RLE decode, mask cache, overlay data
 │   ├── vision/         # Spark 1.3 vision fusion (+ input downscale)
 │   ├── orchestrator/   # Spark 1.3 reasoning + 5-stage pipeline
@@ -187,18 +186,16 @@ python -m eval.run --mode live --cases-dir eval/cases/synthetic --out live_repor
 │   ├── ui/             # Review surface (Vite + React)
 │   └── synthetic/      # Muse Image case generator (50 eval cases)
 ├── eval/               # 50-case harness: mocked + live, gates, report.json
-├── eval/cases/         # Case JSONs committed; PNGs gitignored, regenerable
-├── tests/              # 127 tests incl. Meta-only + cert-pattern drift tests
+├── eval/cases/         # 50 JSONs + 50 PNGs committed (~205 MB)
+├── tests/              # 171 tests incl. Meta-only + cert-pattern drift tests
 ├── docs/               # Onboarding guides with version matrix
 ├── live_reports/       # Timestamped live eval reports (local-only, gitignored)
-├── docker-compose.yml  # API :8000, UI :3000, OTEL, Prometheus (MinIO returns with M3)
+├── docker-compose.yml  # API :8000, UI :3000, OTEL, Prometheus, Valkey (MinIO returns with M3)
 ├── Dockerfile          # python:3.12-slim, single worker, healthcheck
 ├── Makefile            # dev, run, test, verify-meta-only, lint
 ├── PRD.md / ARCHITECTURE.md / SECURITY.md / AUDIT.md
 └── README.md           # this file
 ```
-
-Also: `app/cli.py` (no-server CLI), `app/api/jwt_auth.py` (issue/refresh).
 
 Also: `app/cli.py` (no-server CLI), `app/api/jwt_auth.py` (issue/refresh).
 
@@ -226,7 +223,7 @@ without labeled data — a market that did not exist 12 months ago.
   compose demo, CI, security baseline
 - **M2 — planned:** success-rate follow-up (refuse-without-quoting, span convention), Scout
   cost path if verified, batch mode, offline mobile capture
-- **M3 — planned:** latency architecture decision, Postgres/MinIO persistence, JWT/SSO, SBOM,
+- **M3 — planned:** latency architecture decision, Postgres/MinIO persistence, SSO, SBOM,
   SOC 2 groundwork, air-gapped deploy
 - **M4 — planned:** adapter GA, multi-asset portfolio analytics
 

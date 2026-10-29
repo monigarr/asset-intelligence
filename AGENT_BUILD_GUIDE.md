@@ -2,6 +2,8 @@
 
 This is the execution guide for your coding agents. Source of truth: PRD.md + ARCHITECTURE.md + README.md
 
+> Historical build notes (2026-10-26): model IDs and retry/policy details here are stale where they differ from ARCHITECTURE.md — notably, no Llama model exists on the live API (ARCH §4.3), and ARCH retry/Valkey/JWT terms win.
+
 ## 0. Golden Rules
 
 - **Meta-Only:** Use only Meta Model API. Allowed models: sam-3.1, llama-4-maverick-17b-128e-vision, llama-4-scout-17b-16e-vision, muse-spark-1.3, muse-wonder, muse-image. Also allowed: Llama 4 open-weights via Baseten/Modal. NEVER import openai, anthropic, cohere. CI will grep and fail.

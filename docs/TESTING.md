@@ -1,6 +1,6 @@
 # Testing
 
-> Doc version: 1.2 | Updated: 2026-10-29 | Verified against: `2b1c7dc`
+> Doc version: 1.3 | Updated: 2026-10-29 | Verified against: `c83dfd5`
 
 ## Unit suite (required before every commit)
 
@@ -67,7 +67,7 @@ Two workflows run on push/PR (`.github/workflows/`):
 | Workflow | Checks |
 |----------|--------|
 | `ci.yml` | pytest + coverage, ruff, Meta-only, SBOM, UI, compose, live slice (needs `META_API_KEY` secret) |
-| `secret-scan.yml` | Secret scan over `app/` |
+| `secret-scan.yml` | Gitleaks + TruffleHog scans, Meta-only grep, `.env` + boundary checks |
 
 Keep both green. If CI fails on code you did not touch, report it -- do not "fix" it by
 weakening the gate.

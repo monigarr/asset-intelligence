@@ -1,6 +1,6 @@
 # Getting Started
 
-> Doc version: 1.1 | Updated: 2026-10-29 | Verified against: `2b1c7dc`
+> Doc version: 1.2 | Updated: 2026-10-29 | Verified against: `c83dfd5`
 
 From zero to a verified working checkout in about 30 minutes. No API key needed until Step 6.
 
@@ -52,7 +52,7 @@ Copy-Item .env.example .env
 
 `.env` is gitignored — never commit it. For a first local run you can leave `META_API_KEY`
 empty; the mocked eval and unit tests do not need it. See [Configuration](CONFIGURATION.md)
-for every variable (cost metering: copy the 7 commented price lines from `.env.example`, plus `META_PRICE_TIER` only if contributor-billed). Get a key at <https://dev.meta.ai/api-keys> when you are ready for live calls.
+for every variable (cost metering: copy the 15 commented `# META_PRICE…` lines from `.env.example`, plus `META_PRICE_TIER` only if contributor-billed). Get a key at <https://dev.meta.ai/api-keys> when you are ready for live calls.
 
 ## 6. Verify — mocked eval (no key needed)
 

@@ -6,11 +6,11 @@ this directory are the committed eval oracle: prompts, notes, asset metadata,
 and expected labels. They contain no real inspections, no PII, and no secrets
 (synthetic `SYN-*` IDs, fixed `2026-10-20` date).
 
-## Images are gitignored (regenerable)
+## Images are committed (regenerable)
 
-`images/*.png` (~200 MB) is intentionally NOT committed: `.gitignore` keeps
-`*.png` ignored here (only the directory itself is un-ignored, so JSONs stay
-committable). Regenerate any time with a Meta API key:
+`images/*.png` (~205 MB) ships with the repo: `.gitignore` negates the global
+`*.png` rule for this directory so new developers can run evals immediately.
+Refresh any time with a Meta API key:
 
 ```powershell
 Copy-Item .env.example .env   # then set META_API_KEY (never commit .env)

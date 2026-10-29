@@ -1,6 +1,6 @@
 # Runbook
 
-> Doc version: 1.1 | Updated: 2026-10-27 | Verified against: `2b1c7dc`
+> Doc version: 1.2 | Updated: 2026-10-29 | Verified against: `c83dfd5`
 
 Day-to-day commands. All assume the venv is activated from the repo root.
 
@@ -24,7 +24,7 @@ Routes (`v1` = API version):
 | `POST /v1/inspections/{request_id}/review` | Human review decision |
 
 Authenticated routes need the `X-API-Key` header or `Authorization: Bearer <access>` (see [Configuration](CONFIGURATION.md)).
-Single worker by design: rate limiting is in-memory; scale out via replicas later.
+Single worker per container by design. Local runs default to in-memory limits; compose sets `RATE_LIMIT_STORAGE_URI=redis://valkey:6379` for shared limits across replicas.
 
 Example inspection (dev key only, local):
 
@@ -82,7 +82,7 @@ Exit code is nonzero when any gate fails — read the gate table in the report J
 
 ## Synthetic case generation
 
-Case PNGs are gitignored (~200 MB); only JSONs + manifest are committed. Regenerate locally
+Case PNGs (~205 MB) ship with the repo, so evals run with no regeneration step. Refresh them with
 (needs `META_API_KEY`; image generation needs the 180 s timeout):
 
 ```powershell

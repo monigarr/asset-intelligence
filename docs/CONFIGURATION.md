@@ -1,6 +1,6 @@
 # Configuration
 
-> Doc version: 1.2 | Updated: 2026-10-29 | Verified against: `2b1c7dc`
+> Doc version: 1.3 | Updated: 2026-10-29 | Verified against: `c83dfd5`
 
 All runtime configuration is environment variables, loaded from `.env` (see `.env.example`).
 **Never commit `.env`.** The template `.env.example` is safe to commit and is the canonical list.
@@ -18,7 +18,7 @@ All runtime configuration is environment variables, loaded from `.env` (see `.en
 | Variable | Default | Role |
 |----------|---------|------|
 | `VISION_MODEL_ID` | `muse-spark-1.3` | Primary vision fusion |
-| `FALLBACK_VISION_MODEL_ID` | `muse-spark-1.3` | Vision fallback (same model; deliberate deviation from ARCH §4.3, which names Scout — no Llama model exists on the live API) |
+| `FALLBACK_VISION_MODEL_ID` | `muse-spark-1.3` | Vision fallback (same model; no Llama model exists on the live API, verified 2026-10-27) |
 | `REASONING_MODEL_ID` | `muse-spark-1.3` | Spark structured reasoning |
 | `PLANNING_MODEL_ID` | `muse-wonder-1.0` | Wonder planning review |
 | `IMAGE_MODEL_ID` | `muse-image-1.0` | Synthetic image generation |
@@ -26,6 +26,8 @@ All runtime configuration is environment variables, loaded from `.env` (see `.en
 
 There is no `POST /v1/segment` endpoint; segmentation goes through `/v1/responses` with the
 official `meta_sam_parser` (`app/gateway/sam_responses.py`).
+
+The compose stack pins `VISION/FALLBACK_VISION/REASONING/PLANNING_MODEL_ID` in `docker-compose.yml` so demos ignore stale `.env` IDs; local runs use `.env` (or code defaults).
 
 ## API server
 

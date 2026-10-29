@@ -24,10 +24,9 @@
   for anything shared.
 - `/healthz` and `/metrics` are unauthenticated by design; they expose no
   inspection data.
-- JWT/SSO (named in ARCH §6) is **deferred post-hackathon**: API key only.
-- Rate limiting: 60/minute per key (slowapi, in-memory) with 429 responses;
-  Redis-backed limits and multi-worker operation are the production move —
-  run one worker until then (`Dockerfile`).
+- JWT issue/refresh (HS256 access + rotating refresh, Argon2 password check) is implemented (`POST /v1/auth/*`); SSO stays deferred post-hackathon.
+- Rate limiting: 60/minute per key (slowapi; in-memory solo, Valkey-backed in compose) with 429 responses;
+  run one worker per container and scale via replicas (`docker-compose.yml`).
 
 ## 3. Input handling (ARCH §4.1, `app/api/adapter.py`)
 
@@ -109,8 +108,7 @@
 
 ## 10. Known gaps (honest list, not roadmap promises)
 
-- JWT/SSO, Redis rate limiting, Postgres/MinIO persistence: designed
-  (ARCH §5–§6) but not implemented.
+- SSO and Postgres/MinIO persistence: designed (ARCH §5–§6) but not implemented.
 - No `Llama 4 Maverick/Scout` vision models exist on the live Meta Model API
   catalog (verified 2026-10-27: 9 models, none Llama); the vision step uses
   `muse-spark-1.3` per the owner-blessed 2026-10-27 decision (see §11).

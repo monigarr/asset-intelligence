@@ -1,6 +1,6 @@
 # Asset Intelligence — Documentation
 
-> Doc version: 1.1 | Updated: 2026-10-27 | Verified against: `2b1c7dc`
+> Doc version: 1.2 | Updated: 2026-10-29 | Verified against: `c83dfd5`
 
 Start here if you just joined the team. These guides get the repo running on your machine
 and explain how to work in it day to day.
@@ -19,7 +19,7 @@ and explain how to work in it day to day.
 ## Source-of-truth documents (repo root, read after onboarding)
 
 - `PRD.md` v1.1 — product requirements.
-- `ARCHITECTURE.md` v1.1 — system design and module contracts.
+- `ARCHITECTURE.md` v1.2 — system design and module contracts.
 - `SECURITY.md` — threat model, auth, secret handling.
 - `AUDIT.md` — known gaps and risks.
 - `AGENT_BUILD_GUIDE.md` / `PRIVATE_DEV_GUIDE.md` — maintainer-owned build notes.

@@ -1,6 +1,6 @@
 # Troubleshooting
 
-> Doc version: 1.1 | Updated: 2026-10-27 | Verified against: `2b1c7dc`
+> Doc version: 1.2 | Updated: 2026-10-29 | Verified against: `c83dfd5`
 
 ## Environment & platform
 
@@ -12,6 +12,22 @@ Your checkout is probably on a UNC path (`\\server\share`). Copy the repo to a l
 Use Windows PowerShell (5.1+) or PowerShell 7 with the venv activated. Note PowerShell 5.1
 has no `&&` separator and `ConvertFrom-Json` has no `-Depth` flag — use `;` and Python for
 deep JSON inspection.
+
+## Git on network shares
+
+**Background `git gc` fails (`Permission denied`, pack-rename errors, commit-graph warnings).**
+Pack renames over SMB are unreliable under contention, so this checkout sets repo-local
+`gc.auto=0`: automatic collection never runs. Push/pull/status/log are unaffected.
+Run one git writer at a time on a share (close VSCode during maintenance), and do full
+repacks in a local clone if ever needed.
+
+**`fatal: Unable to create '.git/index.lock': File exists`.**
+A crashed process left a stale lock. Verify no `git.exe` (or editor git integration) is
+running, then delete `.git/index.lock` and retry. Never delete a lock owned by a live process.
+
+**Line endings look odd (`M` on untouched files, CRLF warnings).**
+Blobs in this repo predate normalization. Do not “fix” them in passing — a deliberate
+`git add --renormalize` commit is the only sanctioned path (not yet done).
 
 ## API keys & auth
 
@@ -64,7 +80,7 @@ without quoting the demand.
 ## Evals & cases
 
 **`eval/cases/synthetic` has JSONs but no PNGs.**
-By design — PNGs (~200 MB) are gitignored. Regenerate with `python -m app.synthetic --out
+PNGs (~205 MB) ship with the repo — re-pull if yours are missing, or regenerate with `python -m app.synthetic --out
 eval/cases/synthetic` (needs key + 180 s timeout). See `eval/cases/synthetic/README.md`.
 
 **Mocked eval is red.**
