@@ -56,7 +56,8 @@ jobs:
 
   live:
     runs-on: ubuntu-latest
-    if: ${{ secrets.META_API_KEY != '' }}
+    env:
+      META_API_KEY: ${{ secrets.META_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -67,16 +68,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt -r requirements-dev.txt
       - name: Generate 5 live cases
+        if: ${{ env.META_API_KEY != '' }}
         env:
-          META_API_KEY: ${{ secrets.META_API_KEY }}
           META_API_TIMEOUT_S: '180'
         run: python -m app.synthetic --out eval/cases/synthetic --suites clear --limit 5
       - name: Live slice (ARCH 13)
+        if: ${{ env.META_API_KEY != '' }}
         env:
-          META_API_KEY: ${{ secrets.META_API_KEY }}
           META_API_TIMEOUT_S: '180'
         run: python -m eval.run --mode live --cases-dir eval/cases/synthetic --suites clear --limit 5 --out eval-live.json
       - name: Upload live report
+        if: ${{ env.META_API_KEY != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: eval-live
