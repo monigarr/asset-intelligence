@@ -1,6 +1,6 @@
 # Versions
 
-> Doc version: 1.5 | Updated: 2026-10-29 | Verified against: `bc663e4`
+> Doc version: 1.6 | Updated: 2026-10-29 | Verified against: `5a83c3e`
 
 Single reference for every version that matters in this repo. When you change a pinned
 version, update this file in the same commit.
@@ -15,6 +15,7 @@ version, update this file in the same commit.
 | 1.3 | 2026-10-29 | Verified against `c83dfd5`: PNG-policy corrections, 171-test sync, git-housekeeping notes, CI fixes; ARCH v1.2 |
 | 1.4 | 2026-10-29 | Verified against `42211b5`: CI live/skip-gates, compose `$$` unescape, JWT escaping docs |
 | 1.5 | 2026-10-29 | Verified against `bc663e4`: Insights tab (history/stats endpoints, filterable UI); 178 tests |
+| 1.6 | 2026-10-29 | Verified against `5a83c3e`: marketing/ tracked, BRAND_KIT v2.1, DESIGN v1.1, version cross-refs synced |
 
 Guide docs carry their own `Doc version` headers; bump MINOR on content changes, MAJOR on
 restructuring, and add a row here.
@@ -28,6 +29,7 @@ restructuring, and add a row here.
 | API version | `v1` (`/v1/inspections`, …) | `app/api/main.py` |
 | Review UI | 0.1.0 | `app/ui/package.json` |
 | PRD / ARCHITECTURE | PRD v1.1, ARCH v1.2 (2026-10-29) | repo root |
+| DESIGN / BRAND_KIT | DESIGN v1.1, BRAND_KIT v2.1 (2026-10-29) | repo root |
 
 ## Live model IDs (verified 2026-10-27 via `GET /v1/models`)
 

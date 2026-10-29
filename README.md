@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](Dockerfile)
 
 > **Meta Global AI Developer Hackathon — Startup Track / Push the Frontier**
-> README v2.3 · Updated 2026-10-29 · Verified against `bc663e4` · Meta-only stack, no OpenAI
+> README v2.4 · Updated 2026-10-29 · Verified against `5a83c3e` · Meta-only stack, no OpenAI
 
 **One-liner:** Asset Intelligence gives machines a new capability — seeing infrastructure
 defects (SAM 3.1), understanding field notes (Muse Spark 1.3 Vision), reasoning with cited
@@ -72,7 +72,7 @@ flowchart LR
   verified 2026-10-27 that no Llama model exists on the live API. The fallback equals the
   primary pending a verified replacement (see `ARCHITECTURE.md` §4.3).
 
-Full contracts: [`ARCHITECTURE.md`](ARCHITECTURE.md). Product requirements: [`PRD.md`](PRD.md).
+Full contracts: [`ARCHITECTURE.md`](ARCHITECTURE.md). Product requirements: [`PRD.md`](PRD.md). Design: [`DESIGN.md`](DESIGN.md). Brand: [`BRAND_KIT.md`](BRAND_KIT.md).
 
 ## Quickstart — Local Dev (No Docker)
 

@@ -1,6 +1,6 @@
 # Asset Intelligence — Documentation
 
-> Doc version: 1.2 | Updated: 2026-10-29 | Verified against: `c83dfd5`
+> Doc version: 1.3 | Updated: 2026-10-29 | Verified against: `5a83c3e`
 
 Start here if you just joined the team. These guides get the repo running on your machine
 and explain how to work in it day to day.
@@ -20,6 +20,8 @@ and explain how to work in it day to day.
 
 - `PRD.md` v1.1 — product requirements.
 - `ARCHITECTURE.md` v1.2 — system design and module contracts.
+- `DESIGN.md` v1.1 — UI/UX design law + polish plan.
+- `BRAND_KIT.md` v2.1 — logos, tokens, usage law.
 - `SECURITY.md` — threat model, auth, secret handling.
 - `AUDIT.md` — known gaps and risks.
 - `AGENT_BUILD_GUIDE.md` / `PRIVATE_DEV_GUIDE.md` — maintainer-owned build notes.
