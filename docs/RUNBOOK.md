@@ -1,6 +1,6 @@
 # Runbook
 
-> Doc version: 1.3 | Updated: 2026-10-29 | Verified against: `42211b5`
+> Doc version: 1.4 | Updated: 2026-10-29 | Verified against: `bc663e4`
 
 Day-to-day commands. All assume the venv is activated from the repo root.
 
@@ -22,6 +22,8 @@ Routes (`v1` = API version):
 | `GET /v1/inspections/{request_id}` | Fetch a stored result |
 | `GET /v1/inspections/{request_id}/overlay` | Segmentation overlay image |
 | `POST /v1/inspections/{request_id}/review` | Human review decision |
+| `GET /v1/inspections` | History list (`limit`, `review_status`, `asset_id` filters) |
+| `GET /v1/stats` | Summary counts, review rate, cost totals, latency p50/p95 |
 
 Authenticated routes need the `X-API-Key` header or `Authorization: Bearer <access>` (see [Configuration](CONFIGURATION.md)).
 Single worker per container by design. Local runs default to in-memory limits; compose sets `RATE_LIMIT_STORAGE_URI=redis://valkey:6379` for shared limits across replicas.

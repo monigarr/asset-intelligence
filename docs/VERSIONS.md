@@ -1,6 +1,6 @@
 # Versions
 
-> Doc version: 1.4 | Updated: 2026-10-29 | Verified against: `42211b5`
+> Doc version: 1.5 | Updated: 2026-10-29 | Verified against: `bc663e4`
 
 Single reference for every version that matters in this repo. When you change a pinned
 version, update this file in the same commit.
@@ -14,6 +14,7 @@ version, update this file in the same commit.
 | 1.2 | 2026-10-29 | TESTING 1.2 (regression workflow); CONFIGURATION 1.2 (pricing contract); GETTING_STARTED 1.1; freeze adds starlette 1.10.0; 171 tests |
 | 1.3 | 2026-10-29 | Verified against `c83dfd5`: PNG-policy corrections, 171-test sync, git-housekeeping notes, CI fixes; ARCH v1.2 |
 | 1.4 | 2026-10-29 | Verified against `42211b5`: CI live/skip-gates, compose `$$` unescape, JWT escaping docs |
+| 1.5 | 2026-10-29 | Verified against `bc663e4`: Insights tab (history/stats endpoints, filterable UI); 178 tests |
 
 Guide docs carry their own `Doc version` headers; bump MINOR on content changes, MAJOR on
 restructuring, and add a row here.
@@ -89,4 +90,4 @@ per `PRIVATE_DEV_GUIDE.md`.)
 | mask IoU | ≥ 0.55 (mocked only) | n/a live |
 | ECE | ≤ 0.15 (needs labels) | n/a (unlabeled cases) |
 
-Unit suite: 171 tests, coverage gate 70% (currently ~89%). Report: `live_reports/`.
+Unit suite: 178 tests, coverage gate 70% (currently ~89%). Report: `live_reports/`.

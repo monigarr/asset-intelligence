@@ -1,6 +1,6 @@
 # Testing
 
-> Doc version: 1.3 | Updated: 2026-10-29 | Verified against: `c83dfd5`
+> Doc version: 1.4 | Updated: 2026-10-29 | Verified against: `bc663e4`
 
 ## Unit suite (required before every commit)
 
@@ -8,7 +8,7 @@
 python -m pytest tests/ -q --cov=app --cov-fail-under=70
 ```
 
-Current state: 171 tests, ~89% coverage, gate is 70%. Relevant test file or package must pass
+Current state: 178 tests, ~89% coverage, gate is 70%. Relevant test file or package must pass
 for any area you touch; never narrow a failing run (`-k 'not ...'`, `--deselect`, skips) to
 make it green.
 
