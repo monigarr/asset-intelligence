@@ -34,10 +34,23 @@ WONDER_SYSTEM_PROMPT = (
     "safest next step. "
     "Rules: NEVER certify safe or unsafe. NEVER declare compliance. NEVER invent "
     "measurements, dimensions, or dates. Flag contradictions between the note and "
-    "the images. List missing information as short snake_case keys "
-    "(e.g. crack_dimensions, inspection_date). Recommend only non-certifying next "
+    "the images. "
+    "If ANY observation states the note conflicts with image evidence, "
+    "you MUST surface it as a discrepancy naming both claims "
+    "(note says X, image shows Y). "
+    "If observations and note AGREE, return an empty discrepancies array "
+"-- never placeholder or filler text. "
+    "List missing information as short snake_case keys "
+    "(e.g. crack_dimensions, inspection_date), at most 3, most critical first. "
+    "Recommend only non-certifying next "
     "steps such as requesting a qualified inspection or re-photographing with a "
     "scale reference. Return ONLY JSON matching the schema."
+)
+
+_STRICT_SUFFIX = (
+    "\nSTRICT RETRY: your previous output failed schema validation. "
+    "Return ONLY a single JSON object matching the schema exactly. "
+    "No prose, no markdown, no missing keys."
 )
 
 WONDER_JSON_SCHEMA: dict[str, Any] = {
@@ -128,46 +141,61 @@ class WonderPlanner:
                 )
         masks_text = "\n".join(mask_lines) if mask_lines else "(no segmentations)"
 
-        result = self._client.chat(
-            self._settings.planning_model_id,
-            [
-                {"role": "system", "content": WONDER_SYSTEM_PROMPT},
-                {
-                    "role": "user",
-                    "content": (
-                        "OBSERVATIONS:\n"
-                        f"{json.dumps([o.model_dump() for o in draft.observations])}\n"
-                        f"VISION: {vision.model_dump_json(exclude={'usage'})}\n"
-                        f"SEGMENTATIONS:\n{masks_text}\n"
-                        f"NOTE: {note}\n"
-                        f"ASSET_META: {json.dumps(asset_meta)}\n"
-                        "TASK: Given observations + evidence, what contradicts? "
-                        "What is missing for a qualified decision? What is the "
-                        "safest next step that is NOT a certification?"
-                    ),
-                },
-            ],
-            response_format={
-                "type": "json_schema",
-                "json_schema": WONDER_JSON_SCHEMA,
+        messages: list[dict[str, Any]] = [
+            {"role": "system", "content": WONDER_SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": (
+                    "OBSERVATIONS:\n"
+                    f"{json.dumps([o.model_dump() for o in draft.observations])}\n"
+                    f"VISION: {vision.model_dump_json(exclude={'usage'})}\n"
+                    f"SEGMENTATIONS:\n{masks_text}\n"
+                    f"NOTE: {note}\n"
+                    f"ASSET_META: {json.dumps(asset_meta)}\n"
+                    "TASK: Given observations + evidence, what contradicts? "
+                    "What is missing for a qualified decision? What is the "
+                    "safest next step that is NOT a certification?"
+                ),
             },
-            request_id=request_id,
-        )
-        data = result.data
-        if data is None:
-            raise MetaResponseError("planning model returned no JSON data")
-        try:
-            plan = WonderPlan(
-                discrepancies=data["discrepancies"],
-                missing_information=data["missing_information"],
-                recommended_next_step=data["recommended_next_step"],
-                usage=result.usage,
-                model_id=self._settings.planning_model_id,
+        ]
+        last_error: MetaResponseError | None = None
+        plan: WonderPlan | None = None
+        for attempt in range(2):  # ARCH \u00a711: one stricter-prompt retry
+            result = self._client.chat(
+                self._settings.planning_model_id,
+                messages,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": WONDER_JSON_SCHEMA,
+                },
+                request_id=request_id,
             )
-        except (KeyError, ValidationError) as exc:
-            raise MetaResponseError(
-                f"planning model returned invalid plan: {exc}"
-            ) from exc
+            data = result.data
+            if data is None:
+                last_error = MetaResponseError("planning model returned no JSON data")
+            else:
+                try:
+                    plan = WonderPlan(
+                        discrepancies=data["discrepancies"],
+                        missing_information=data["missing_information"],
+                        recommended_next_step=data["recommended_next_step"],
+                        usage=result.usage,
+                        model_id=self._settings.planning_model_id,
+                    )
+                except (KeyError, ValidationError) as exc:
+                    last_error = MetaResponseError(
+                        f"planning model returned invalid plan: {exc}"
+                    )
+            if plan is not None:
+                break
+            if attempt == 0:
+                logger.info("wonder_strict_retry", extra={"request_id": request_id})
+                user_msg = dict(messages[1])
+                user_msg["content"] = str(user_msg["content"]) + _STRICT_SUFFIX
+                messages = [messages[0], user_msg]
+        if plan is None:
+            assert last_error is not None
+            raise last_error
         logger.debug(
             "wonder_plan",
             extra={

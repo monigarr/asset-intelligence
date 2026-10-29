@@ -38,3 +38,7 @@ class MetaClientError(MetaAPIError):
 
 class MetaResponseError(MetaAPIError):
     """API answered but the payload is not usable JSON of the expected shape."""
+
+
+class MetaCircuitOpenError(MetaAPIError):
+    """Circuit open after consecutive upstream failures. Never retried."""

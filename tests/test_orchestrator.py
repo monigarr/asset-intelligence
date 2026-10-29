@@ -15,6 +15,7 @@ from app.gateway import MetaClient, Segmentation, Settings
 from app.gateway.errors import MetaResponseError
 from app.gateway.meta_client import ChatUsage
 from app.orchestrator import InspectionPipeline, PipelineInputError, SparkReasoner
+from app.orchestrator.spark import OBSERVATION_JSON_SCHEMA
 from app.sam_service import DecodedMask, SamService
 from app.vision import VisionExtractor, VisionObservation
 
@@ -299,3 +300,46 @@ def test_full_flow_sam_vision_spark() -> None:
     assert out.segmentations[0].rle["size"] == [24, 32]
     assert sum(out.segmentations[0].rle["counts"]) == 32 * 24
     assert out.observations[0].evidence[0].mask_id == "mask_1"
+
+
+def test_spark_evidence_schema_requires_grounding() -> None:
+    items = OBSERVATION_JSON_SCHEMA["schema"]["properties"]["observations"]["items"][
+        "properties"
+    ]["evidence"]["items"]
+    requireds = [set(branch["required"]) for branch in items["anyOf"]]
+    assert {"source", "mask_id"} in requireds
+    assert {"source", "span"} in requireds
+
+
+def test_spark_retries_once_with_stricter_prompt() -> None:
+    from types import SimpleNamespace
+
+    from app.gateway import Settings
+    from app.gateway.meta_client import ChatUsage
+    from app.orchestrator.spark import SparkReasoner
+
+    calls: list[str] = []
+
+    class _SeqClient:
+        def chat(self, model_id: str, messages: list, **kwargs: object):  # type: ignore[no-untyped-def]
+            calls.append(messages[1]["content"])
+            if len(calls) == 1:
+                bad = {"observations": [{"text": "x", "evidence": [], "uncertainty": 0.5}]}
+                return SimpleNamespace(data=bad, usage=ChatUsage())
+            good = {
+                "observations": [
+                    {
+                        "text": "ok",
+                        "evidence": [{"source": "maintenance_note", "span": [0, 2]}],
+                        "uncertainty": 0.5,
+                    }
+                ],
+                "missing_information": [],
+            }
+            return SimpleNamespace(data=good, usage=ChatUsage())
+
+    reasoner = SparkReasoner(client=_SeqClient(), settings=Settings(api_key="t"))  # type: ignore[arg-type]
+    draft = reasoner.reason("{}", [], "note", {}, request_id="r1")
+    assert draft.observations[0].text == "ok"
+    assert len(calls) == 2
+    assert "STRICT RETRY" in calls[1]

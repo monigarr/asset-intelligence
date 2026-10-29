@@ -204,6 +204,7 @@ def test_measurement_rule() -> None:
         "The wall is structurally sound.",
         "No further action needed.",
         "No action required at this time.",
+        "Recommend approval certificate for the file.",
     ],
 )
 def test_certifying_language_rejected(text: str) -> None:
@@ -225,21 +226,16 @@ def test_certifying_language_rejected(text: str) -> None:
         "Request qualified inspection with measurement tape.",
         "Schedule a follow-up safety inspection after rain.",
         "Re-photograph with a scale reference; do not certify anything yet.",
+        "The certification paperwork is missing from the file.",
     ],
 )
 def test_non_certifying_language_passes(text: str) -> None:
-    # NOTE: the third case mentions "certify" inside a refusal instruction —
-    # the guard is intentionally literal and rejects any certif* mention.
-    if "certify" in text:
-        with pytest.raises(ValidationError, match="certifying language"):
-            validate_inspection(
-                _payload(recommended_next_step=text), note=NOTE, image_count=1
-            )
-    else:
-        out = validate_inspection(
-            _payload(recommended_next_step=text), note=NOTE, image_count=1
-        )
-        assert out.recommended_next_step == text
+    # Refusal phrasing ("do not certify") and the bare noun
+    # ("certification paperwork") are NOT performed certification.
+    out = validate_inspection(
+        _payload(recommended_next_step=text), note=NOTE, image_count=1
+    )
+    assert out.recommended_next_step == text
 
 
 # -- shape details ------------------------------------------------------

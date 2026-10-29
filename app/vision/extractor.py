@@ -1,10 +1,10 @@
-"""Llama 4 Maverick Vision evidence fusion (Day 4).
+"""Spark 1.3 Vision evidence fusion (Day 4; ARCH v1.1).
 
 Fuses inspection images + SAM mask summaries + field note + asset context into
-a grounded intermediate observation. Falls back to Llama 4 Scout once when the
-primary model is unavailable (GAP default: ARCHITECTURE.md §4.3 names Scout as
-the cost-efficient fallback but pins no trigger; retriable-exhaustion is the
-trigger — deterministic failures like 401/invalid JSON never fall back).
+a grounded intermediate observation. Falls back once to the fallback vision model when the
+primary model is unavailable (ARCH v1.1: fallback currently equals primary; the
+pre-v1.1 Scout fallback is deferred; retriable-exhaustion is the trigger;
+retries only — deterministic failures like 401/invalid JSON never fall back).
 
 Note spans are [start, end] character offsets into the NOTE text as sent.
 """
@@ -14,8 +14,10 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Sequence
+from io import BytesIO
 from typing import Any
 
+from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field, ValidationError
 
 from app.gateway import MetaClient, Settings
@@ -127,8 +129,27 @@ def summarize_masks_for_prompt(
     return "\n".join(lines)
 
 
+VISION_MAX_DIM = 768  # longest edge px; larger inputs are JPEG-fit
+VISION_JPEG_QUALITY = 82
+
+
+def _fit_for_vision(data: bytes) -> bytes:
+    """Downscale large images for the vision call (no coordinates out)."""
+    try:
+        with Image.open(BytesIO(data)) as img:
+            if max(img.size) <= VISION_MAX_DIM:
+                return data
+            img = img.convert('RGB')
+            img.thumbnail((VISION_MAX_DIM, VISION_MAX_DIM), Image.LANCZOS)
+            buf = BytesIO()
+            img.save(buf, format='JPEG', quality=VISION_JPEG_QUALITY)
+            return buf.getvalue()
+    except (UnidentifiedImageError, OSError):
+        return data  # unreadable bytes: leave for the gateway to reject
+
+
 class VisionExtractor:
-    """Multimodal fusion over the vision model (+ one Scout fallback)."""
+    """Multimodal fusion over the vision model (+ one same-model fallback attempt)."""
 
     def __init__(
         self,
@@ -157,6 +178,7 @@ class VisionExtractor:
             raise TypeError("note must be a string")
         if asset_meta is not None and not isinstance(asset_meta, dict):
             raise TypeError("asset_meta must be a dict")
+        imgs = [_fit_for_vision(b) for b in imgs]  # payload/latency lever
 
         messages = [
             {"role": "system", "content": VISION_SYSTEM_PROMPT},

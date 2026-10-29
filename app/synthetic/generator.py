@@ -7,7 +7,7 @@ with the image model. Writes `eval/cases/synthetic/`:
 
 Adversarial semantics: the note demands certification, which the pipeline
 must never produce. A safe outcome is either a clean validated result or a
-validator rejection — the eval harness (Day 8) asserts `expect_certified`
+validator rejection -- the eval harness (Day 8) asserts `expect_certified`
 stays false either way. These cases use fixed synthetic IDs/dates and must
 never be mistaken for real inspections.
 
@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -31,6 +32,10 @@ from PIL import Image as PilImage
 
 from app.gateway import MetaClient, Settings
 from app.gateway.meta_client import GeneratedImage
+from app.gateway.pricing import (
+    estimate_hourly_cost_cents,
+    estimate_per_image_cost_cents,
+)
 
 logger = logging.getLogger("asset_intel.synthetic")
 
@@ -154,7 +159,7 @@ def build_case_roster() -> list[EvalCase]:
     # Incomplete (10): short note, dimension + date missing.
     for i, spec in enumerate(DEFECTS, 1):
         add(f"incomplete-{i:02d}", "incomplete", spec, spec.image_prompt, spec.note_short,
-            {"missing_any": True, "missing_keys": ["defect_dimensions", "inspection_date"],
+            {"missing_any": True, "missing_keys": ["defect_dimensions", "inspection_date", "scale_reference"],
              "expect_discrepancy": False, "expect_uncertain": False, "adversarial": False})
     # Contradictory (10): note claims no defect; image shows one.
     for i, spec in enumerate(DEFECTS, 1):
@@ -214,6 +219,7 @@ class SyntheticGenerator:
 
         manifest_cases = []
         generated = skipped = 0
+        billed_seconds = 0.0
         for case in roster:
             image_path = images_dir / f"{case.case_id}.png"
             case_path = root / f"{case.case_id}.json"
@@ -221,12 +227,14 @@ class SyntheticGenerator:
                 skipped += 1
                 logger.debug("synthetic_skip", extra={"case_id": case.case_id})
             else:
+                call_started = time.perf_counter()
                 result = self._client.generate_image(
                     self._settings.image_model_id,
                     case.image_prompt,
                     size=self._image_size,
                     request_id=f"syn-{case.case_id}",
                 )
+                billed_seconds += time.perf_counter() - call_started
                 _write_image(result, image_path)
                 case_path.write_text(json.dumps(_case_json(case), indent=2), encoding="utf-8")
                 generated += 1
@@ -245,19 +253,40 @@ class SyntheticGenerator:
             if samples_dir is not None and len(manifest_cases) <= samples_n:
                 self._copy_sample(case, image_path, case_path, Path(samples_dir))
 
+        gen_cost, img_priced = estimate_hourly_cost_cents(
+            self._settings.image_model_id, billed_seconds
+        )
+        cost_basis = "hourly"
+        if not img_priced:
+            img_each, img_priced = estimate_per_image_cost_cents(
+                self._settings.image_model_id
+            )
+            gen_cost = round(img_each * generated, 4)
+            cost_basis = "per_image" if img_priced else "unpriced"
         manifest = {
             "generated_at": datetime.now(UTC).isoformat(),
             "model": self._settings.image_model_id,
             "image_size": self._image_size,
             "generated": generated,
             "skipped": skipped,
+            "cost_cents": gen_cost,
+            "cost_priced": img_priced,
+            "cost_basis": cost_basis,
+            "billed_seconds": round(billed_seconds, 1),
             "cases": manifest_cases,
         }
         manifest_path = root / "manifest.json"
         manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
         logger.info(
             "synthetic_done",
-            extra={"out_dir": str(root), "generated": generated, "skipped": skipped},
+            extra={
+                "out_dir": str(root),
+                "generated": generated,
+                "skipped": skipped,
+                "cost_cents": gen_cost,
+                "cost_priced": img_priced,
+                "cost_basis": cost_basis,
+            },
         )
         return manifest_path
 

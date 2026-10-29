@@ -43,7 +43,7 @@ class Settings:
     # Live-verified 2026-10-27: the Meta Model API serves no Llama vision
     # models (GET /v1/models: 9 entries, none Llama). Vision uses the
     # API-native multimodal reader instead — a deliberate deviation from
-    # ARCHITECTURE.md §4.3, blessed by the owner. Fallback intentionally
+    # ARCHITECTURE.md §4.3. Fallback intentionally (open-weights deferred, ARCH v1.1)
     # equals primary: no cheaper multimodal model exists on this API.
     vision_model_id: str = "muse-spark-1.3"
     fallback_vision_model_id: str = "muse-spark-1.3"

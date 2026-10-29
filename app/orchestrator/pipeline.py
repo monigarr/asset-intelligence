@@ -12,6 +12,7 @@ No stage certifies safety, declares compliance, or creates work orders.
 from __future__ import annotations
 
 import logging
+import time
 from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
@@ -19,7 +20,7 @@ from typing import Any, Literal
 from uuid import uuid4
 
 from opentelemetry import trace
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.gateway import MetaClient, Segmentation, Settings
 from app.gateway.errors import MetaRateLimitError, MetaServerError, MetaTimeoutError
@@ -30,6 +31,7 @@ from app.orchestrator.spark import DraftObservation, SparkReasoner
 from app.planner import WonderPlanner
 from app.sam_service import DecodedMask, SamService
 from app.validator import InspectionResult, validate_inspection
+from app.validator.schema import UsageSummary
 from app.vision import VisionExtractor, VisionObservation
 
 logger = logging.getLogger("asset_intel.pipeline")
@@ -38,6 +40,8 @@ tracer = trace.get_tracer("asset_intel.pipeline")
 MAX_IMAGES = 5
 MAX_NOTE_CHARS = 10_000  # ARCHITECTURE.md §4.1
 MAX_WORKERS = 5
+
+BUDGET_ALERT_CENTS = 50.0  # ARCH §12: warn above this per-request cost
 
 
 class ModelTrace(BaseModel):
@@ -59,6 +63,17 @@ class DraftResult(BaseModel):
     model_trace: ModelTrace
     cost_cents: float = 0.0
     cost_priced: bool = False
+    durations_ms: dict[str, float] = {}
+    usage: UsageSummary = Field(default_factory=UsageSummary)
+
+
+def _sum_usage(*usages: Any) -> UsageSummary:
+    """Aggregate ChatUsage/UsageSummary objects field-wise."""
+    return UsageSummary(
+        prompt_tokens=sum(u.prompt_tokens for u in usages),
+        completion_tokens=sum(u.completion_tokens for u in usages),
+        total_tokens=sum(u.total_tokens for u in usages),
+    )
 
 
 class InspectionPipeline:
@@ -103,12 +118,24 @@ class InspectionPipeline:
         draft, vision, meta, text, image_count = self._execute(
             images, note, asset_meta, request_id
         )
+        wonder_started = time.perf_counter()
         with tracer.start_as_current_span("wonder.plan") as span:
             plan = self._wonder.plan(draft, vision, text, meta, draft.request_id)
             span.set_attribute("planning.model_id", plan.model_id)
+        durations_ms = dict(draft.durations_ms)
+        durations_ms['wonder'] = round(
+            (time.perf_counter() - wonder_started) * 1000, 1
+        )
         wonder_cents, wonder_priced = estimate_chat_cost_cents(
             plan.model_id, plan.usage.prompt_tokens, plan.usage.completion_tokens
         )
+        total_cents = round(draft.cost_cents + wonder_cents, 4)
+        usage = _sum_usage(draft.usage, plan.usage)
+        if total_cents > BUDGET_ALERT_CENTS:
+            logger.warning(
+                "cost_budget_alert",
+                extra={"request_id": draft.request_id, "cost_cents": total_cents},
+            )
         trace = draft.model_trace.model_dump()
         trace["planning"] = plan.model_id
         payload = draft.model_dump()
@@ -118,12 +145,19 @@ class InspectionPipeline:
                 draft.missing_information, plan.missing_information
             ),
             recommended_next_step=plan.recommended_next_step,
+            durations_ms=durations_ms,
             model_trace=trace,
-            cost_cents=round(draft.cost_cents + wonder_cents, 4),
+            cost_cents=total_cents,
             cost_priced=bool(draft.cost_priced and wonder_priced),
+            usage=usage,
         )
+        validate_started = time.perf_counter()
         with tracer.start_as_current_span("validate"):
-            return validate_inspection(payload, note=text, image_count=image_count)
+            result = validate_inspection(payload, note=text, image_count=image_count)
+        durations_ms['validate'] = round(
+            (time.perf_counter() - validate_started) * 1000, 1
+        )
+        return result.model_copy(update={"durations_ms": durations_ms})
 
     def _execute(
         self,
@@ -137,6 +171,7 @@ class InspectionPipeline:
         meta = self._validate_asset_meta(asset_meta)
         rid = request_id or f"req_{uuid4().hex[:24]}"  # same interim format as gateway
 
+        sam_started = time.perf_counter()
         with tracer.start_as_current_span("sam.segment") as span:
             span.set_attribute("image_count", len(imgs))
             try:
@@ -152,16 +187,22 @@ class InspectionPipeline:
                 masks_by_image = [[] for _ in imgs]
                 sam_degraded = True
 
+        durations_ms = {"sam": round((time.perf_counter() - sam_started) * 1000, 1)}
+        vision_started = time.perf_counter()
         with tracer.start_as_current_span("vision.extract") as span:
             vision = self._vision.extract(imgs, masks_by_image, text, meta, rid)
             span.set_attribute("vision.model_id", vision.model_id)
             span.set_attribute("vision.fallback_used", vision.fallback_used)
+        durations_ms["vision"] = round((time.perf_counter() - vision_started) * 1000, 1)
+        spark_started = time.perf_counter()
         with tracer.start_as_current_span("spark.reason") as span:
             draft = self._spark.reason(
                 vision.model_dump_json(), masks_by_image, text, meta, rid
             )
             span.set_attribute("reasoning.model_id", draft.model_id)
 
+        durations_ms["spark"] = round((time.perf_counter() - spark_started) * 1000, 1)
+        usage = _sum_usage(vision.usage, draft.usage)
         cost_cents, priced = self._total_cost(vision, draft.usage, len(imgs))
         result = DraftResult(
             request_id=rid,
@@ -179,6 +220,8 @@ class InspectionPipeline:
             ),
             cost_cents=cost_cents,
             cost_priced=priced,
+            durations_ms=durations_ms,
+            usage=usage,
         )
         if sam_degraded:
             # ARCH §11 vision-only fallback: masks stay empty, uncertainty is

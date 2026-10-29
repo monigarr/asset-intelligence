@@ -194,3 +194,25 @@ def test_extract_real_jpeg_bytes() -> None:
 
     obs = _extractor(handler).extract([buf.getvalue()], [[_decoded()]])
     assert obs.symptoms[0].text == "linear crack with seepage"
+
+
+def test_fit_for_vision_downscales_large_images() -> None:
+    from io import BytesIO
+
+    from PIL import Image
+
+    from app.vision.extractor import VISION_MAX_DIM, _fit_for_vision
+
+    big = Image.new("RGB", (1600, 1200), (90, 90, 90))
+    buf = BytesIO()
+    big.save(buf, format="PNG")
+    small = _fit_for_vision(buf.getvalue())
+    with Image.open(BytesIO(small)) as img:
+        assert max(img.size) <= VISION_MAX_DIM
+        assert len(small) < len(buf.getvalue())
+
+
+def test_fit_for_vision_passes_through_small_or_invalid() -> None:
+    from app.vision.extractor import _fit_for_vision
+
+    assert _fit_for_vision(JPEG) == JPEG  # invalid fixture bytes untouched

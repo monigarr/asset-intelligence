@@ -2,7 +2,7 @@
 
 Demo posture per ARCHITECTURE.md §5: SQLite file (or :memory:), no cloud.
 Production path (M3) is Postgres + MinIO/R2; the compose file already runs
-MinIO reserved for that move. No raw uploads or notes are stored — only the
+MinIO reserved for that move. No raw uploads or notes are stored -- only the
 validated result, rendered overlays, and review state (data minimization).
 """
 

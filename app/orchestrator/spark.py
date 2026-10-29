@@ -15,7 +15,13 @@ import re
 from collections.abc import Sequence
 from typing import Any
 
-from pydantic import BaseModel, Field, ValidationError, field_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 
 from app.gateway import MetaClient, Settings
 from app.gateway.errors import MetaResponseError
@@ -33,8 +39,15 @@ SPARK_SYSTEM_PROMPT = (
     "Evidence before inference. Explicit uncertainty over false precision. "
     "List missing_information as short snake_case keys "
     "(e.g. crack_dimensions, inspection_date), never sentences. "
+    "List at most 3 keys, most critical first. "
     "If no SAM masks exist, cite maintenance_note spans only — never a bare "
     'image source without a mask_id."'
+)
+
+_STRICT_SUFFIX = (
+    "\nSTRICT RETRY: your previous output failed schema validation. "
+    "Return ONLY a single JSON object matching the schema exactly. "
+    "No prose, no markdown, no missing keys."
 )
 
 OBSERVATION_JSON_SCHEMA: dict[str, Any] = {
@@ -54,19 +67,36 @@ OBSERVATION_JSON_SCHEMA: dict[str, Any] = {
                         "evidence": {
                             "type": "array",
                             "minItems": 1,
+                            # Grounding is structural: image evidence must carry a
+                            # mask_id, note evidence must carry a span. A bare
+                            # image source matches neither branch, so structured
+                            # output cannot generate one. Validator stays backstop.
                             "items": {
-                                "type": "object",
-                                "required": ["source"],
-                                "properties": {
-                                    "source": {"type": "string"},
-                                    "mask_id": {"type": ["string", "null"]},
-                                    "span": {
-                                        "type": ["array"],
-                                        "items": {"type": "integer"},
-                                        "minItems": 2,
-                                        "maxItems": 2,
+                                "anyOf": [
+                                    {
+                                        "type": "object",
+                                        "required": ["source", "mask_id"],
+                                        "properties": {
+                                            "source": {"type": "string"},
+                                            "mask_id": {"type": "string"},
+                                            "span": {"type": ["array", "null"]},
+                                        },
                                     },
-                                },
+                                    {
+                                        "type": "object",
+                                        "required": ["source", "span"],
+                                        "properties": {
+                                            "source": {"const": "maintenance_note"},
+                                            "mask_id": {"type": ["string", "null"]},
+                                            "span": {
+                                                "type": "array",
+                                                "items": {"type": "integer"},
+                                                "minItems": 2,
+                                                "maxItems": 2,
+                                            },
+                                        },
+                                    },
+                                ]
                             },
                         },
                         "uncertainty": {
@@ -91,6 +121,12 @@ class EvidenceRef(BaseModel):
     source: str  # image_<i> or maintenance_note
     mask_id: str | None = None
     span: list[int] | None = Field(default=None, min_length=2, max_length=2)
+
+    @model_validator(mode="after")
+    def _image_spans_need_mask(self) -> EvidenceRef:
+        if self.source != "maintenance_note" and self.span and not self.mask_id:
+            raise ValueError("image evidence requires mask_id, not a span")
+        return self
 
 
 class DraftObservation(BaseModel):
@@ -139,50 +175,62 @@ class SparkReasoner:
     ) -> SparkDraft:
         """Produce a validated draft from fused evidence."""
         image_refs = ", ".join(f"image_{i}" for i in range(len(masks_by_image)))
-        result = self._client.chat(
-            self._settings.reasoning_model_id,
-            [
-                {"role": "system", "content": SPARK_SYSTEM_PROMPT},
-                {
-                    "role": "user",
-                    "content": (
-                        f"IMAGES: {image_refs} with SAM masks\n"
-                        f"{summarize_masks_for_prompt(masks_by_image)}\n"
-                        f"NOTE: {note}\n"
-                        f"ASSET_META: {json.dumps(asset_meta)}\n"
-                        f"VISION: {vision_json}\n"
-                        "TASK: Produce JSON matching schema. "
-                        "If dimension missing, list in missing_information."
-                    ),
+        messages: list[dict[str, Any]] = [
+            {"role": "system", "content": SPARK_SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": (
+                    f"IMAGES: {image_refs} with SAM masks\n"
+                    f"{summarize_masks_for_prompt(masks_by_image)}\n"
+                    f"NOTE: {note}\n"
+                    f"ASSET_META: {json.dumps(asset_meta)}\n"
+                    f"VISION: {vision_json}\n"
+                    "TASK: Produce JSON matching schema. "
+                    "If dimension missing, list in missing_information."
+                ),
+            },
+        ]
+        last_error: MetaResponseError | None = None
+        for attempt in range(2):  # ARCH \u00a711: one stricter-prompt retry
+            result = self._client.chat(
+                self._settings.reasoning_model_id,
+                messages,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": OBSERVATION_JSON_SCHEMA,
                 },
-            ],
-            response_format={
-                "type": "json_schema",
-                "json_schema": OBSERVATION_JSON_SCHEMA,
-            },
-            request_id=request_id,
-        )
-        data = result.data
-        if data is None:
-            raise MetaResponseError("reasoning model returned no JSON data")
-        try:
-            draft = SparkDraft(
-                asset_type=data.get("asset_type"),
-                observations=data["observations"],
-                missing_information=data.get("missing_information", []),
-                usage=result.usage,
-                model_id=self._settings.reasoning_model_id,
+                request_id=request_id,
             )
-        except (KeyError, ValidationError) as exc:
-            raise MetaResponseError(
-                f"reasoning model returned invalid draft: {exc}"
-            ) from exc
-        logger.debug(
-            "spark_draft",
-            extra={
-                "request_id": request_id,
-                "model_id": draft.model_id,
-                "observation_count": len(draft.observations),
-            },
-        )
-        return draft
+            data = result.data
+            if data is None:
+                last_error = MetaResponseError("reasoning model returned no JSON data")
+            else:
+                try:
+                    draft = SparkDraft(
+                        asset_type=data.get("asset_type"),
+                        observations=data["observations"],
+                        missing_information=data.get("missing_information", []),
+                        usage=result.usage,
+                        model_id=self._settings.reasoning_model_id,
+                    )
+                except (KeyError, ValidationError) as exc:
+                    last_error = MetaResponseError(
+                        f"reasoning model returned invalid draft: {exc}"
+                    )
+                else:
+                    logger.debug(
+                        "spark_draft",
+                        extra={
+                            "request_id": request_id,
+                            "model_id": draft.model_id,
+                            "observation_count": len(draft.observations),
+                        },
+                    )
+                    return draft
+            if attempt == 0:
+                logger.info("spark_strict_retry", extra={"request_id": request_id})
+                user_msg = dict(messages[1])
+                user_msg["content"] = str(user_msg["content"]) + _STRICT_SUFFIX
+                messages = [messages[0], user_msg]
+        assert last_error is not None
+        raise last_error

@@ -354,3 +354,141 @@ def test_no_secret_leak_in_logs(caplog: pytest.LogCaptureFixture) -> None:
 
     _client(handler).chat("muse-spark-1.3", [{"role": "user", "content": "hi"}])
     assert "test-key" not in caplog.text
+
+
+def test_placeholder_tables_cover_live_model_ids() -> None:
+    from app.gateway.pricing import (
+        _PLACEHOLDER_PER_1K_TOKENS_CENTS,
+        _PLACEHOLDER_PER_IMAGE_CENTS,
+    )
+
+    assert "muse-wonder-1.0" in _PLACEHOLDER_PER_1K_TOKENS_CENTS
+    assert "muse-image-1.0" in _PLACEHOLDER_PER_IMAGE_CENTS
+    assert "muse-wonder" not in _PLACEHOLDER_PER_1K_TOKENS_CENTS
+    assert "muse-image" not in _PLACEHOLDER_PER_IMAGE_CENTS
+
+
+def test_breaker_opens_after_consecutive_server_errors() -> None:
+    import httpx
+
+    from app.gateway import Settings
+    from app.gateway.errors import MetaCircuitOpenError, MetaServerError
+    from app.gateway.meta_client import MetaClient
+
+    def _boom(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(500, json={"error": "down"})
+
+    client = MetaClient(
+        settings=Settings(api_key="t"),
+        transport=httpx.MockTransport(_boom),
+        retry_wait=lambda _state: 0.0,
+    )
+    for _ in range(5):
+        with pytest.raises(MetaServerError):
+            client.chat("muse-spark-1.3", [{"role": "user", "content": "hi"}])
+    with pytest.raises(MetaCircuitOpenError):
+        client.chat("muse-spark-1.3", [{"role": "user", "content": "hi"}])
+
+
+def test_breaker_resets_on_success_and_half_opens() -> None:
+    from app.gateway.meta_client import _CircuitBreaker
+
+    breaker = _CircuitBreaker(threshold=2, cooldown_s=100.0)
+    breaker.record_failure()
+    breaker.record_success()  # consecutive chain broken
+    breaker.record_failure()
+    breaker.check()  # only 1 consecutive: still closed
+    breaker.record_failure()
+    with pytest.raises(Exception, match="circuit open"):
+        breaker.check()
+    breaker._opened_at -= 200.0  # simulate cooldown elapse
+    breaker.check()  # half-open: trial allowed
+    breaker.record_success()
+    breaker.check()  # closed again
+
+
+def test_split_pricing_input_output_math() -> None:
+    from app.gateway.pricing import estimate_chat_cost_cents
+
+    env = {
+        "META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_INPUT": "0.125",
+        "META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_OUTPUT": "0.425",
+    }
+    cents, priced = estimate_chat_cost_cents("muse-spark-1.3", 1000, 1000, env)
+    assert priced is True
+    assert cents == pytest.approx(0.55)
+
+
+def test_split_pricing_cached_tokens_use_cached_rate() -> None:
+    from app.gateway.pricing import estimate_chat_cost_cents
+
+    env = {
+        "META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_INPUT": "0.125",
+        "META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_CACHED_INPUT": "0.015",
+        "META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_OUTPUT": "0.425",
+    }
+    cents, priced = estimate_chat_cost_cents(
+        "muse-spark-1.3", 1000, 0, env, cached_tokens=1000
+    )
+    assert priced is True
+    assert cents == pytest.approx(0.015)
+
+
+def test_blended_fallback_when_split_unset() -> None:
+    from app.gateway.pricing import estimate_chat_cost_cents
+
+    env = {"META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3": "0.2"}
+    cents, priced = estimate_chat_cost_cents("muse-spark-1.3", 1000, 1000, env)
+    assert priced is True
+    assert cents == pytest.approx(0.4)
+
+
+def test_price_override_rejects_non_numeric() -> None:
+    from app.gateway.pricing import estimate_chat_cost_cents
+
+    with pytest.raises(ValueError, match="must be a number"):
+        estimate_chat_cost_cents(
+            "muse-spark-1.3",
+            1,
+            1,
+            {"META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3": "$1.25"},
+        )
+
+
+def test_tier_schedule_wins_when_complete() -> None:
+    from app.gateway.pricing import estimate_chat_cost_cents
+
+    env = {
+        "META_PRICE_TIER": "contributor",
+        "META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_INPUT": "0.125",
+        "META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_OUTPUT": "0.425",
+        "META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_CONTRIBUTOR_INPUT": "0.01",
+        "META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_CONTRIBUTOR_OUTPUT": "0.02",
+    }
+    cents, priced = estimate_chat_cost_cents("muse-spark-1.3", 1000, 1000, env)
+    assert priced is True
+    assert cents == pytest.approx(0.03)
+
+
+def test_tier_falls_back_to_base_schedule() -> None:
+    from app.gateway.pricing import estimate_chat_cost_cents
+
+    env = {
+        "META_PRICE_TIER": "contributor",
+        "META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_INPUT": "0.125",
+        "META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_OUTPUT": "0.425",
+    }
+    cents, priced = estimate_chat_cost_cents("muse-spark-1.3", 1000, 1000, env)
+    assert priced is True
+    assert cents == pytest.approx(0.55)
+
+
+def test_hourly_estimate_math_and_unpriced() -> None:
+    from app.gateway.pricing import estimate_hourly_cost_cents
+
+    cents, priced = estimate_hourly_cost_cents(
+        "muse-image-1.0", 1800.0, {"META_PRICE_PER_1_HOUR_MUSE_IMAGE_1_0_OUTPUT": "1.0"}
+    )
+    assert priced is True
+    assert cents == pytest.approx(0.5)
+    assert estimate_hourly_cost_cents("muse-image-1.0", 1800.0, {}) == (0.0, False)

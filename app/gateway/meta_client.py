@@ -46,6 +46,7 @@ from app.gateway.config import Settings
 from app.gateway.errors import (
     MetaAPIError,
     MetaAuthError,
+    MetaCircuitOpenError,
     MetaClientError,
     MetaRateLimitError,
     MetaResponseError,
@@ -197,6 +198,42 @@ def _with_images(
 # ---------------------------------------------------------------------------
 # Client
 # ---------------------------------------------------------------------------
+BREAKER_THRESHOLD = 5
+BREAKER_COOLDOWN_S = 30.0
+
+
+class _CircuitBreaker:
+    """Consecutive-failure circuit breaker (PRD §7). Half-open after cooldown."""
+
+    def __init__(
+        self,
+        threshold: int = BREAKER_THRESHOLD,
+        cooldown_s: float = BREAKER_COOLDOWN_S,
+    ) -> None:
+        self._threshold = threshold
+        self._cooldown_s = cooldown_s
+        self._failures = 0
+        self._opened_at: float | None = None
+
+    def check(self) -> None:
+        if self._opened_at is None:
+            return
+        if time.monotonic() - self._opened_at >= self._cooldown_s:
+            return  # half-open: allow a trial call
+        raise MetaCircuitOpenError(
+            f"circuit open after {self._failures} consecutive upstream failures"
+        )
+
+    def record_success(self) -> None:
+        self._failures = 0
+        self._opened_at = None
+
+    def record_failure(self) -> None:
+        if self._opened_at is not None:
+            return  # already open: never extend the cooldown under load
+        self._failures += 1
+        if self._failures >= self._threshold:
+            self._opened_at = time.monotonic()
 
 
 class MetaClient:
@@ -223,6 +260,7 @@ class MetaClient:
             transport=transport,
             headers={"Authorization": f"Bearer {self._settings.api_key}"},
         )
+        self._breaker = _CircuitBreaker()
 
     def close(self) -> None:
         self._http.close()
@@ -441,6 +479,7 @@ class MetaClient:
     ) -> Any:
         started = time.monotonic()
         attempts = 0
+        self._breaker.check()
         try:
             for attempt in self._retrying():
                 with attempt:
@@ -459,8 +498,11 @@ class MetaClient:
                         attempts=attempts,
                         **fields,
                     )
+                    self._breaker.record_success()
                     return result
         except MetaAPIError as exc:
+            if isinstance(exc, (MetaServerError, MetaTimeoutError)):
+                self._breaker.record_failure()
             # A success record can never precede this: _log(ok) runs only
             # immediately before the return above, and parse failures raise
             # non-retriable MetaResponseError before any success log.

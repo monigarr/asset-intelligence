@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from io import BytesIO
 from typing import Any
 
@@ -264,3 +265,36 @@ def test_full_chain_all_real_components() -> None:
     assert out.model_trace.planning == "muse-wonder-1.0"
     assert out.observations[0].evidence[0].mask_id == "mask_1"
     assert out.missing_information == ["crack_dimensions", "inspection_date"]
+
+
+def test_run_full_records_stage_durations() -> None:
+    from app.orchestrator.spark import SparkReasoner
+
+    pipe = InspectionPipeline(
+        sam=_FakeSam(),  # type: ignore[arg-type]
+        vision=_FakeVision(),  # type: ignore[arg-type]
+        spark=SparkReasoner(client=_spark_client(_spark_ok), settings=_settings()),
+        wonder=_FakeWonder(_plan()),  # type: ignore[arg-type]
+        settings=_settings(),
+    )
+    out = pipe.run_full([JPEG], note="Crack seen", asset_meta={"asset_id": "F-1"})
+    assert set(out.durations_ms) == {"sam", "vision", "spark", "wonder", "validate"}
+    assert all(v >= 0 for v in out.durations_ms.values())
+
+
+def test_budget_alert_logs_over_50c(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    from app.orchestrator.spark import SparkReasoner
+
+    monkeypatch.setenv("META_PRICE_PER_IMAGE_CENTS_SAM_3_1", "100.0")
+    pipe = InspectionPipeline(
+        sam=_FakeSam(),  # type: ignore[arg-type]
+        vision=_FakeVision(),  # type: ignore[arg-type]
+        spark=SparkReasoner(client=_spark_client(_spark_ok), settings=_settings()),
+        wonder=_FakeWonder(_plan()),  # type: ignore[arg-type]
+        settings=_settings(),
+    )
+    with caplog.at_level(logging.WARNING, logger="asset_intel.pipeline"):
+        pipe.run_full([JPEG], note="Crack seen", asset_meta={"asset_id": "F-1"})
+    assert "cost_budget_alert" in caplog.text

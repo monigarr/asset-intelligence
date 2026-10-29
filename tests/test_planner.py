@@ -126,3 +126,41 @@ def test_plan_rejects_bad_payloads() -> None:
     for payload, match in bad_cases:
         with pytest.raises(MetaResponseError, match=match):
             _planner(handler_for(payload)).plan(_draft(), _vision(), "n", {})
+
+
+def test_wonder_prompt_has_discrepancy_decision_rule() -> None:
+    from app.planner.wonder import WONDER_SYSTEM_PROMPT
+
+    assert "MUST surface" in WONDER_SYSTEM_PROMPT
+    assert "empty discrepancies array" in WONDER_SYSTEM_PROMPT
+    assert "never placeholder or filler text" in WONDER_SYSTEM_PROMPT
+
+
+def test_wonder_retries_once_with_stricter_prompt() -> None:
+    from types import SimpleNamespace
+
+    from app.gateway import Settings
+    from app.gateway.meta_client import ChatUsage
+    from app.planner.wonder import WonderPlanner
+
+    calls: list[str] = []
+
+    class _SeqClient:
+        def chat(self, model_id: str, messages: list, **kwargs: object):  # type: ignore[no-untyped-def]
+            calls.append(messages[1]["content"])
+            if len(calls) == 1:
+                return SimpleNamespace(data={}, usage=ChatUsage())
+            good = {
+                "discrepancies": [],
+                "missing_information": [],
+                "recommended_next_step": "Escalate to qualified inspector.",
+            }
+            return SimpleNamespace(data=good, usage=ChatUsage())
+
+    planner = WonderPlanner(client=_SeqClient(), settings=Settings(api_key="t"))  # type: ignore[arg-type]
+    draft = SimpleNamespace(segmentations=[], observations=[], request_id="r1")
+    vision = SimpleNamespace(model_dump_json=lambda **kwargs: "{}")
+    plan = planner.plan(draft, vision, "note", {}, request_id="r1")  # type: ignore[arg-type]
+    assert plan.recommended_next_step.startswith("Escalate")
+    assert len(calls) == 2
+    assert "STRICT RETRY" in calls[1]

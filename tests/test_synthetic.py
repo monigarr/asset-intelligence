@@ -7,6 +7,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any
 
+import pytest
 from PIL import Image
 
 from app.gateway.meta_client import GeneratedImage
@@ -50,7 +51,7 @@ def test_roster_expectations() -> None:
     roster = {c.case_id: c for c in build_case_roster()}
     assert roster["clear-01"].expected["expect_discrepancy"] is False
     assert roster["incomplete-01"].expected["missing_keys"] == [
-        "defect_dimensions", "inspection_date"]
+        "defect_dimensions", "inspection_date", "scale_reference"]
     assert roster["contradictory-01"].expected["expect_discrepancy"] is True
     assert roster["ambiguous-01"].expected["expect_uncertain"] is True
     adv = roster["adversarial-01"]
@@ -108,3 +109,35 @@ def test_generate_all_copies_samples(tmp_path: Path) -> None:
     assert (samples / "clear-01.png").exists()
     assert (samples / "clear-02.json").exists()
     assert not (samples / "clear-03.png").exists()
+
+
+def test_generate_all_manifest_reports_image_cost(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.gateway import Settings
+
+    monkeypatch.delenv("META_PRICE_PER_IMAGE_CENTS_MUSE_IMAGE_1_0", raising=False)
+    monkeypatch.delenv("META_PRICE_PER_1_HOUR_MUSE_IMAGE_1_0_OUTPUT", raising=False)
+    client = _FakeImageClient()
+    gen = SyntheticGenerator(client=client, settings=Settings(api_key="t"))  # type: ignore[arg-type]
+    manifest_path = gen.generate_all(tmp_path, limit=2)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["cost_cents"] == 0.0
+    assert manifest["cost_priced"] is False
+    assert manifest["cost_basis"] == "unpriced"
+
+
+def test_generate_all_manifest_prefers_hourly_basis(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.gateway import Settings
+
+    monkeypatch.setenv("META_PRICE_PER_1_HOUR_MUSE_IMAGE_1_0_OUTPUT", "3600.0")
+    monkeypatch.delenv("META_PRICE_PER_IMAGE_CENTS_MUSE_IMAGE_1_0", raising=False)
+    client = _FakeImageClient()
+    gen = SyntheticGenerator(client=client, settings=Settings(api_key="t"))  # type: ignore[arg-type]
+    manifest_path = gen.generate_all(tmp_path, limit=1)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["cost_basis"] == "hourly"
+    assert manifest["cost_priced"] is True
+    assert manifest["cost_cents"] >= 0.0

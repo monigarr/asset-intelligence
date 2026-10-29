@@ -37,8 +37,36 @@ _DIMENSION_RE = re.compile(
     re.IGNORECASE,
 )
 _DIGIT_RE = re.compile(r"\d")
+# Entries [0:_CERT_ACTION_COUNT] are action-anchored certif* patterns: the bare
+# noun ("certification paperwork") never matches, and refusal phrasing
+# ("do not certify") is exempt via _REFUSAL_BEFORE_RE. Only performed or
+# claimed certification is blocked.
+_CERT_ACTION_COUNT = 2
+_REFUSAL_BEFORE_RE = re.compile(
+    r"\b(do not|don't|cannot|can't|won't|will not|never"
+    r"|refus\w*|decline[sd]?|unable to)\b",
+    re.IGNORECASE,
+)
+
+
+def _cert_action_hit(text: str, pattern: re.Pattern[str]) -> str | None:
+    """Match unless refusal phrasing precedes it within 40 chars."""
+    match = pattern.search(text)
+    if not match:
+        return None
+    window = text[max(0, match.start() - 40) : match.start()]
+    if _REFUSAL_BEFORE_RE.search(window):
+        return None
+    return match.group()
+
+
 _CERT_PATTERNS = (
-    re.compile(r"certif\w*", re.IGNORECASE),
+    re.compile(
+        r"\b(issue[sd]?|grant(?:s|ed|ing)?|sign(?:s|ed|ing)?"
+        r"|approv(?:e[sd]?|ing|al))\b.{0,40}\bcertificat",
+        re.IGNORECASE,
+    ),
+    re.compile(r"\bcertif(y|ies|ied|ying)\b", re.IGNORECASE),
     re.compile(r"\bcompliant\b", re.IGNORECASE),
     re.compile(r"safe to (use|operate|open|occupy)", re.IGNORECASE),
     re.compile(r"declare[sd]? .{0,30}safe\b", re.IGNORECASE),
@@ -75,6 +103,14 @@ class ModelTrace(BaseModel):
     timestamp: str
 
 
+class UsageSummary(BaseModel):
+    """Aggregate token usage across vision + reasoning + planning calls."""
+
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
+
+
 class InspectionResult(BaseModel):
     request_id: str
     asset_id: str
@@ -88,6 +124,8 @@ class InspectionResult(BaseModel):
     model_trace: ModelTrace
     cost_cents: float = 0.0
     cost_priced: bool = False
+    durations_ms: dict[str, float] = {}
+    usage: UsageSummary = Field(default_factory=UsageSummary)
 
     @field_validator("recommended_next_step")
     @classmethod
@@ -201,10 +239,14 @@ class InspectionResult(BaseModel):
         texts.append(("recommended_next_step", self.recommended_next_step))
         errors = []
         for loc, text in texts:
-            for pattern in _CERT_PATTERNS:
-                match = pattern.search(text)
-                if match:
-                    errors.append(f"{loc}: certifying language {match.group()!r}")
+            for i, pattern in enumerate(_CERT_PATTERNS):
+                if i < _CERT_ACTION_COUNT:
+                    hit = _cert_action_hit(text, pattern)
+                else:
+                    match = pattern.search(text)
+                    hit = match.group() if match else None
+                if hit:
+                    errors.append(f"{loc}: certifying language {hit!r}")
         if errors:
             raise ValueError("; ".join(errors))
         return self
