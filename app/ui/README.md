@@ -12,19 +12,20 @@ npm install
 npm run dev      # http://localhost:3000 (proxies /v1 to :8000)
 ```
 
-`npm test` runs the vitest suite (RLE decoder). `npm run build` produces
+`npm test` runs the vitest suite (RLE decoder + fixture validation). `npm run build` produces
 `dist/` for the Day-7 container.
 
 ## Modes
 
-- **Demo**: no backend needed. Renders a labeled fixture
-  (`src/demo/fixture.js`, asset `DEMO-DRAIN-001`) over a procedural
-  schematic — clearly marked, never presented as inspection data.
+- **Demo**: no backend needed. Pick a fixture from the dropdown; the UI loads
+  its committed image + result JSON (`public/fixtures/`, shipped in the build)
+  with client-side RLE fills — clearly marked as fixture data, and you can still
+  run the same image live via API mode.
 - **API**: uploads 1–5 images + note to the Day-7 backend
   (`POST /v1/inspections`, polls `GET /v1/inspections/{id}`), fetches the
   server overlay PNG when available, and posts review decisions to
-  `POST /v1/inspections/{id}/review`.
-
+  `POST /v1/inspections/{id}/review`. The form accepts incremental adds
+  (browse or drag-and-drop) with per-file remove, and validates type/size/count.
 ## Overlay sources (in order)
 
 1. Server-rendered PNG from `GET /v1/inspections/{id}/overlay?image=N`
@@ -48,3 +49,9 @@ cd $env:TEMP\ai-ui
 npm install
 npm run dev
 ```
+
+## Header
+
+Brand left (“Asset Intelligence / by ManageAssets.ca”), icon-only nav right
+(contact, GitHub) plus a tab bar (Demo, New inspection, About). About copy lives in `src/components/about.js` —
+paste the YouTube URL into `YOUTUBE_URL` when it ships.

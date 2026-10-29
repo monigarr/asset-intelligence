@@ -49,6 +49,64 @@ button {
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 button:disabled { opacity: 0.5; cursor: default; }
 button.active { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fixture-picker { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.fixture-picker select {
+  font: inherit;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  cursor: pointer;
+  max-width: 340px;
+}
+.fixture-picker select:disabled { opacity: 0.5; cursor: default; }
+.fixture-blurb { margin: 0 0 16px 0; }
+.fixture-blurb .muted { opacity: 0.65; }
+.dropzone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+.dropzone.dragging {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: -4px;
+}
+.dropzone p { margin: 4px 0 8px 0; }
+.thumbs {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0;
+  margin: 0 0 12px 0;
+}
+.thumbs li {
+  position: relative;
+  width: 120px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px;
+  background: var(--panel);
+}
+.thumbs img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+}
+.thumb-name {
+  display: block;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.thumbs .chip { position: absolute; top: 2px; right: 2px; padding: 0 7px; }
+.rejected { color: #b91c1c; font-size: 13px; margin: 0 0 12px 0; padding-left: 18px; }
 
 .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
@@ -109,3 +167,83 @@ button.chip.active { outline: 2px solid var(--accent); }
 .review-actions { display: flex; gap: 8px; }
 .trace { font-size: 12px; color: var(--muted); font-family: ui-monospace, Consolas, monospace; }
 .raw-json { font-size: 12px; max-height: 320px; overflow: auto; background: var(--panel); padding: 8px; }
+
+.app-header { align-items: center; }
+.brand { display: flex; flex-direction: column; line-height: 1.2; }
+.brand-name { font-size: 20px; font-weight: 700; }
+.brand-sub { color: var(--muted); font-size: 13px; }
+.head-right { display: flex; align-items: center; gap: 14px; }
+.main-nav { display: flex; align-items: center; gap: 4px; }
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius);
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+a.nav-icon { text-decoration: none; }
+button.nav-icon { font: inherit; }
+.nav-icon:hover { background: var(--panel); border-color: var(--border); }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+.modal {
+  background: #fff;
+  color: var(--text);
+  border-radius: 8px;
+  max-width: 520px;
+  width: 100%;
+  padding: 20px 22px;
+  position: relative;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+.modal h2 { margin: 0 0 10px 0; font-size: 18px; padding-right: 28px; }
+.modal p { margin: 8px 0; }
+.modal a { color: var(--accent); }
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 4px 8px;
+}
+.modal-close:hover { color: var(--text); }
+.video-placeholder {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  color: var(--muted);
+}
+.mode-toggle button svg, .fixture-picker svg { vertical-align: -3px; margin-right: 2px; }
+
+/* Visible keyboard focus (Wave 6 a11y). */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

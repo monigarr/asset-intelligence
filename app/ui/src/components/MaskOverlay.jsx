@@ -34,7 +34,7 @@ function drawSchematic(ctx, width, height) {
   ctx.fillStyle = '#fff';
   ctx.strokeStyle = '#000';
   ctx.lineWidth = 3;
-  const label = 'DEMO SCHEMATIC — no image loaded';
+  const label = 'DEMO SCHEMATIC -- no image loaded';
   ctx.strokeText(label, 10, 20);
   ctx.fillText(label, 10, 20);
 }
@@ -70,6 +70,7 @@ function paintRleFill(ctx, seg, width, height) {
 export default function MaskOverlay({
   imageUrl,
   overlayUrl,
+  apiKey,
   width,
   height,
   segmentations,
@@ -100,14 +101,28 @@ export default function MaskOverlay({
       if (cancelled) return;
       let overlayDrawn = false;
       if (overlayUrl) {
+        // Server overlay requires X-API-Key; a bare Image load 401s (console
+        // error). Fetch with auth, decode via blob URL, revoke after draw.
+        let blobUrl = null;
         try {
-          const ov = await loadImage(overlayUrl);
+          let src = overlayUrl;
+          if (apiKey) {
+            const res = await fetch(overlayUrl, {
+              headers: { 'X-API-Key': apiKey },
+            });
+            if (!res.ok) throw new Error(`overlay ${res.status}`);
+            blobUrl = URL.createObjectURL(await res.blob());
+            src = blobUrl;
+          }
+          const ov = await loadImage(src);
           if (!cancelled) {
             ctx.drawImage(ov, 0, 0, width, height);
             overlayDrawn = true;
           }
         } catch {
           /* fall through to client-side fills */
+        } finally {
+          if (blobUrl) URL.revokeObjectURL(blobUrl);
         }
       }
       if (cancelled) return;
@@ -143,7 +158,7 @@ export default function MaskOverlay({
     return () => {
       cancelled = true;
     };
-  }, [imageUrl, overlayUrl, width, height, segmentations, selectedMaskId]);
+  }, [imageUrl, overlayUrl, apiKey, width, height, segmentations, selectedMaskId]);
 
   function onClick(e) {
     const canvas = ref.current;
@@ -163,7 +178,13 @@ export default function MaskOverlay({
 
   return (
     <div className="overlay-wrap">
-      <canvas ref={ref} onClick={onClick} style={{ cursor: 'crosshair' }} />
+      <canvas
+        ref={ref}
+        onClick={onClick}
+        style={{ cursor: 'crosshair' }}
+        role="img"
+        aria-label={`Defect overlay with ${segmentations.length} annotated masks`}
+      />
       <div className="hint">Click a mask to highlight its evidence.</div>
     </div>
   );

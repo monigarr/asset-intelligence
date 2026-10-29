@@ -1,0 +1,120 @@
+{
+  "id": "culvert-crack",
+  "label": "Crack vs clean note \u2014 culvert",
+  "case_id": "contradictory-01",
+  "suite": "contradictory",
+  "image": "culvert-crack.jpg",
+  "width": 800,
+  "height": 800,
+  "note": "No defects observed. Surface dry and sound.",
+  "asset_meta": {
+    "asset_id": "SYN-contradictory-01",
+    "asset_type": "drainage_structure"
+  },
+  "result": {
+    "request_id": "fixture-culvert-crack",
+    "asset_id": "SYN-contradictory-01",
+    "asset_type": "drainage_structure",
+    "model_trace": {
+      "sam": "sam-3.1",
+      "vision": "muse-spark-1.3",
+      "vision_fallback_used": false,
+      "reasoning": "muse-spark-1.3",
+      "planning": "muse-wonder-1.0",
+      "timestamp": "2026-10-27T23:09:35.747263+00:00"
+    },
+    "segmentations": [
+      {
+        "mask_id": "mask_1",
+        "label": "crack",
+        "bbox": [
+          416.0,
+          675.5,
+          451.0,
+          800.0
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            15749,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            13200
+          ]
+        },
+        "source_image": "image_0"
+      }
+    ],
+    "observations": [
+      {
+        "text": "crack feature segmented in image_0 contradicts maintenance note claim of no defects observed",
+        "evidence": [
+          {
+            "source": "image_0",
+            "mask_id": "mask_1",
+            "span": null
+          },
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              20
+            ]
+          }
+        ],
+        "uncertainty": 0.5
+      },
+      {
+        "text": "maintenance note claims surface dry and sound; moisture, ponding and staining extent cannot be quantified from crack mask alone",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              21,
+              43
+            ]
+          },
+          {
+            "source": "image_0",
+            "mask_id": "mask_1",
+            "span": null
+          }
+        ],
+        "uncertainty": 0.65
+      }
+    ],
+    "discrepancies": [
+      "Note says 'No defects observed', but image shows a segmented crack feature and visible cracking and surface deterioration of the invert and soffit.",
+      "Note says 'Surface dry and sound', but image shows a wet concrete invert with reflective moisture, ponding and muddy deposits, and dark moisture staining and green discoloration."
+    ],
+    "missing_information": [
+      "crack_dimensions",
+      "moisture_extent",
+      "inspection_date",
+      "moisture_ponding_extent"
+    ],
+    "recommended_next_step": "Request a qualified inspection and re-photograph the area with a scale reference to document the crack and moisture conditions.",
+    "human_review_required": true,
+    "cost_cents": 0.0,
+    "cost_priced": false
+  }
+}

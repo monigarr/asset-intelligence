@@ -1,0 +1,490 @@
+{
+  "id": "low-light",
+  "label": "Low-light uncertainty demo",
+  "case_id": "ambiguous-03",
+  "suite": "ambiguous",
+  "image": "low-light.jpg",
+  "width": 800,
+  "height": 800,
+  "note": "Something looks off in low light, hard to tell.",
+  "asset_meta": {
+    "asset_id": "SYN-ambiguous-03",
+    "asset_type": "bridge_component"
+  },
+  "result": {
+    "request_id": "fixture-low-light",
+    "asset_id": "SYN-ambiguous-03",
+    "asset_type": "bridge_component",
+    "model_trace": {
+      "sam": "sam-3.1",
+      "vision": "muse-spark-1.3",
+      "vision_fallback_used": false,
+      "reasoning": "muse-spark-1.3",
+      "planning": "muse-wonder-1.0",
+      "timestamp": "2026-10-27T22:54:45.190795+00:00"
+    },
+    "segmentations": [
+      {
+        "mask_id": "mask_1",
+        "label": "corrosion",
+        "bbox": [
+          272.5,
+          370.0,
+          284.5,
+          444.5
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            10292,
+            19,
+            131,
+            19,
+            131,
+            19,
+            19389
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_2",
+        "label": "corrosion",
+        "bbox": [
+          413.5,
+          398.0,
+          430.0,
+          499.0
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            15549,
+            25,
+            125,
+            25,
+            125,
+            25,
+            125,
+            25,
+            13976
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_3",
+        "label": "corrosion",
+        "bbox": [
+          314.5,
+          362.0,
+          336.5,
+          534.5
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            11790,
+            43,
+            107,
+            43,
+            107,
+            43,
+            107,
+            43,
+            107,
+            43,
+            107,
+            43,
+            17417
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_4",
+        "label": "corrosion",
+        "bbox": [
+          85.0,
+          423.0,
+          101.5,
+          477.0
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            3255,
+            14,
+            136,
+            14,
+            136,
+            14,
+            136,
+            14,
+            26281
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_5",
+        "label": "corrosion",
+        "bbox": [
+          205.0,
+          400.0,
+          228.5,
+          520.5
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            7750,
+            30,
+            120,
+            30,
+            120,
+            30,
+            120,
+            30,
+            120,
+            30,
+            120,
+            30,
+            21470
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_6",
+        "label": "corrosion",
+        "bbox": [
+          240.0,
+          346.5,
+          259.0,
+          467.5
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            9086,
+            30,
+            120,
+            30,
+            120,
+            30,
+            120,
+            30,
+            20434
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_7",
+        "label": "corrosion",
+        "bbox": [
+          184.0,
+          449.5,
+          242.5,
+          478.0
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            7012,
+            7,
+            143,
+            7,
+            143,
+            7,
+            143,
+            7,
+            143,
+            7,
+            143,
+            7,
+            143,
+            7,
+            143,
+            7,
+            143,
+            7,
+            143,
+            7,
+            143,
+            7,
+            143,
+            7,
+            143,
+            7,
+            143,
+            7,
+            21031
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_8",
+        "label": "corrosion",
+        "bbox": [
+          102.5,
+          408.0,
+          205.0,
+          433.0
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            3852,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            144,
+            6,
+            22392
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_9",
+        "label": "corrosion",
+        "bbox": [
+          129.0,
+          344.0,
+          152.5,
+          510.5
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            4886,
+            41,
+            109,
+            41,
+            109,
+            41,
+            109,
+            41,
+            109,
+            41,
+            109,
+            41,
+            24323
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_10",
+        "label": "corrosion",
+        "bbox": [
+          350.0,
+          381.5,
+          370.5,
+          531.5
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            13145,
+            37,
+            113,
+            37,
+            113,
+            37,
+            113,
+            37,
+            113,
+            37,
+            16218
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_11",
+        "label": "corrosion",
+        "bbox": [
+          279.0,
+          339.0,
+          305.0,
+          530.0
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            10434,
+            48,
+            102,
+            48,
+            102,
+            48,
+            102,
+            48,
+            102,
+            48,
+            102,
+            48,
+            102,
+            48,
+            18618
+          ]
+        },
+        "source_image": "image_0"
+      }
+    ],
+    "observations": [
+      {
+        "text": "Exposed corroded vertical rebar with surrounding concrete spalling/scaling and rust staining at pier base",
+        "evidence": [
+          {
+            "source": "image_0",
+            "mask_id": "mask_3",
+            "span": null
+          },
+          {
+            "source": "image_0",
+            "mask_id": "mask_5",
+            "span": null
+          },
+          {
+            "source": "image_0",
+            "mask_id": "mask_6",
+            "span": null
+          },
+          {
+            "source": "image_0",
+            "mask_id": "mask_10",
+            "span": null
+          },
+          {
+            "source": "image_0",
+            "mask_id": "mask_11",
+            "span": null
+          }
+        ],
+        "uncertainty": 0.5
+      },
+      {
+        "text": "Overall appearance looks off but hard to tell in low light",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              47
+            ]
+          }
+        ],
+        "uncertainty": 0.8
+      }
+    ],
+    "discrepancies": [],
+    "missing_information": [
+      "spall_dimensions",
+      "corrosion_depth",
+      "inspection_date",
+      "spall_and_corrosion_dimensions",
+      "rebar_section_loss",
+      "scale_reference"
+    ],
+    "recommended_next_step": "Request a qualified inspection of the pier base in adequate lighting and re-photograph the affected area with a scale reference",
+    "human_review_required": true,
+    "cost_cents": 0.0,
+    "cost_priced": false
+  }
+}

@@ -1,0 +1,292 @@
+{
+  "id": "channel-vegetation",
+  "label": "Vegetation blocking channel",
+  "case_id": "clear-05",
+  "suite": "clear",
+  "image": "channel-vegetation.jpg",
+  "width": 800,
+  "height": 800,
+  "note": "Vegetation and sediment blocking roughly half the channel width. Inspected 2026-10-20.",
+  "asset_meta": {
+    "asset_id": "SYN-clear-05",
+    "asset_type": "drainage_structure"
+  },
+  "result": {
+    "request_id": "fixture-channel-vegetation",
+    "asset_id": "SYN-clear-05",
+    "asset_type": "drainage_structure",
+    "model_trace": {
+      "sam": "sam-3.1",
+      "vision": "muse-spark-1.3",
+      "vision_fallback_used": false,
+      "reasoning": "muse-spark-1.3",
+      "planning": "muse-wonder-1.0",
+      "timestamp": "2026-10-27T23:02:31.567587+00:00"
+    },
+    "segmentations": [
+      {
+        "mask_id": "mask_1",
+        "label": "crack",
+        "bbox": [
+          708.5,
+          0.0,
+          773.5,
+          330.5
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            26550,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            1118
+          ]
+        },
+        "source_image": "image_0"
+      }
+    ],
+    "observations": [
+      {
+        "text": "Vegetation and sediment blocking roughly half the channel width",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              64
+            ]
+          }
+        ],
+        "uncertainty": 0.2
+      },
+      {
+        "text": "Sediment accumulation in channel associated with blockage",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              64
+            ]
+          }
+        ],
+        "uncertainty": 0.3
+      },
+      {
+        "text": "Vegetation growth within channel associated with blockage",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              64
+            ]
+          }
+        ],
+        "uncertainty": 0.3
+      },
+      {
+        "text": "Channel conveyance restricted to approximately half width",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              64
+            ]
+          }
+        ],
+        "uncertainty": 0.35
+      },
+      {
+        "text": "Standing turbid water and muddy deposits in channel invert",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              64
+            ]
+          }
+        ],
+        "uncertainty": 0.45
+      },
+      {
+        "text": "Restricted flow indicated by standing water and deposits",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              64
+            ]
+          }
+        ],
+        "uncertainty": 0.5
+      },
+      {
+        "text": "Right concrete channel wall shows staining and surface variation",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              64
+            ]
+          }
+        ],
+        "uncertainty": 0.6
+      },
+      {
+        "text": "Possible vertical crack on right concrete channel wall",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              64
+            ]
+          }
+        ],
+        "uncertainty": 0.85
+      },
+      {
+        "text": "Inspection recorded on 2026-10-20",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              65,
+              86
+            ]
+          }
+        ],
+        "uncertainty": 0.05
+      },
+      {
+        "text": "Asset exhibits blockage, sediment, and vegetation conditions",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              64
+            ]
+          }
+        ],
+        "uncertainty": 0.25
+      },
+      {
+        "text": "Drainage structure with partial blockage requiring clearing and crack verification",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              86
+            ]
+          }
+        ],
+        "uncertainty": 0.4
+      },
+      {
+        "text": "No confirmed structural failure, only possible crack requiring verification",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              64
+            ]
+          }
+        ],
+        "uncertainty": 0.7
+      },
+      {
+        "text": "Sediment and vegetation extent described as roughly half, precise limits unverified",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              64
+            ]
+          }
+        ],
+        "uncertainty": 0.4
+      },
+      {
+        "text": "Overall condition reflects maintenance blockage rather than confirmed structural damage",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              86
+            ]
+          }
+        ],
+        "uncertainty": 0.35
+      }
+    ],
+    "discrepancies": [],
+    "missing_information": [
+      "crack_dimensions",
+      "sediment_depth",
+      "flow_condition",
+      "crack_verification",
+      "quantified_blockage_extent"
+    ],
+    "recommended_next_step": "Request a qualified inspection to verify the possible right wall crack and quantify sediment and vegetation blockage, with scale-referenced photographs of the crack and channel.",
+    "human_review_required": true,
+    "cost_cents": 0.0,
+    "cost_priced": false
+  }
+}

@@ -1,0 +1,267 @@
+{
+  "id": "joint-seepage",
+  "label": "Seepage \u2014 cold joint",
+  "case_id": "clear-04",
+  "suite": "clear",
+  "image": "joint-seepage.jpg",
+  "width": 800,
+  "height": 800,
+  "note": "Active seepage through cold joint, mineral deposits, damp 3ft wide area. Inspected 2026-10-20.",
+  "asset_meta": {
+    "asset_id": "SYN-clear-04",
+    "asset_type": "retaining_wall"
+  },
+  "result": {
+    "request_id": "fixture-joint-seepage",
+    "asset_id": "SYN-clear-04",
+    "asset_type": "retaining_wall",
+    "model_trace": {
+      "sam": "sam-3.1",
+      "vision": "muse-spark-1.3",
+      "vision_fallback_used": false,
+      "reasoning": "muse-spark-1.3",
+      "planning": "muse-wonder-1.0",
+      "timestamp": "2026-10-27T23:01:58.150098+00:00"
+    },
+    "segmentations": [
+      {
+        "mask_id": "mask_1",
+        "label": "water seepage",
+        "bbox": [
+          269.0,
+          347.0,
+          291.5,
+          472.5
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            10136,
+            32,
+            118,
+            32,
+            118,
+            32,
+            118,
+            32,
+            118,
+            32,
+            19232
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_2",
+        "label": "water seepage",
+        "bbox": [
+          647.0,
+          347.0,
+          721.0,
+          800.0
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            24236,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            86,
+            64,
+            3000
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_3",
+        "label": "water seepage",
+        "bbox": [
+          157.0,
+          339.5,
+          172.5,
+          407.0
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            5934,
+            17,
+            133,
+            17,
+            133,
+            17,
+            133,
+            17,
+            23599
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_4",
+        "label": "water seepage",
+        "bbox": [
+          590.5,
+          350.0,
+          603.0,
+          505.0
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            22137,
+            39,
+            111,
+            39,
+            111,
+            39,
+            7524
+          ]
+        },
+        "source_image": "image_0"
+      }
+    ],
+    "observations": [
+      {
+        "text": "Active water seepage through cold joint with vertical runoff streaks below joint",
+        "evidence": [
+          {
+            "source": "image_0",
+            "mask_id": "mask_2",
+            "span": null
+          },
+          {
+            "source": "image_0",
+            "mask_id": "mask_1",
+            "span": null
+          },
+          {
+            "source": "image_0",
+            "mask_id": "mask_4",
+            "span": null
+          },
+          {
+            "source": "image_0",
+            "mask_id": "mask_3",
+            "span": null
+          },
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              33
+            ]
+          }
+        ],
+        "uncertainty": 0.5
+      },
+      {
+        "text": "White mineral deposits along joint and in drip lines below",
+        "evidence": [
+          {
+            "source": "image_0",
+            "mask_id": "mask_2",
+            "span": null
+          },
+          {
+            "source": "image_0",
+            "mask_id": "mask_1",
+            "span": null
+          },
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              35,
+              51
+            ]
+          }
+        ],
+        "uncertainty": 0.5
+      },
+      {
+        "text": "Damp dark-stained concrete area below joint reported as 3ft wide area",
+        "evidence": [
+          {
+            "source": "image_0",
+            "mask_id": "mask_2",
+            "span": null
+          },
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              53,
+              71
+            ]
+          }
+        ],
+        "uncertainty": 0.4
+      }
+    ],
+    "discrepancies": [],
+    "missing_information": [
+      "seepage_flow_rate",
+      "joint_length",
+      "wall_dimensions",
+      "scale_reference_for_extent",
+      "drainage_condition_behind_wall",
+      "seepage_source_and_flow_rate"
+    ],
+    "recommended_next_step": "Request a qualified inspection of the seepage and drainage condition, and re-photograph the affected area with a scale reference.",
+    "human_review_required": true,
+    "cost_cents": 0.0,
+    "cost_priced": false
+  }
+}

@@ -1,0 +1,431 @@
+{
+  "id": "denied-defects",
+  "label": "'No defects' note vs image \u2014 culvert",
+  "case_id": "contradictory-05",
+  "suite": "contradictory",
+  "image": "denied-defects.jpg",
+  "width": 800,
+  "height": 800,
+  "note": "No defects observed. Surface dry and sound.",
+  "asset_meta": {
+    "asset_id": "SYN-contradictory-05",
+    "asset_type": "drainage_structure"
+  },
+  "result": {
+    "request_id": "fixture-denied-defects",
+    "asset_id": "SYN-contradictory-05",
+    "asset_type": "drainage_structure",
+    "model_trace": {
+      "sam": "sam-3.1",
+      "vision": "muse-spark-1.3",
+      "vision_fallback_used": false,
+      "reasoning": "muse-spark-1.3",
+      "planning": "muse-wonder-1.0",
+      "timestamp": "2026-10-27T23:12:15.840031+00:00"
+    },
+    "segmentations": [
+      {
+        "mask_id": "mask_1",
+        "label": "crack",
+        "bbox": [
+          607.0,
+          168.5,
+          725.0,
+          414.0
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            22692,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            89,
+            61,
+            2897
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_2",
+        "label": "crack",
+        "bbox": [
+          0.0,
+          157.5,
+          150.5,
+          430.0
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            39,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            82,
+            68,
+            24493
+          ]
+        },
+        "source_image": "image_0"
+      },
+      {
+        "mask_id": "mask_3",
+        "label": "water seepage",
+        "bbox": [
+          269.0,
+          661.5,
+          426.0,
+          800.0
+        ],
+        "confidence": 0.5,
+        "rle": {
+          "size": [
+            150,
+            200
+          ],
+          "counts": [
+            10199,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            149,
+            1,
+            14100
+          ]
+        },
+        "source_image": "image_0"
+      }
+    ],
+    "observations": [
+      {
+        "text": "Maintenance note states no defects observed with dry sound surface",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              21,
+              43
+            ]
+          },
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              20
+            ]
+          }
+        ],
+        "uncertainty": 0.05
+      },
+      {
+        "text": "Maintenance note claim of dry surface contradicted by image water detection",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              21,
+              43
+            ]
+          },
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              20
+            ]
+          }
+        ],
+        "uncertainty": 0.15
+      },
+      {
+        "text": "Maintenance note claim of no defects contradicted by image water detection",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              21,
+              43
+            ]
+          },
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              20
+            ]
+          }
+        ],
+        "uncertainty": 0.2
+      },
+      {
+        "text": "Maintenance note reports dry conditions while water seepage mask indicates wet invert",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              21,
+              43
+            ]
+          },
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              20
+            ]
+          }
+        ],
+        "uncertainty": 0.25
+      },
+      {
+        "text": "Note-image contradiction present between reported dry sound surface and visible water",
+        "evidence": [
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              21,
+              43
+            ]
+          },
+          {
+            "source": "maintenance_note",
+            "mask_id": null,
+            "span": [
+              0,
+              20
+            ]
+          }
+        ],
+        "uncertainty": 0.3
+      }
+    ],
+    "discrepancies": [
+      "note says no defects observed, image shows ponded turbid water, silt accumulation, vegetation growth and moisture staining",
+      "note says surface dry and sound, image shows water seepage at the channel invert (mask_3) and dark moisture staining on the side walls"
+    ],
+    "missing_information": [
+      "crack_dimensions",
+      "water_depth",
+      "inspection_date",
+      "note_image_timing_alignment",
+      "scale_reference"
+    ],
+    "recommended_next_step": "Request a qualified inspection to reconcile the note and image evidence and re-photograph the structure with a scale reference",
+    "human_review_required": true,
+    "cost_cents": 0.0,
+    "cost_priced": false
+  }
+}

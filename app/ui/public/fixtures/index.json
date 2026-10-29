@@ -1,0 +1,52 @@
+[
+  {
+    "id": "drain-crack",
+    "label": "Longitudinal crack + seepage \u2014 drain",
+    "blurb": "Longitudinal crack near top edge, about 2ft long, water seeping through. Inspect"
+  },
+  {
+    "id": "rebar-corrosion",
+    "label": "Corroded rebar \u2014 bridge pier",
+    "blurb": "Exposed rebar with heavy corrosion and section loss over 12in length. Inspected "
+  },
+  {
+    "id": "joint-seepage",
+    "label": "Seepage \u2014 cold joint",
+    "blurb": "Active seepage through cold joint, mineral deposits, damp 3ft wide area. Inspect"
+  },
+  {
+    "id": "channel-vegetation",
+    "label": "Vegetation blocking channel",
+    "blurb": "Vegetation and sediment blocking roughly half the channel width. Inspected 2026-"
+  },
+  {
+    "id": "ring-crack",
+    "label": "Circumferential crack \u2014 pipe",
+    "blurb": "Circumferential crack with infiltration staining around full perimeter. Inspecte"
+  },
+  {
+    "id": "bare-rebar-note",
+    "label": "Terse note, rich image \u2014 rebar",
+    "blurb": "Corroded rebar exposed."
+  },
+  {
+    "id": "stained-crack",
+    "label": "Stained crack, sparse note",
+    "blurb": "Crack with staining."
+  },
+  {
+    "id": "culvert-crack",
+    "label": "Crack vs clean note \u2014 culvert",
+    "blurb": "No defects observed. Surface dry and sound."
+  },
+  {
+    "id": "denied-defects",
+    "label": "'No defects' note vs image \u2014 culvert",
+    "blurb": "No defects observed. Surface dry and sound."
+  },
+  {
+    "id": "low-light",
+    "label": "Low-light uncertainty demo",
+    "blurb": "Something looks off in low light, hard to tell."
+  }
+]
