@@ -77,6 +77,10 @@ datasets/
 !eval/cases/synthetic/images/*.png
 !eval/cases/demo/
 
+# marketing/: brand logo sets are committed (parent + product)
+!marketing/*.png
+!marketing/manage_assets_inc/*.png
+
 # Review-UI demo fixtures: committed images + JSON, shipped in the UI build.
 !app/ui/public/fixtures/
 !app/ui/public/fixtures/**
