@@ -8,7 +8,8 @@ import ReviewActions from './components/ReviewActions.jsx';
 import UploadForm from './components/UploadForm.jsx';
 import Header from './components/Header.jsx';
 import AboutPanel from './components/AboutPanel.jsx';
-import { CodeIcon, InfoIcon, PlayIcon } from './components/icons.jsx';
+import InsightsPanel from './components/InsightsPanel.jsx';
+import { ChartIcon, CodeIcon, InfoIcon, PlayIcon } from './components/icons.jsx';
 
 const FALLBACK_DIMS = { width: 800, height: 600 };
 
@@ -188,6 +189,14 @@ export default function App() {
         >
           <InfoIcon size={16} /> About
         </button>
+        <button
+          role="tab"
+          aria-selected={mode === 'insights'}
+          className={mode === 'insights' ? 'active' : ''}
+          onClick={() => switchTab('insights')}
+        >
+          <ChartIcon size={16} /> Insights
+        </button>
       </div>
 
       {demo && (
@@ -230,6 +239,8 @@ export default function App() {
 
       {mode === 'about' && <AboutPanel />}
 
+      {mode === 'insights' && <InsightsPanel apiKey={apiKey} onApiKey={setApiKey} />}
+
       {mode === 'new' && (
         <div className="panel">
           <h2>New inspection</h2>
@@ -237,7 +248,7 @@ export default function App() {
         </div>
       )}
 
-      {result && mode !== 'about' && (
+      {result && (mode === 'demo' || mode === 'new') && (
         <div className="layout">
           <div>
             <div className="panel">

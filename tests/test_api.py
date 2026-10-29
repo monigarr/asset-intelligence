@@ -364,3 +364,69 @@ def test_rate_limit_storage_uri_plumbing(tmp_path) -> None:
     assert "redis" in type(app.state.limiter._storage).__name__.lower()
     app2 = create_app(api_key="k", store_path=str(tmp_path / "t2.db"))
     assert "memory" in type(app2.state.limiter._storage).__name__.lower()
+
+
+# -- insights: history + stats --------------------------------------------
+
+
+def _seeded_client(tmp_path, specs):
+    store = InspectionStore(tmp_path / "t.db")
+    for rid, asset, cost, priced, durations, review in specs:
+        result = _result().model_copy(update={
+            "request_id": rid, "asset_id": asset, "cost_cents": cost,
+            "cost_priced": priced, "durations_ms": durations,
+        })
+        store.save(result, {})
+        if review:
+            store.review(rid, review, None)
+    app = create_app(store=store, api_key="test-key-123",
+                     rate_limit="1000/minute", enable_otel=False)
+    return TestClient(app)
+
+
+def test_list_inspections_empty_and_auth(tmp_path) -> None:
+    client = _seeded_client(tmp_path, [])
+    assert client.get("/v1/inspections").status_code == 401
+    r = client.get("/v1/inspections", headers=KEY)
+    assert r.status_code == 200
+    assert r.json() == {"inspections": [], "count": 0}
+    assert client.get("/v1/stats").status_code == 401
+    s = client.get("/v1/stats", headers=KEY).json()
+    assert s["n"] == 0 and s["cost_unpriced_count"] == 0
+
+
+def test_list_inspections_filters(tmp_path) -> None:
+    client = _seeded_client(tmp_path, [
+        ("req_a", "A-1", 10.0, True, {"sam": 100.0, "vision": 200.0}, None),
+        ("req_b", "B-2", 5.0, False, {"sam": 50.0}, "accept"),
+    ])
+    r = client.get("/v1/inspections", headers=KEY).json()
+    assert r["count"] == 2
+    assert r["inspections"][0]["request_id"] == "req_b"  # newest first
+    assert r["inspections"][0]["latency_ms_total"] == 50.0
+    assert r["inspections"][1]["review_status"] is None
+    p = client.get("/v1/inspections", params={"review_status": "pending"}, headers=KEY).json()
+    assert [i["request_id"] for i in p["inspections"]] == ["req_a"]
+    a = client.get("/v1/inspections", params={"review_status": "accept"}, headers=KEY).json()
+    assert [i["request_id"] for i in a["inspections"]] == ["req_b"]
+    f = client.get("/v1/inspections", params={"asset_id": "B-2"}, headers=KEY).json()
+    assert [i["request_id"] for i in f["inspections"]] == ["req_b"]
+    bad = client.get("/v1/inspections", params={"review_status": "bogus"}, headers=KEY)
+    assert bad.status_code == 422
+    over = client.get("/v1/inspections", params={"limit": 500}, headers=KEY)
+    assert over.status_code == 422
+
+
+def test_stats_summary(tmp_path) -> None:
+    client = _seeded_client(tmp_path, [
+        ("req_a", "A-1", 10.0, True, {"sam": 100.0, "vision": 200.0}, None),
+        ("req_b", "B-2", 5.0, False, {"sam": 50.0}, "accept"),
+    ])
+    s = client.get("/v1/stats", headers=KEY).json()
+    assert s["n"] == 2
+    assert s["by_review_status"] == {"pending": 1, "accept": 1, "edit": 0, "reject": 0}
+    assert s["review_rate"] == 0.5
+    assert s["cost_priced_cents"] == 10.0
+    assert s["cost_unpriced_count"] == 1
+    assert s["latency_p50_ms"] == 175.0
+    assert s["latency_p95_ms"] == 287.5

@@ -51,3 +51,30 @@ export async function submitReview(requestId, decision, edits, apiKey) {
   if (!res.ok) throw new Error(`review failed: ${res.status} ${await res.text()}`);
   return res.json();
 }
+
+export async function fetchInspections(apiKey, { limit = 50, reviewStatus = '', assetId = '' } = {}) {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (reviewStatus) params.set('review_status', reviewStatus);
+  if (assetId) params.set('asset_id', assetId);
+  const res = await fetch(`/v1/inspections?${params}`, {
+    headers: apiKey ? { 'X-API-Key': apiKey } : {},
+  });
+  if (!res.ok) throw new Error(`history failed: ${res.status} ${await res.text()}`);
+  return res.json();
+}
+
+export async function fetchStats(apiKey) {
+  const res = await fetch('/v1/stats', {
+    headers: apiKey ? { 'X-API-Key': apiKey } : {},
+  });
+  if (!res.ok) throw new Error(`stats failed: ${res.status} ${await res.text()}`);
+  return res.json();
+}
+
+export async function fetchInspection(requestId, apiKey) {
+  const res = await fetch(`/v1/inspections/${encodeURIComponent(requestId)}`, {
+    headers: apiKey ? { 'X-API-Key': apiKey } : {},
+  });
+  if (!res.ok) throw new Error(`inspection failed: ${res.status} ${await res.text()}`);
+  return res.json();
+}

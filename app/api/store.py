@@ -10,18 +10,32 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import sqlite3
 import threading
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from app.validator import InspectionResult
 
 logger = logging.getLogger("asset_intel.store")
 
 TTL_HOURS = 24
+MAX_LIST_LIMIT = 200
+
+
+def _percentile(sorted_values: Sequence[float], pct: float) -> float | None:
+    """Linear-interpolation percentile over ascending values (None when empty)."""
+    if not sorted_values:
+        return None
+    if len(sorted_values) == 1:
+        return round(sorted_values[0], 1)
+    rank = (pct / 100) * (len(sorted_values) - 1)
+    low, high = math.floor(rank), math.ceil(rank)
+    span = sorted_values[high] - sorted_values[low]
+    return round(sorted_values[low] + span * (rank - low), 1)
 
 
 class InspectionRecord(InspectionResult):
@@ -105,6 +119,112 @@ class InspectionStore:
                 (request_id, image_index),
             ).fetchone()
         return bytes(row[0]) if row else None
+
+    def list(
+        self,
+        *,
+        limit: int = 50,
+        review_status: str | None = None,
+        asset_id: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Newest-first inspection summaries (expired records pruned first).
+
+        `review_status`: "pending" (unreviewed) or a decision; `asset_id` is an
+        exact match. Only validated results are ever stored, so every row here
+        is a successful inspection -- filter by review state, not outcome.
+        """
+        limit = max(1, min(limit, MAX_LIST_LIMIT))
+        with self._lock:
+            self._prune_locked(datetime.now(UTC).isoformat())
+            query = (
+                "SELECT request_id, result_json, review_status,"
+                " created_at, reviewed_at FROM inspections"
+            )
+            clauses: list[str] = []
+            params: list[str] = []
+            if review_status == "pending":
+                clauses.append("review_status IS NULL")
+            elif review_status is not None:
+                clauses.append("review_status = ?")
+                params.append(review_status)
+            if clauses:
+                query += " WHERE " + " AND ".join(clauses)
+            query += " ORDER BY created_at DESC LIMIT ?"
+            params.append(str(limit))
+            rows = self._db.execute(query, params).fetchall()
+        items = []
+        for request_id, result_json, status, created_at, reviewed_at in rows:
+            try:
+                result = json.loads(result_json)
+            except (json.JSONDecodeError, TypeError):
+                continue
+            if asset_id is not None and result.get("asset_id") != asset_id:
+                continue
+            durations = result.get("durations_ms") or {}
+            items.append({
+                "request_id": request_id,
+                "asset_id": result.get("asset_id"),
+                "asset_type": result.get("asset_type"),
+                "created_at": created_at,
+                "reviewed_at": reviewed_at,
+                "review_status": status,
+                "latency_ms_total": round(sum(float(v) for v in durations.values()), 1),
+                "cost_cents": result.get("cost_cents", 0.0),
+                "cost_priced": bool(result.get("cost_priced", False)),
+                "model_trace": result.get("model_trace") or {},
+                "usage_total_tokens": (result.get("usage") or {}).get("total_tokens", 0),
+                "observation_count": len(result.get("observations") or []),
+                "discrepancy_count": len(result.get("discrepancies") or []),
+                "missing_count": len(result.get("missing_information") or []),
+            })
+        return items
+
+    def stats(self) -> dict[str, Any]:
+        """Aggregate summary over unexpired inspections (Insights tab)."""
+        with self._lock:
+            self._prune_locked(datetime.now(UTC).isoformat())
+            n = self._db.execute("SELECT COUNT(*) FROM inspections").fetchone()[0]
+            by_review = dict(
+                self._db.execute(
+                    "SELECT review_status, COUNT(*)"
+                    " FROM inspections GROUP BY review_status"
+                ).fetchall()
+            )
+            blobs = [
+                r[0]
+                for r in self._db.execute("SELECT result_json FROM inspections").fetchall()
+            ]
+        priced_cents = 0.0
+        unpriced = 0
+        latencies: list[float] = []
+        for blob in blobs:
+            try:
+                result = json.loads(blob)
+            except (json.JSONDecodeError, TypeError):
+                continue
+            if result.get("cost_priced"):
+                priced_cents += float(result.get("cost_cents") or 0.0)
+            else:
+                unpriced += 1
+            durations = result.get("durations_ms") or {}
+            latencies.append(sum(float(v) for v in durations.values()))
+        latencies.sort()
+        pending = by_review.get(None, 0)
+        return {
+            "n": n,
+            "by_review_status": {
+                "pending": pending,
+                "accept": by_review.get("accept", 0),
+                "edit": by_review.get("edit", 0),
+                "reject": by_review.get("reject", 0),
+            },
+            "review_rate": round((n - pending) / n, 4) if n else None,
+            "cost_priced_cents": round(priced_cents, 2),
+            "cost_unpriced_count": unpriced,
+            "latency_p50_ms": _percentile(latencies, 50),
+            "latency_p95_ms": _percentile(latencies, 95),
+            "generated_at": datetime.now(UTC).isoformat(),
+        }
 
     def review(
         self, request_id: str, decision: str, note: str | None

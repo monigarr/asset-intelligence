@@ -1,7 +1,8 @@
 """FastAPI review API (Day 7).
 
 Routes: POST /v1/inspections (multipart upload → validated result),
-GET /v1/inspections/{id}, GET .../overlay?image=N, POST .../review,
+GET /v1/inspections (history list), GET /v1/inspections/{id},
+GET .../overlay?image=N, POST .../review, GET /v1/stats (summary),
 plus /healthz and /metrics (no auth).
 
 Notes:
@@ -30,6 +31,7 @@ from fastapi import (
     Form,
     Header,
     HTTPException,
+    Query,
     Request,
     Response,
     UploadFile,
@@ -267,6 +269,20 @@ def create_app(
         if record is None:
             raise HTTPException(404, "unknown or expired inspection")
         return record.model_dump(mode="json")
+
+    @app.get("/v1/inspections")
+    async def list_inspections(
+        limit: int = Query(50, ge=1, le=200),
+        review_status: Literal["pending", "accept", "edit", "reject"] | None = Query(None),
+        asset_id: str | None = Query(None, max_length=128),
+        key: str = Depends(require_key),
+    ) -> dict[str, Any]:
+        items = active_store.list(limit=limit, review_status=review_status, asset_id=asset_id)
+        return {"inspections": items, "count": len(items)}
+
+    @app.get("/v1/stats")
+    async def get_stats(key: str = Depends(require_key)) -> dict[str, Any]:
+        return active_store.stats()
 
     @app.get("/v1/inspections/{request_id}/overlay")
     async def get_overlay(
