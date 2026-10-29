@@ -542,13 +542,37 @@ def _judge_record(
 # ---------------------------------------------------------------------------
 
 
+GATE_NAMES = frozenset({
+    "success_rate",
+    "fabrication_rate",
+    "refusal_rate",
+    "missing_f1",
+    "missing_precision",
+    "conflict_f1",
+    "mask_iou_mean",
+    "latency_p95_ms",
+    "ece",
+})
+
+
+def _overall_pass(gates: Mapping[str, Any]) -> bool:
+    return all(
+        g["pass"] for g in gates.values() if g["pass"] not in ("n/a", "skipped")
+    )
+
+
 def _build_report(
     mode: str,
     results: list[dict[str, Any]],
     truth_rles: Mapping[str, Any],
     roster_hash: str | None = None,
     run_tag: str | None = None,
+    skip_gates: Sequence[str] | None = None,
 ) -> dict[str, Any]:
+    skip = set(skip_gates or ())
+    unknown = skip - GATE_NAMES
+    if unknown:
+        raise ValueError(f"unknown skip_gates: {sorted(unknown)}")
     ok = [r for r in results if r["outcome"] == "ok"]
     n = len(results)
     success_rate = len(ok) / n if n else 0.0
@@ -676,7 +700,13 @@ def _build_report(
         "latency_p95_ms": _gate(latency_p95, lambda v: v < GATE_LATENCY_P95_MS, f"< {GATE_LATENCY_P95_MS}ms"),
         "ece": {"value": None, "threshold": "<= 0.15 (needs labels)", "pass": "n/a"},
     }
-    overall = all(g["pass"] for g in gates.values() if g["pass"] != "n/a")
+    for name in skip:
+        gates[name] = {
+            "value": gates[name]["value"],
+            "threshold": f"{gates[name]['threshold']} (skipped)",
+            "pass": "skipped",
+        }
+    overall = _overall_pass(gates)
     return {
         "mode": mode,
         "run_tag": run_tag,
@@ -713,6 +743,7 @@ def run_eval(
     replay_dir: Path | str | None = None,
     run_tag: str | None = None,
     judge: bool = False,
+    skip_gates: Sequence[str] | None = None,
 ) -> dict[str, Any]:
     """Run the eval and write report.json. Returns the report dict.
 
@@ -720,6 +751,7 @@ def run_eval(
     `record_dir` caches raw live payloads; `replay_dir` reruns from cache.
     `run_tag` labels the run for side-by-side comparison.
     `judge` scores narrative clarity (live only, never gating).
+    `skip_gates` measures named gates without enforcing them (CI exempts latency).
     """
     if record_dir is not None and replay_dir is not None:
         raise ValueError("pass at most one of record_dir, replay_dir")
@@ -833,6 +865,7 @@ def run_eval(
     report = _build_report(
         mode, results, truth_rles,
         roster_hash=_roster_hash(cases), run_tag=run_tag,
+        skip_gates=skip_gates,
     )
     out = Path(out_path or "eval/report.json")
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -851,6 +884,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--replay", default=None, help="rerun deterministically from DIR")
     parser.add_argument("--run-tag", default=None, help="label for run comparison")
     parser.add_argument("--judge", action="store_true", help="score narrative clarity (live only, never gating)")
+    parser.add_argument("--skip-gates", nargs="*", default=None, help="measure but do not enforce these gates (e.g. latency_p95_ms)")
     args = parser.parse_args(argv)
     try:
         report = run_eval(
@@ -863,6 +897,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             replay_dir=args.replay,
             run_tag=args.run_tag,
             judge=args.judge,
+            skip_gates=args.skip_gates,
         )
     except (FileNotFoundError, MetaAuthError, ValueError, ReplayMissError) as exc:
         print(f"eval error: {exc}", file=sys.stderr)

@@ -281,6 +281,25 @@ def test_store_ttl_expiry(tmp_path) -> None:
     reopened.close()
 
 
+def test_jwt_compose_escaped_hash(tmp_path) -> None:
+    from argon2 import PasswordHasher
+    from fastapi.testclient import TestClient
+
+    from app.api.main import create_app
+
+    pwd_hash = PasswordHasher().hash("pw")
+    app = create_app(
+        api_key="k",
+        store_path=str(tmp_path / "t.db"),
+        jwt_secret="test-secret-1234567890",
+        ui_username="u",
+        ui_password_hash=pwd_hash.replace("$", "$$"),
+    )
+    client = TestClient(app)
+    r = client.post("/v1/auth/token", json={"username": "u", "password": "pw"})
+    assert r.status_code == 200, r.text
+
+
 def test_jwt_issue_refresh_and_bearer_access(tmp_path) -> None:
     from argon2 import PasswordHasher
     from fastapi.testclient import TestClient

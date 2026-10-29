@@ -54,6 +54,11 @@ def verify_password(password_hash: str, plaintext: str) -> bool:
         return False
 
 
+def compose_unescape(value: str) -> str:
+    """Collapse compose `$$` escapes (env values with `$`, e.g. Argon2 hashes)."""
+    return value.replace("$$", "$")
+
+
 def issue_token_pair(config: JWTConfig, username: str) -> dict[str, Any]:
     now = int(time.time())
     access = jwt.encode(

@@ -45,6 +45,7 @@ from app.api.adapter import normalize_inspection
 from app.api.jwt_auth import (
     JWTConfig,
     JWTError,
+    compose_unescape,
     issue_token_pair,
     rotate_token_pair,
     verify_access_token,
@@ -141,9 +142,11 @@ def create_app(
 ) -> FastAPI:
     expected_key = api_key or resolve_api_key()
     jwt_cfg = JWTConfig(
-        secret=jwt_secret or os.environ.get("JWT_SECRET", ""),
+        secret=compose_unescape(jwt_secret or os.environ.get("JWT_SECRET", "")),
         username=ui_username or os.environ.get("UI_USERNAME", "reviewer"),
-        password_hash=ui_password_hash or os.environ.get("UI_PASSWORD_HASH", ""),
+        password_hash=compose_unescape(
+            ui_password_hash or os.environ.get("UI_PASSWORD_HASH", "")
+        ),
     )
     consumed_refresh_jtis: dict[str, int] = {}
     active_store = store or InspectionStore(

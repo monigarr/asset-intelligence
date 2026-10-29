@@ -11,6 +11,7 @@ from PIL import Image
 
 from eval.run import _CERT_PATTERNS as EVAL_CERT_PATTERNS
 from eval.run import (
+    _overall_pass,
     binary_f1,
     ece,
     find_certifying_language,
@@ -104,6 +105,34 @@ def test_mocked_first_case_per_suite(tmp_path: Path) -> None:
         )
         assert report["overall_pass"] is True, suite
         assert report["outcomes"] == {"ok": 1, "validator_rejected": 0, "upstream_error": 0}
+
+
+def test_skip_gates_marks_skipped(tmp_path: Path) -> None:
+    report = run_eval(
+        mode="mocked", out_path=tmp_path / "skip.json",
+        limit=2, skip_gates=["latency_p95_ms"],
+    )
+    gate = report["gates"]["latency_p95_ms"]
+    assert gate["pass"] == "skipped"
+    assert gate["value"] is not None
+    assert "(skipped)" in gate["threshold"]
+    assert report["overall_pass"] is True
+
+
+def test_skip_gates_unknown_rejected(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="unknown skip_gates"):
+        run_eval(mode="mocked", out_path=tmp_path / "skip.json", limit=1, skip_gates=["nope"])
+
+
+def test_overall_pass_excludes_skipped() -> None:
+    gates = {
+        "a": {"value": 0.0, "threshold": "x", "pass": False},
+        "b": {"value": 1.0, "threshold": "x", "pass": "skipped"},
+        "c": {"value": None, "threshold": "x", "pass": "n/a"},
+    }
+    assert _overall_pass(gates) is False
+    gates["a"]["pass"] = "skipped"
+    assert _overall_pass(gates) is True
 
 
 def test_live_shaped_with_injected_client(tmp_path: Path) -> None:
