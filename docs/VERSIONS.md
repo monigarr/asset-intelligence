@@ -1,6 +1,6 @@
 # Versions
 
-> Doc version: 1.3 | Updated: 2026-10-29 | Verified against: `c83dfd5`
+> Doc version: 1.4 | Updated: 2026-10-29 | Verified against: `42211b5`
 
 Single reference for every version that matters in this repo. When you change a pinned
 version, update this file in the same commit.
@@ -13,6 +13,7 @@ version, update this file in the same commit.
 | 1.1 | 2026-10-27 | JWT/Valkey/CLI coverage; new dep pins; 139 tests; precision gate; PRD/ARCH v1.1 |
 | 1.2 | 2026-10-29 | TESTING 1.2 (regression workflow); CONFIGURATION 1.2 (pricing contract); GETTING_STARTED 1.1; freeze adds starlette 1.10.0; 171 tests |
 | 1.3 | 2026-10-29 | Verified against `c83dfd5`: PNG-policy corrections, 171-test sync, git-housekeeping notes, CI fixes; ARCH v1.2 |
+| 1.4 | 2026-10-29 | Verified against `42211b5`: CI live/skip-gates, compose `$$` unescape, JWT escaping docs |
 
 Guide docs carry their own `Doc version` headers; bump MINOR on content changes, MAJOR on
 restructuring, and add a row here.

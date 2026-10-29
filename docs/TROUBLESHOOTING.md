@@ -1,6 +1,6 @@
 # Troubleshooting
 
-> Doc version: 1.2 | Updated: 2026-10-29 | Verified against: `c83dfd5`
+> Doc version: 1.3 | Updated: 2026-10-29 | Verified against: `42211b5`
 
 ## Environment & platform
 
@@ -42,6 +42,7 @@ to a documented dev key for local demos only.
 
 **`401` on `/v1/auth/*`.**
 Wrong username/password, or a reused/expired refresh token (single-use by design).
+If the correct password 401s under compose, `UI_PASSWORD_HASH` likely lost its `$` to compose interpolation — write `$$` (see [Configuration](CONFIGURATION.md)).
 
 **`503` on `/v1/auth/*`.**
 `JWT_SECRET` or `UI_PASSWORD_HASH` is unset. JWT is optional; X-API-Key works without it.

@@ -1,6 +1,6 @@
 # Configuration
 
-> Doc version: 1.3 | Updated: 2026-10-29 | Verified against: `c83dfd5`
+> Doc version: 1.4 | Updated: 2026-10-29 | Verified against: `42211b5`
 
 All runtime configuration is environment variables, loaded from `.env` (see `.env.example`).
 **Never commit `.env`.** The template `.env.example` is safe to commit and is the canonical list.
@@ -41,6 +41,8 @@ Protected routes accept `X-API-Key` or a JWT Bearer token (`/v1/auth/*` issue/re
 | `RATE_LIMIT_STORAGE_URI` | slowapi storage: `memory://` solo, `redis://valkey:6379` shared | memory:// |
 | `STORE_PATH` | SQLite inspection store path | compose sets `/data/inspections.db` |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP/HTTP trace export (full path; a bare host 404s) | compose sets `http://otel-collector:4318/v1/traces` |
+
+`UI_PASSWORD_HASH` is an Argon2 string containing `$` separators: write them as `$$` in `.env` (compose collapses `$$` to `$`; the API unescapes too, so local runs keep working). Same for `JWT_SECRET` if it contains `$`. Unescaped, compose blanks `$VAR` sequences and correct passwords return 401.
 
 ## Cost metering (optional, fail-closed)
 

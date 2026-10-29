@@ -1,6 +1,6 @@
 # Runbook
 
-> Doc version: 1.2 | Updated: 2026-10-29 | Verified against: `c83dfd5`
+> Doc version: 1.3 | Updated: 2026-10-29 | Verified against: `42211b5`
 
 Day-to-day commands. All assume the venv is activated from the repo root.
 
@@ -74,7 +74,7 @@ $env:META_API_TIMEOUT_S = "180"
 python -m eval.run --mode live --cases-dir eval/cases/synthetic --out live_reports/live-YYYY-MM-DD.json
 ```
 
-CLI flags: `--mode {mocked,live}`, `--cases-dir`, `--out`, `--limit N`, `--suites ...`.
+CLI flags: `--mode {mocked,live}`, `--cases-dir`, `--out`, `--limit N`, `--suites ...`, `--skip-gates ...`. `--skip-gates` measures but exempts named gates (CI exempts `latency_p95_ms`, red by architecture).
 Suites: `clear` (15), `incomplete` (10), `contradictory` (10), `ambiguous` (10), `adversarial` (5).
 Exit code is nonzero when any gate fails — read the gate table in the report JSON.
 
