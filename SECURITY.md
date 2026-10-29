@@ -42,14 +42,19 @@
 ## 4. Data minimization and privacy (PRD §7, ARCH §9)
 
 - Storage keeps only the validated result, rendered PNG overlays, and review
-  state — never raw uploads or notes (`app/api/store.py`).
+  state -- never raw uploads or notes (`app/api/store.py`).
 - SQLite records expire after 24 h (opportunistic TTL prune on access).
-- Logs carry `request_id`, counts, and cost — never image bytes
+- Logs carry `request_id`, counts, and cost -- never image bytes
   (`app/api/main.py` `inspection_complete`). Prometheus labels use route
   templates, not raw paths, so request IDs never become label cardinality
   (`app/api/telemetry.py`).
 - Eval data is synthetic only (Muse Image, fixed synthetic IDs/dates);
   nothing in `eval/` may be mistaken for real inspections.
+- Uploads are re-encoded at ingress, which drops EXIF (GPS included) before
+  anything downstream — logs, store, or Meta API calls — sees it
+  (`app/api/adapter.py`).
+- Reported `cost_cents` are estimates from console rate cards for budgeting;
+  the Meta console invoice is the billed truth (`app/gateway/pricing.py`).
 
 ## 5. Model-output safety (PRD §14, ARCH §2)
 

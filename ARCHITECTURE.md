@@ -2,8 +2,8 @@
 
 - **Status:** Production-Ready Prototype for Meta Global AI Hackathon
 - **Track:** Startup / Push the Frontier
-- **Version:** 1.0
-- **Date:** 2026-10-26
+- **Version:** 1.1 (2026-10-27: Wave-3 conformance sync)
+- **Date:** 2026-10-27
 - **Mandate:** Meta-Only Stack — Zero OpenAI Dependency
 
 ## 1. Purpose & Hackathon Fit
@@ -16,7 +16,7 @@ Asset Intelligence transforms physical infrastructure inspection evidence (photo
 
 ## 2. Principles
 
-- **Meta-First:** Every inference via Meta Model API — Muse Spark series, Muse Wonder, Muse Image, SAM 3.1 + Llama 4 open-weights (Scout/Maverick) via Baseten/Modal partners.
+- **Meta-First:** Every inference via Meta Model API — Muse Spark series, Muse Wonder, Muse Image, SAM 3.1. Llama 4 open-weights via partners: deferred (no live Llama model, verified 2026-10-27).
 - **Production-First:** Stateless, 12-factor, observable, secure by default — what Startup track demands.
 - **Verifiable:** SAM masks + evidence pointers + uncertainty > pure captioning.
 - **Fail-Closed:** Invalid JSON, low SAM confidence, missing evidence → error, not hallucination.
@@ -33,9 +33,9 @@ flowchart TD
     ORCH[Inspection Orchestrator]
     V[Validator - Pydantic v2]
     SAM[SAM 3.1 - Meta Model API - Segmentation]
-    VLM[Llama 4 Maverick Vision - Multimodal Extraction]
+    VLM[Muse Spark 1.3 Vision - Multimodal Extraction]
     REASON[Muse Spark 1.3 - Structured Reasoning]
-    PLAN[Muse Wonder - Discrepancy & Planning]
+    PLAN[Muse Wonder 1.0 - Discrepancy & Planning]
     SYN[Muse Image - Synthetic Data Gen]
     ADAPT[Manage Assets Adapter - Optional mTLS]
     CORE[Proprietary Manage Assets Core - Private]
@@ -75,23 +75,24 @@ flowchart TD
 
 **Why SAM 3.1 wins points:** No training data needed, physical world understanding, instance-level evidence.
 
-### 4.3 Llama 4 Maverick Vision Extractor — Creative Use #2
+### 4.3 Muse Spark 1.3 Vision Extractor — Creative Use #2
 
-**Models:** llama-4-maverick-vision (primary), llama-4-scout-vision (cost-efficient fallback) via Meta Model API or Baseten/Modal open-weights endpoints
+**Models:** muse-spark-1.3 (primary and fallback; identical pending a verified replacement -- no Llama model on the live API)
 
 **Responsibility:**
 
-- Fuse images + SAM masks + note + asset history (up to 1M token context Maverick, 10M Scout)
+- Fuse images + SAM masks + note + asset context (downscaled to 768 px for the vision call; no coordinates leave vision)
 - Extract: asset_type, condition_tags, visible symptoms
 - Output intermediate: VisionObservation {observations[], evidence_refs[]}
 
 **Config:**
 
 ```text
-META_API_BASE=https://api.meta.ai/v1
-VISION_MODEL_ID=llama-4-maverick-17b-128e-vision
-FALLBACK_VISION_MODEL_ID=llama-4-scout-17b-16e-vision
+META_API_BASE_URL=https://api.meta.ai/v1
+VISION_MODEL_ID=muse-spark-1.3
+FALLBACK_VISION_MODEL_ID=muse-spark-1.3
 VISION_MAX_IMAGES=5
+VISION_MAX_DIM=768
 ```
 
 ### 4.4 Muse Spark 1.3 Reasoning Gateway — Creative Use #3
@@ -101,7 +102,7 @@ VISION_MAX_IMAGES=5
 **Responsibility:**
 
 - System prompt: "You are infrastructure inspection analyst. Return ONLY valid JSON per schema. Every observation must cite evidence: image index + mask_id or note span. Never invent measurements."
-- JSON mode + tool calling for schema enforcement
+- JSON mode (json_schema response format) for schema enforcement
 - Handles auth, timeout (15s), bounded retry (2), rate limit parsing
 - Logs: model_id, latency, token usage, cost
 
@@ -119,7 +120,7 @@ TASK: Produce JSON matching schema. If dimension missing, list in missing_inform
 
 ### 4.5 Muse Wonder Planner — Creative Use #4
 
-**Model:** muse-wonder
+**Model:** muse-wonder-1.0
 
 **Responsibility:**
 
@@ -129,7 +130,7 @@ TASK: Produce JSON matching schema. If dimension missing, list in missing_inform
 
 ### 4.6 Muse Image Synthetic Generator — Creative Use #5
 
-**Model:** muse-image via Meta Model API
+**Model:** muse-image-1.0 via Meta Model API
 
 **Responsibility:**
 
@@ -145,15 +146,15 @@ TASK: Produce JSON matching schema. If dimension missing, list in missing_inform
 
 - Required: asset_id, observations[], evidence[], human_review_required=true
 - Every observation.evidence must reference valid image or mask_id
-- uncertainty field required if SAM confidence <0.6
+- uncertainty field always required (stricter than the <0.6 trigger)
 - No numeric dimensions unless evidence contains measurement reference
 - Fail-closed: invalid → 422 with field-level errors, no partial acceptance
 
 ### 4.8 Evidence & Review Layer
 
-- **API:** GET /inspections/{request_id}, POST /inspections/{id}/review {decision: accept|edit|reject, edits?}
+- **API:** GET /v1/inspections/{request_id}, POST /v1/inspections/{id}/review {decision: accept|edit|reject, note?} (+ /v1/auth/* JWT, /healthz, /metrics)
 - **UI:** React minimal + Canvas for SAM mask overlay, evidence click-to-highlight, missing info checklist
-- **CLI:** asset-intel inspect --image crack.jpg --note "crack near top" → streams JSON + mask preview
+- **CLI:** python -m app.cli inspect --image crack.jpg --note "crack near top" (exit 0/1/2; --out, --overlay-dir) → streams JSON + mask preview
 
 ### 4.9 Optional Manage Assets Adapter (Disabled by Default)
 
@@ -164,13 +165,13 @@ TASK: Produce JSON matching schema. If dimension missing, list in missing_inform
 
 ## 5. Detailed Request Flow — 8 Steps, 5 Meta Models
 
-- **Ingress:** POST /v1/inspections → Auth (API key) → Rate limit (Redis) → InputAdapter validates → generates request_id (ULID)
-- **SAM:** Images → SAM 3.1 → masks + bboxes (parallel per image, 2s p95)
-- **Vision:** Images + masks + note → Llama 4 Maverick Vision → vision_observations
+- **Ingress:** POST /v1/inspections → Auth (API key) → Rate limit (Valkey/memory) → InputAdapter validates → generates request_id (ULID)
+- **SAM:** Images → SAM 3.1 → masks + bboxes (parallel per image; 11 s p95 measured live 2026-10-27, see live_reports/)
+- **Vision:** Images + masks + note → Muse Spark 1.3 Vision → vision_observations
 - **Reasoning:** vision_observations + masks → Muse Spark 1.3 → draft JSON (JSON mode)
 - **Planning:** draft + vision → Muse Wonder → discrepancies + missing + next step
 - **Validation:** Pydantic validator → if fail, return 422 with trace; if pass, attach cost + model_trace
-- **Persistence (ephemeral for demo):** SQLite + S3-compatible (MinIO) for masks, 24h TTL, no PII logging
+- **Persistence (ephemeral for demo):** SQLite + overlay BLOBs, 24h TTL, no PII logging (MinIO returns with M3)
 - **Review:** UI polls or SSE streams result, shows SAM overlay, human approves
 - **Total cost tracked:** cost_cents = sam_tokens + vision_tokens + spark_tokens + wonder_tokens
 
@@ -179,18 +180,18 @@ TASK: Produce JSON matching schema. If dimension missing, list in missing_inform
 | Layer | Choice | Why |
 | --- | --- | --- |
 | API | FastAPI, Python 3.12, Uvicorn | Async, Pydantic v2, OpenAPI auto |
-| Meta Inference | Meta Model API SDK (meta-ai-sdk) | Official, supports Spark, Wonder, SAM 3.1, Muse Image |
-| Open-weights fallback | Llama 4 Scout/Maverick via Baseten ($100 credits) + Modal Endpoints ($100 credits) | Hackathon partners, production scale |
+| Meta Inference | Hand-rolled httpx gateway (tenacity retry, breaker) | No official SDK; supports Spark, Wonder, SAM 3.1, Muse Image |
+| Open-weights fallback | Deferred (no live Llama model) | Was: Scout/Maverick via partners; re-add when verified |
 | Validation | Pydantic v2, JSON Schema | Fail-closed |
-| Auth | API Key (header) + JWT for UI, Argon2 | Simple for demo, extensible |
-| Storage | SQLite for demo, Postgres for prod; MinIO for masks | Zero cloud dep for local |
+| Auth | X-API-Key + JWT issue/refresh (HS256, Argon2) | Bearer or key; SSO post-hackathon |
+| Storage | SQLite + overlay BLOBs (demo); Postgres/MinIO M3 | Zero cloud dep for local |
 | Queue (future) | Modal Queues or Redis | Batch inspections |
-| Observability | OpenTelemetry, Prometheus, structlog | OTEL traces per model call |
+| Observability | OpenTelemetry, Prometheus, stdlib logging | OTEL traces per model call |
 | Packaging | Docker, docker-compose, Makefile | docker compose up wins |
-| CI | GitHub Actions: lint, test, eval, meta-only check | Startup track demands CI |
+| CI | lint, test+coverage, meta-only, SBOM, UI, compose, live slice (keyed) | Startup track demands CI |
 | Code Gen | Muse Code agent | Build faster, required by hackathon |
 
-No OpenAI SDK: requirements.txt has meta-ai, baseten, modal, pydantic, fastapi — NOT openai.
+No OpenAI SDK: requirements.txt has httpx, tenacity, pydantic, fastapi (plus pyjwt, argon2-cffi, redis for auth/limits) — NOT openai.
 
 ## 7. Data Schemas
 
@@ -218,19 +219,19 @@ docker compose up
 - api: :8000 (FastAPI)
 - ui: :3000 (Vite + React)
 - otel-collector: :4317
-- minio: :9000
+- valkey: :6379 (rate limits; minio returns with M3)
 - prometheus: :9090
 ```
 
 ### Production (Startup Vision):
 
-- API on Modal (serverless GPUs for SAM + Llama 4) + Fly.io / Render for gateway
-- Baseten for dedicated Llama 4 Maverick endpoint (2M TPM rate limit from partner)
+- API on serverless GPUs (SAM) + Fly.io / Render for gateway
+- Dedicated model endpoints if open-weights return (was: Baseten Maverick 2M TPM)
 - Cloudflare R2 for mask storage, Postgres managed
 
 ## 9. Security & Privacy
 
-- **Secrets:** MODEL_API_KEY, BASETEN_KEY, MODAL_TOKEN via env, never committed. .env.example contains placeholders only.
+- **Secrets:** META_API_KEY, API_KEY, JWT_SECRET, UI_PASSWORD_HASH via env, never committed. .env.example contains placeholders only.
 - **Image handling:** EXIF GPS stripped, no raw images in logs, masks stored with TTL
 - **Prompt injection:** note is treated as data, not instruction; system prompt immutable
 - **Hosted inference disclosure:** README states inputs sent to Meta Model API
@@ -242,15 +243,16 @@ docker compose up
 
 - request_id, model_ids, latency per model, token counts, cost_cents, validation_result, sam_mask_count, human_review_status
 - OTEL span: sam.segment, vision.extract, spark.reason, wonder.plan, validate
-- Metrics: inspection_requests_total, validation_failures_total, model_latency_histogram, cost_cents_histogram
+- Metrics: inspection_requests_total, inspection_validation_failures_total, inspection_request_latency_seconds, inspection_cost_cents
 
 ## 11. Reliability & Failure Handling
 
 | Failure | Behavior |
 | --- | --- |
 | Missing API key | 500 with "META_API_KEY not configured — see README" (no secret leak) |
-| SAM 3.1 unavailable | Fallback to Llama Vision only, flag uncertainty high |
+| SAM 3.1 unavailable | Degraded Spark-vision-only path, flag uncertainty high |
 | Rate limit (429) | Exponential backoff 2x, max 2 retries, then 429 to client with Retry-After |
+| Sustained 5xx/timeouts | Circuit opens after 5 consecutive failures; 503 + half-open trial after 30 s |
 | Invalid JSON from Spark | Validator rejects, logs raw (truncated), returns 422, triggers retry with stricter prompt once |
 | Low SAM confidence (<0.4) | Keep mask but set uncertainty 0.9, add to missing_information: "requires human measurement" |
 | Image too large | 413, instruct resize |
@@ -258,7 +260,7 @@ docker compose up
 
 ## 12. Cost Control
 
-- Llama 4 Scout for cheap path: 10x cheaper than Maverick
+- Cost guard: warn over 50c per request (Scout cheap path deferred with open-weights)
 - SAM masks cached by image hash (in-memory LRU)
 - Eval uses synthetic images from Muse Image (no repeated real inference)
 - Budget alert: if cost_cents >50 per request, log warning
@@ -271,11 +273,11 @@ docker compose up
 
 **Integration (mocked Meta API):**
 
-- SAM response parsing, Maverick vision fusion, Spark JSON mode, Wonder discrepancy
+- SAM response parsing (incl. breaker), Spark vision fusion, Spark JSON mode, Wonder discrepancy
 
 **Live (separate job, requires META_API_KEY):**
 
-- End-to-end with 5 synthetic cases, asserts schema_valid and evidence_coverage >0.8
+- End-to-end with 5 synthetic clear cases in CI (keyed job), asserts gates pass
 
 **Evaluation (50 cases):**
 
@@ -284,18 +286,18 @@ docker compose up
 ## 14. Implementation Sequence — 10 Days
 
 - **Day 1-2:** API Connectivity
-  - Verify Meta Model API base, model IDs: sam-3.1, llama-4-maverick, muse-spark-1.3, muse-wonder, muse-image
+  - Verify Meta Model API base, model IDs: sam-3.1, muse-spark-1.3, muse-wonder-1.0, muse-image-1.0
   - Implement Meta Model Gateway with auth, timeout, retry
 - **Day 3:** SAM Integration
   - SAM service, mask RLE decode, overlay generation
 - **Day 4:** Vision + Reasoning
-  - Llama 4 Vision extractor + Spark structured output
+  - Spark 1.3 vision extractor + Spark structured output
 - **Day 5:** Wonder + Validation
   - Wonder planner, Pydantic validator, fail-closed logic
 - **Day 6:** UI + Synthetic
   - Minimal UI with SAM overlay, Muse Image synthetic gen
 - **Day 7:** Production Hardening
-  - Auth, rate limit, OTEL, Docker, Makefile, CI, meta-only check
+  - Auth, rate limit, OTEL, Docker, Makefile, CI, meta-only check, SBOM
 - **Day 8:** Eval
   - 50-case harness, report generation
 - **Day 9:** Demo Video + Docs
@@ -306,11 +308,11 @@ docker compose up
 
 ### ADR-001: Meta-Only Inference
 
-**Decision:** Use only Meta Model API + Llama 4 open-weights via Baseten/Modal. No OpenAI, Anthropic, etc.
+**Decision:** Use only Meta Model API (+ deferred open-weights path). No OpenAI, Anthropic, etc.
 
 **Reason:** Hackathon requires Meta usage, startup track needs defensible stack, avoids competitor dependency.
 
-**Consequence:** Must handle Meta API quirks, but gains partner credits and judging points for creative Meta use.
+**Consequence:** Must handle Meta API quirks directly (no SDK), but gains judging points for creative Meta use.
 
 ### ADR-002: SAM 3.1 as First-Class Evidence
 
@@ -318,7 +320,7 @@ docker compose up
 
 **Reason:** Physical system understanding = segmentation, pushes frontier beyond captioning.
 
-### ADR-003: 5-Model Orchestration > Single Model
+### ADR-003: 5-Stage Orchestration > Single Model
 
 **Decision:** SAM → Vision → Spark → Wonder → Image (eval)
 
@@ -337,3 +339,12 @@ docker compose up
 **Reason:** Trust > coverage for infrastructure — critical for impact score.
 
 **Agent Build Command:** make dev → make test → make eval → make verify-meta-only (greps for openai import) → make demo
+
+## 16. Changelog
+
+- **v1.1 (2026-10-27, Wave-3 audit):** vision is Muse Spark 1.3 (no live Llama
+  model); `-1.0` model IDs; `/v1` routes; httpx gateway (no meta-ai-sdk); stdlib
+  logging; Valkey (not Redis) rate-limit storage; SQLite + BLOB persistence
+  (MinIO M3); measured SAM p95; breaker + budget-guard + strict-retry behaviors;
+  JWT issue/refresh; `python -m app.cli`; CI live slice; exact metric names.
+- **v1.0 (2026-10-26):** initial hackathon architecture.

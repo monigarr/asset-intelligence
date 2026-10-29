@@ -54,7 +54,7 @@ out/
 .vite/
 *.tsbuildinfo
 
-# Data - real vs synthetic — keep synthetic, ignore real
+# Data - real vs synthetic -- keep synthetic, ignore real
 samples/raw/
 samples/private/
 samples/customer/
@@ -70,8 +70,16 @@ datasets/
 !samples/demo/
 !samples/demo/**
 !samples/synthetic/
+# eval/cases/synthetic: golden set commits (JSONs + manifest + images/*.png)
+# so new developers can onboard and run evals without regenerating. 50 PNGs,
+# ~205MB total, each under GitHub's 100MB/file limit (max ~5.2MB).
 !eval/cases/synthetic/
+!eval/cases/synthetic/images/*.png
 !eval/cases/demo/
+
+# Review-UI demo fixtures: committed images + JSON, shipped in the UI build.
+!app/ui/public/fixtures/
+!app/ui/public/fixtures/**
 
 # Large binaries
 *.npy
@@ -119,8 +127,12 @@ real_customer_records/
 # Eval temp (keep final report)
 eval/raw/
 eval/tmp/
+eval/.cache/
 !eval/report.json
 !eval/report.html
+
+# Live eval reports (timestamped, local only)
+live_reports/
 
 # Security scan results
 security-scan-results/
@@ -128,3 +140,9 @@ gitleaks-report.json
 
 # AI agent tooling - vendored skills, local agent state
 .agents/
+
+
+# Private audit (owner-only, never commit)
+
+docs/PRIVATE_AUDIT.md
+

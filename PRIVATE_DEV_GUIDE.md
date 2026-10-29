@@ -326,12 +326,12 @@ mkdir /tmp/public-release
 cd /tmp/public-release
 git clone --no-checkout https://github.com/monigarr/asset-intelligence-private temp-private
 cd temp-private
-git archive --format=tar main app/ samples/demo/ samples/synthetic/ eval/cases/synthetic/ eval/report.json README_OPTIMIZED.md PRD_OPTIMIZED.md ARCHITECTURE_OPTIMIZED.md Makefile requirements.txt docker-compose.yml Dockerfile .env.example .github/ | tar -x -C /tmp/public-release
+git archive --format=tar main app/ samples/demo/ samples/synthetic/ eval/cases/synthetic/ eval/report.json README.md PRD.md ARCHITECTURE.md Makefile requirements.txt docker-compose.yml Dockerfile .env.example .github/ | tar -x -C /tmp/public-release
 # 3. In public repo
 cd /tmp/public-release
-cp README_OPTIMIZED.md README.md
-cp PRD_OPTIMIZED.md PRD.md
-cp ARCHITECTURE_OPTIMIZED.md ARCHITECTURE.md
+cp README.md README.md
+cp PRD.md PRD.md
+cp ARCHITECTURE.md ARCHITECTURE.md
 rm -rf .git
 git init
 git add .

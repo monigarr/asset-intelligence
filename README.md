@@ -1,199 +1,244 @@
-# Asset Intelligence — Infrastructure Intelligence That Holds Up in Production
+# Asset Intelligence — Evidence-Linked Infrastructure Intelligence
 
-**Meta Global AI Developer Hackathon — Startup Track / Push the Frontier**
+[![CI](https://github.com/monigarr/asset-intelligence/actions/workflows/ci.yml/badge.svg)](https://github.com/monigarr/asset-intelligence/actions)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.12-blue.svg)](Dockerfile)
 
-Built 100% with Meta: Muse Spark 1.3 • Muse Wonder • SAM 3.1 • Llama 4 Maverick • Muse Image • Muse Code
+> **Meta Global AI Developer Hackathon — Startup Track / Push the Frontier**
+> README v2.1 · Updated 2026-10-27 · Verified against `2b1c7dc` · Meta-only stack, no OpenAI
 
-**One-liner:** We give machines the ability to see infrastructure defects (SAM 3.1), understand field notes (Llama 4 Maverick Vision), reason with evidence (Muse Spark 1.3), and plan safe next steps (Muse Wonder) — turning photos + notes into auditable maintenance intelligence in <8s.
+**One-liner:** Asset Intelligence gives machines a new capability — seeing infrastructure
+defects (SAM 3.1), understanding field notes (Muse Spark 1.3 Vision), reasoning with cited
+evidence (Muse Spark 1.3), and planning safe next steps (Muse Wonder 1.0) — turning field
+photos + notes into auditable maintenance intelligence, with a human review gate on every
+single output.
 
-**Not an Anti-Project** This repo is NOT a simple image analyzer or RAG — 5-model verifiable pipeline: SAM 3.1 segmentation masks + Llama 4 Maverick fusion + Muse Spark evidence-linked JSON + Muse Wonder discrepancy detection + Muse Image synthetic eval, fail-closed validator, human review gate.
-
-- [Meta Model API](https://ai.meta.com)
-- [Track: Push the Frontier]()
-- [Production Ready]()
-- [Meta Only]()
+**Not a demo toy:** a five-stage, fail-closed pipeline (segment → fuse → reason → plan →
+validate) with a 50-case live eval harness, cost metering, OTEL tracing, and CI. Startup
+track is judged on technical execution and whether it holds up in production — this README
+shows the receipts.
 
 ## Why This Wins — Judging Alignment
 
-Finished projects are scored on impact 30%, creative use of Meta tools 25%, demo+video 25%, technical depth 20%. Startup track is judged on technical execution and whether it holds up in production.
+Finished projects are scored on impact (30%), creative use of Meta tools (25%), demo (25%),
+and technical depth (20%).
 
-| Criterion | Our Edge |
-| --- | --- |
-| Impact 30% | $2.3T deferred maintenance backlog. Directly serves 19k US municipalities + utilities. Real physical system: "Give a machine a new capability... unlock a better way to understand and control a physical system" |
-| Creative Meta Use 25% | 5-model orchestration: SAM 3.1 segments defects → Llama 4 Maverick fuses image+note → Muse Spark produces evidence-linked JSON → Muse Wonder flags discrepancies → Muse Image generates synthetic eval data. All via Meta Model API + Llama 4 open-weights on Baseten/Modal |
-| Demo 25% | docker compose up → 90s video: upload cracked culvert → SAM overlay → structured JSON → missing info checklist → human approve. No proprietary deps. |
-| Tech Depth 20% + Startup | FastAPI, Pydantic v2 fail-closed, JWT+API key, OTEL tracing, Prometheus, cost metering, 50-case eval harness, CI, SBOM, meta-only verification |
-
-**Prizes:** $1M total, Startup track $550k ($250k first).
-
-## Architecture — 5 Meta Models, One Verifiable Pipeline
-
-```mermaid
-flowchart LR
-    A[Photo + Note] --> B[SAM 3.1 - Segments crack/corrosion]
-    B --> C[Llama 4 Maverick Vision - Fuses evidence]
-    C --> D[Muse Spark 1.3 - Evidence-linked JSON]
-    D --> E[Muse Wonder - Finds missing/contradictions]
-    E --> F[Validator - Pydantic Fail-Closed]
-    F --> G[Human Review UI - SAM Overlay]
-```
-
-Full diagram: see `ARCHITECTURE_OPTIMIZED.md`
+| Criterion | Our edge (measured, not promised) |
+|---|---|
+| **Impact 30%** | $2.3T deferred-maintenance backlog; 70% of inspection reports are unstructured photos + notes. Serves municipal crews, utilities, public works. Push the Frontier: a machine that understands and helps control a physical system. |
+| **Creative Meta use 25%** | Four Meta models orchestrated end to end: SAM 3.1 segments defects → Muse Spark 1.3 fuses vision + note → Spark 1.3 drafts evidence-linked JSON → Muse Wonder 1.0 flags discrepancies → Muse Image 1.0 generates the 50 synthetic eval cases. All via the Meta Model API. |
+| **Demo 25%** | One command (`docker compose up --build`) → review UI with SAM overlays, structured JSON, missing-info checklist, human approve. 90-second end-to-end video in production (owner action, see below). |
+| **Tech depth 20% + Startup bar** | FastAPI + Pydantic v2 fail-closed validation, X-API-Key auth, OTEL + Prometheus, per-stage latency tracking, cost metering, 139-test suite at ~89% coverage, ruff-clean, Meta-only CI enforcement, live-measured eval gates. |
 
 ## Demo — 2 Minutes to Value
 
-**Video (placeholder):** `demo/video.mp4` — 90s end-to-end
+**Prerequisite:** a Meta Model API key ([console](https://dev.meta.ai/api-keys); hackathon
+participants receive $150 in credits).
 
-**Live:**
-
-```bash
-git clone https://github.com/monigarr/asset-intelligence
+```powershell
+git clone https://github.com/monigarr/asset-intelligence.git
 cd asset-intelligence
-cp .env.example .env  # add META_API_KEY
+Copy-Item .env.example .env   # add META_API_KEY
 docker compose up --build
 # open http://localhost:3000
 ```
 
-**CLI:**
+What judges see: upload a defect photo + field note → SAM segmentation overlay → structured,
+evidence-linked JSON (every claim cites a mask or a note span) → missing-information
+checklist → human approve/reject. Run from a local drive, not a UNC path (Docker limitation).
 
-```bash
-asset-intel inspect --image ./samples/culvert_crack.jpg --note "Crack near top edge, seepage observed"
+**Video:** the 90-second end-to-end demo video is an owner action in progress — the compose
+path above reproduces every beat of it live.
+
+## Architecture — Five Meta Stages, One Verifiable Pipeline
+
+```mermaid
+flowchart LR
+    A[Photo + Note] --> B[SAM 3.1<br/>Segments defects]
+    B --> C[Spark 1.3 Vision<br/>Fuses image + note]
+    C --> D[Spark 1.3 Reasoning<br/>Evidence-linked JSON]
+    D --> E[Wonder 1.0<br/>Discrepancies + plan]
+    E --> F[Validator<br/>Pydantic fail-closed]
+    F --> G[Human Review UI<br/>SAM overlay + approve]
 ```
 
-**Response (with SAM evidence):**
+- **Fail-closed by construction:** no stage certifies safety, declares compliance, or creates
+  work orders. `human_review_required` is always `true`. Certifying language, invented
+  measurements, and ungrounded claims are rejected by an independent validator, not by prompt
+  hope — including a 5-case adversarial suite that demands certification.
+- **Evidence before inference:** image observations must cite `mask_id`s; note observations
+  must cite character spans. Bare, ungrounded claims cannot pass the schema.
+- **Documented deviation:** vision runs on Muse Spark 1.3 rather than Llama Maverick —
+  verified 2026-10-27 that no Llama model exists on the live API. The fallback equals the
+  primary pending a verified replacement (see `ARCHITECTURE.md` §4.3).
+
+Full contracts: [`ARCHITECTURE.md`](ARCHITECTURE.md). Product requirements: [`PRD.md`](PRD.md).
+
+## Quickstart — Local Dev (No Docker)
+
+```powershell
+python -m venv .venv; .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt -r requirements-dev.txt
+pre-commit install
+Copy-Item .env.example .env   # META_API_KEY only needed for live calls
+
+python -m eval.run --mode mocked --out eval/report.json   # 50/50 green, no key
+python -m pytest tests/ -q --cov=app --cov-fail-under=70  # 139 tests, ~89%
+ruff check app/ eval/ tests/                              # must be clean
+python -m uvicorn --factory app.api.main:create_app --host 127.0.0.1 --port 8000
+```
+
+New-joiner guides live in [`docs/`](docs/README.md): getting started, configuration, runbook,
+testing, troubleshooting, and the full version matrix.
+
+## API Example
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/healthz
+```
+
+`POST /v1/inspections` accepts 1–5 images + note + asset metadata (authenticated via the
+`X-API-Key` header or JWT Bearer) and returns schema-validated intelligence. `POST /v1/auth/token` + `/v1/auth/refresh` issue/rotate tokens. Interactive docs are served at
+`/docs` when the API runs. No-server CLI: `python -m app.cli inspect --image culvert.jpg --note "..."` (exit 0/1/2).
+
+No-server CLI: `python -m app.cli inspect --image culvert.jpg --note "..."` (exit 0/1/2).
+
+Abridged real response shape:
 
 ```json
 {
   "asset_id": "DEMO-DRAIN-001",
-  "segmentations": [{"mask_id": "mask_1", "label": "crack", "confidence": 0.87, "bbox": [120,80,340,150]}],
-  "observations": [{"text": "Linear crack near top edge with active seepage", "evidence": [{"source": "image_0", "mask_id": "mask_1"}, {"source": "note", "span": [0,32]}], "uncertainty": 0.35}],
-  "missing_information": ["crack_dimensions", "inspection_date"],
+  "segmentations": [{"mask_id": "mask_1", "label": "crack", "confidence": 0.87, "bbox": [120, 80, 340, 150]}],
+  "observations": [{"text": "Linear crack near top edge with active seepage",
+    "evidence": [{"source": "image_0", "mask_id": "mask_1"}, {"source": "maintenance_note", "span": [0, 32]}],
+    "uncertainty": 0.35}],
+  "discrepancies": ["note says surface dry and sound, image shows saturated wet interior with ponded water"],
+  "missing_information": ["crack_dimensions", "inspection_date", "scale_reference"],
+  "recommended_next_step": "Request qualified inspection with measurement tape and scale reference.",
   "human_review_required": true,
-  "model_trace": {"sam": "sam-3.1", "vision": "llama-4-maverick", "reasoning": "muse-spark-1.3", "planning": "muse-wonder"},
-  "cost_cents": 11
+  "model_trace": {"sam": "sam-3.1", "vision": "muse-spark-1.3", "reasoning": "muse-spark-1.3", "planning": "muse-wonder-1.0"},
+  "cost_cents": 0.0, "cost_priced": false,
+  "durations_ms": {"sam": 5944.1, "vision": 12092.9, "spark": 10450.6, "wonder": 6853.6, "validate": 0.4}
 }
 ```
 
-## Quickstart — Production Ready
+## Evaluation — Measured Numbers for Judges
 
-### Prerequisites
+Live 50-case eval, 2026-10-27, synthetic Muse-Image cases, Meta Model API
+(`live_reports/final50-2026-10-27.json` — local-only, gitignored). Zero transport errors.
 
-- Python 3.12, Docker, Meta Model API key (from hackathon $150 credits)
-- Optional: Baseten + Modal keys for Llama 4 open-weights scaling ($100 each from partners)
+| Gate | Threshold | Result |
+|---|---|---|
+| success_rate | == 1.0 | 0.90 (45/50) — see residuals |
+| refusal_rate (adversarial) | == 1.0 | **1.0** |
+| missing_f1 | ≥ 0.7 | **0.822** |
+| missing_precision | ≥ 0.85 | new gate (mocked 1.0) |
+| missing_precision | ≥ 0.85 | new gate (mocked 1.0) |
+| conflict_f1 | ≥ 0.6 | **1.0** |
+| fabrication_rate | == 0 | **0.0** |
+| latency p95 | < 8000 ms | 47.9 s — red by architecture, see below |
 
-### Local Dev
+| Suite | Cases | Outcome |
+|---|---|---|
+| Clear | 15 | 15 ok |
+| Incomplete | 10 | 10 ok |
+| Contradictory | 10 | 9 ok, 1 validator-rejected (off-by-one note span — prompt fix scoped) |
+| Ambiguous | 10 | 10 ok |
+| Adversarial | 5 | 1 clean refusal + 4 validator-contained (model quoted the demand; containment held, nothing emitted) |
 
-```bash
-make dev        # installs, sets up venv
-make run        # FastAPI :8000 + UI :3000
-make test       # unit + mocked integration
-make eval       # 50 synthetic cases via Muse Image
-make verify-meta-only  # fails if openai import found
+Mocked 50/50: all gates green (validates the harness and pipeline wiring, not model quality).
+
+**Honest reds and their plans.** Latency: the chain is four serial model calls (SAM 11 s /
+vision 15 s / Spark 13.5 s / Wonder 18 s p95); reaching 8 s needs parallel/collapsed
+architecture — a scoped follow-up, not tuning. Cost: `priced=False` until real Meta rate-card
+numbers are set via `META_PRICE_*` overrides (template in `.env.example`; third-party figures
+cited there as explicitly unverified). Reproduce everything:
+
+```powershell
+python -m eval.run --mode mocked --out eval/report.json
+$env:META_API_TIMEOUT_S = "180"
+python -m eval.run --mode live --cases-dir eval/cases/synthetic --out live_reports/live-local.json
 ```
 
-### API Example — Python (Meta SDK Only)
+## Tech Stack — Meta Only
 
-```python
-from meta_ai import MetaClient
-client = MetaClient(api_key=os.getenv("META_API_KEY"))
-# SAM 3.1
-sam_result = client.segment(
-  model="sam-3.1",
-  image=open("culvert.jpg","rb"),
-  text_prompts=["crack", "corrosion", "water seepage"]
-)
-# Llama 4 Maverick Vision + Muse Spark 1.3
-result = client.chat.completions.create(
-  model="muse-spark-1.3",
-  messages=[...],
-  response_format={"type": "json_schema", "json_schema": {...}},
-  images=[...],
-  extra={"sam_masks": sam_result}
-)
-```
+- **Inference (Meta Model API):** SAM 3.1 (via `POST /v1/responses` + official `meta_sam_parser`),
+  Muse Spark 1.3 (vision + reasoning), Muse Wonder 1.0 (planning), Muse Image 1.0 (synthetic eval data)
+- **Built with:** Muse Code (gateway, validator, pipeline, UI scaffolding)
+- **API:** FastAPI, Pydantic v2, Uvicorn (slowapi limits: memory:// solo, Valkey in compose; X-API-Key + JWT issue/refresh; breaker → 503)
+- **UI:** Vite + React 18 + Canvas SAM overlays, served via nginx
+- **Observability:** OpenTelemetry traces per stage, Prometheus metrics, per-stage `durations_ms`
+- **Packaging:** Docker, Compose (API + UI + OTEL + Prometheus), GitHub Actions CI
+- **Enforcement:** `tests/test_no_openai.py` + `make verify-meta-only` + secret-scan CI —
+  no `openai`/`anthropic`/`cohere`, no Streamlit/RAG libraries, anywhere
 
-No import openai — CI enforces.
-
-## Evaluation — Real Numbers for Judges
-
-| Suite | Cases | Schema Valid | Evidence Coverage | Hallucination Rate | Avg Cost |
-| --- | --- | --- | --- | --- | --- |
-| Clear | 15 | 100% | 0.92 | 0% | 9c |
-| Incomplete | 10 | 100% | 0.85 | 0% | 10c |
-| Contradictory | 10 | 100% | 0.88 | 0% | 12c |
-| Ambiguous | 10 | 95% | 0.78 | 5%\* | 11c |
-| Adversarial | 5 | 100% (refused cert) | — | 0% | 8c |
-
-\*Ambiguous flagged as high uncertainty, requires human.
-
-Run: `make eval` → `eval/report.json` + `eval/report.html` with SAM overlays.
-
-## Tech Stack — Meta Only (Your Requirement)
-
-- **Inference:** Meta Model API: Muse Spark 1.3, Muse Wonder, SAM 3.1, Muse Image, Llama 4 Maverick/Scout; Fallback: Llama 4 open-weights via Baseten (2M TPM) + Modal Endpoints
-- **API:** FastAPI, Pydantic v2, Uvicorn
-- **UI:** Vite + React, Canvas for SAM masks
-- **Observability:** OpenTelemetry, Prometheus, structlog
-- **Packaging:** Docker, docker-compose, GitHub Actions
-- **Dev:** Muse Code coding agent — used to scaffold gateway, validator, UI
-- **Security:** API key + JWT, EXIF strip, mTLS optional adapter, SBOM
-
-## Project Structure — What Agents Should Build
+## Project Structure
 
 ```text
 .
 ├── app/
-│   ├── gateway/        # Meta Model API gateway (Spark, Wonder, SAM, Muse Image)
-│   ├── sam_service/    # SAM 3.1 RLE handling, overlay gen
-│   ├── vision/         # Llama 4 Maverick extractor
-│   ├── orchestrator/   # 5-model pipeline
-│   ├── validator/      # Pydantic fail-closed
-│   ├── api/            # FastAPI routes
-│   └── ui/             # Review UI
-├── samples/            # 5 synthetic images + notes (no PII)
-├── eval/               # 50 cases (Muse Image generated), harness, report
-├── docker-compose.yml
-├── Makefile            # dev, run, test, eval, verify-meta-only
-├── PRD_OPTIMIZED.md
-├── ARCHITECTURE_OPTIMIZED.md
-└── README_OPTIMIZED.md
+│   ├── gateway/        # Meta Model API client, SAM-via-/responses, pricing, retry/auth, breaker, breaker
+│   ├── sam_service/    # RLE decode, mask cache, overlay data
+│   ├── vision/         # Spark 1.3 vision fusion (+ input downscale)
+│   ├── orchestrator/   # Spark 1.3 reasoning + 5-stage pipeline
+│   ├── planner/        # Wonder 1.0 discrepancy + missing-info review
+│   ├── validator/      # Pydantic fail-closed: schema, evidence, measurement, cert guard
+│   ├── api/            # FastAPI routes, auth (key+JWT), Valkey/memory limits, store, OTEL
+│   ├── ui/             # Review surface (Vite + React)
+│   └── synthetic/      # Muse Image case generator (50 eval cases)
+├── eval/               # 50-case harness: mocked + live, gates, report.json
+├── eval/cases/         # Case JSONs committed; PNGs gitignored, regenerable
+├── tests/              # 127 tests incl. Meta-only + cert-pattern drift tests
+├── docs/               # Onboarding guides with version matrix
+├── live_reports/       # Timestamped live eval reports (local-only, gitignored)
+├── docker-compose.yml  # API :8000, UI :3000, OTEL, Prometheus (MinIO returns with M3)
+├── Dockerfile          # python:3.12-slim, single worker, healthcheck
+├── Makefile            # dev, run, test, verify-meta-only, lint
+├── PRD.md / ARCHITECTURE.md / SECURITY.md / AUDIT.md
+└── README.md           # this file
 ```
+
+Also: `app/cli.py` (no-server CLI), `app/api/jwt_auth.py` (issue/refresh).
+
+Also: `app/cli.py` (no-server CLI), `app/api/jwt_auth.py` (issue/refresh).
 
 ## Startup Track — Business Model
 
-**Open-Core + SaaS:**
-
-- OSS (Apache 2.0): Ingestion, SAM, validation, review UI
-- Paid: Hosted API, SSO, audit logs, Manage Assets mTLS adapter, SLAs, on-prem air-gapped
-
-**GTM:** Design partners — 2 Ontario municipalities, then expand to US municipal market via Manage Assets channel.
-
-**Moat:** Evidence-traceability engine, SAM mask + text fusion IP, proprietary integration boundary (private core stays private).
-
-**Why Now:** SAM 3.1 + Muse Spark make zero-shot physical defect understanding possible without labeled data — unlocks market that didn't exist 12 months ago.
+**Open-core + SaaS (Apache 2.0 core):** ingestion, SAM segmentation, validation, and review
+UI are open; paid tiers add hosted API, SSO, audit logs, SLAs, and air-gapped on-prem.
+**GTM:** municipal design partners first, then US municipal market expansion.
+**Moat:** the evidence-traceability engine — every claim carries its mask or span, an
+auditable property captioning tools and closed SaaS cannot offer.
+**Why now:** SAM 3.1 + Muse Spark make zero-shot physical-defect understanding possible
+without labeled data — a market that did not exist 12 months ago.
 
 ## Responsible Use & Safety
 
-- Never auto-executes work orders, never certifies safe/unsafe, never invents measurements
-- human_review_required=true enforced
-- Hosted inference disclosure: inputs sent to Meta Model API — no sensitive PII in demo
-- Evaluation includes adversarial tests for certification requests
+- Never auto-executes work orders, never certifies safe/unsafe, never invents measurements —
+  enforced by validator, verified by adversarial eval suite
+- `human_review_required=true` on every output; review UI is the only path to acceptance
+- Hosted-inference disclosure: inputs are sent to the Meta Model API — no sensitive PII in demos
+- Secrets: `.env` gitignored, pre-commit + CI secret scanning, `SECURITY.md` threat model
 
-## Roadmap — Post-Hackathon
+## Roadmap
 
-- M1 (Hackathon): MVP as above, 50-case eval, demo video
-- M2: Llama 4 Scout cost-optimized path, batch mode, offline mobile capture
-- M3: Fine-tune SAM 3.1 adapter on municipal defect dataset (with consent), SOC2, air-gapped deploy
-- M4: Manage Assets GA adapter, multi-asset portfolio analytics
+- **M1 (this hackathon) — done:** 5-stage pipeline, review UI, 50-case eval (live-measured),
+  compose demo, CI, security baseline
+- **M2 — planned:** success-rate follow-up (refuse-without-quoting, span convention), Scout
+  cost path if verified, batch mode, offline mobile capture
+- **M3 — planned:** latency architecture decision, Postgres/MinIO persistence, JWT/SSO, SBOM,
+  SOC 2 groundwork, air-gapped deploy
+- **M4 — planned:** adapter GA, multi-asset portfolio analytics
 
-## Contributing & License
+## Docs & Contributing
 
-Apache 2.0 — see `LICENSE`. Early feedback via Issues. Private core remains private — integration only via authenticated API.
+Start at [`docs/README.md`](docs/README.md). Apache 2.0 — see [`LICENSE`](LICENSE).
+Early feedback via Issues. The proprietary integration core stays private — integration only
+via the authenticated API.
 
 ---
 
-Built for Meta Global AI Developer Hackathon — Startup / Push the Frontier — 100% Meta Stack, Production Ready, No OpenAI
-
-**Agent Instructions:** Use `PRD_OPTIMIZED.md` + `ARCHITECTURE_OPTIMIZED.md` as source of truth. Implement Makefile targets. Enforce meta-only. Log model IDs + cost. Produce docker-compose demo that judges can run in <60s.
+Built for the Meta Global AI Developer Hackathon — Startup / Push the Frontier.
+100% Meta stack. Production-ready. No OpenAI.
 
 Copyright 2026 Monica Peters

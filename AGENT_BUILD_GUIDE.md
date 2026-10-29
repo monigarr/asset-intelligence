@@ -1,6 +1,6 @@
 # AGENT BUILD GUIDE — For AI Coding Agents (Muse Code / etc.)
 
-This is the execution guide for your coding agents. Source of truth: PRD_OPTIMIZED.md + ARCHITECTURE_OPTIMIZED.md + README_OPTIMIZED.md
+This is the execution guide for your coding agents. Source of truth: PRD.md + ARCHITECTURE.md + README.md
 
 ## 0. Golden Rules
 
@@ -97,7 +97,7 @@ lint: ruff check app/
 ### Day 9: Demo + Docs
 
 - Record demo/video.mp4 (90s) — use screen capture of UI
-- Polish README_OPTIMIZED.md with badges, quickstart, API example
+- Polish README.md with badges, quickstart, API example
 - Generate SBOM
 
 ### Day 10: Submission
@@ -167,7 +167,7 @@ def test_no_openai_import():
 ## 6. Submission Checklist
 
 - [ ] Public repo, no secrets, no proprietary Manage Assets code
-- [ ] README_OPTIMIZED.md is root README (copy over)
+- [ ] README.md is root README (copy over)
 - [ ] docker compose up works
 - [ ] Demo video <2min uploaded, link in README
 - [ ] Eval report in eval/report.json
@@ -181,7 +181,7 @@ def test_no_openai_import():
 
 Use these prompts for Muse Code agent:
 
-> Build app/gateway/meta_client.py per ARCHITECTURE_OPTIMIZED.md section 4.4. Must support SAM 3.1, Llama 4 Maverick Vision, Muse Spark 1.3, Muse Wonder, Muse Image. Use tenacity retry, OTEL spans, cost logging. No openai import.
+> Build app/gateway/meta_client.py per ARCHITECTURE.md section 4.4. Must support SAM 3.1, Llama 4 Maverick Vision, Muse Spark 1.3, Muse Wonder, Muse Image. Use tenacity retry, OTEL spans, cost logging. No openai import.
 
 > Build app/validator/schema.py per section 4.7. Pydantic v2 fail-closed. Every observation must have evidence ref. human_review_required must be true.
 
