@@ -1,7 +1,7 @@
-# Asset Intelligence — Day 7 targets. eval lands with Day 8 (eval/run.py).
+# Asset Intelligence — Day 7 targets. eval target runs the mocked 50-case harness.
 # Windows without make: use the `python -m ...` equivalents from
 # AGENT_BUILD_GUIDE.md / AGENTS.md.
-.PHONY: dev run test verify-meta-only lint demo
+.PHONY: dev run test eval verify-meta-only lint demo
 
 dev:
 	pip install -r requirements.txt -r requirements-dev.txt
@@ -12,6 +12,9 @@ run:
 
 test:
 	python -m pytest tests/ -v
+
+eval:
+	python -m eval.run --mode mocked --out eval/report.json
 
 # app/ only, matching secret-scan.yml; tests/ is covered by
 # tests/test_no_openai.py, which scans both trees minus itself.

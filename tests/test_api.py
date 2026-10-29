@@ -279,3 +279,69 @@ def test_store_ttl_expiry(tmp_path) -> None:
     reopened = InspectionStore(tmp_path / "t.db", ttl_hours=24)
     assert reopened.get(record.request_id) is None
     reopened.close()
+
+
+def test_jwt_issue_refresh_and_bearer_access(tmp_path) -> None:
+    from argon2 import PasswordHasher
+    from fastapi.testclient import TestClient
+
+    from app.api.main import create_app
+
+    pwd_hash = PasswordHasher().hash("pw")
+    app = create_app(
+        api_key="k",
+        store_path=str(tmp_path / "t.db"),
+        jwt_secret="test-secret-1234567890",
+        ui_username="u",
+        ui_password_hash=pwd_hash,
+    )
+    client = TestClient(app)
+    r = client.post("/v1/auth/token", json={"username": "u", "password": "pw"})
+    assert r.status_code == 200, r.text
+    access, refresh = r.json()["access_token"], r.json()["refresh_token"]
+    assert r.json()["token_type"] == "bearer"
+    r2 = client.post("/v1/auth/refresh", json={"refresh_token": refresh})
+    assert r2.status_code == 200, r2.text
+    r3 = client.post("/v1/auth/refresh", json={"refresh_token": refresh})
+    assert r3.status_code == 401  # rotated: single use
+    r4 = client.post(
+        "/v1/inspections/nope/review",
+        json={"decision": "accept"},
+        headers={"Authorization": f"Bearer {access}"},
+    )
+    assert r4.status_code == 404  # auth passed, unknown id
+    r5 = client.post(
+        "/v1/inspections/nope/review",
+        json={"decision": "accept"},
+        headers={"Authorization": "Bearer bogus"},
+    )
+    assert r5.status_code == 401
+    r6 = client.post("/v1/auth/token", json={"username": "u", "password": "wrong"})
+    assert r6.status_code == 401
+
+
+def test_jwt_routes_503_when_unconfigured(tmp_path, monkeypatch) -> None:
+    from fastapi.testclient import TestClient
+
+    from app.api.main import create_app
+
+    monkeypatch.delenv("JWT_SECRET", raising=False)
+    monkeypatch.delenv("UI_USERNAME", raising=False)
+    monkeypatch.delenv("UI_PASSWORD_HASH", raising=False)
+    app = create_app(api_key="k", store_path=str(tmp_path / "t.db"))
+    client = TestClient(app)
+    assert client.post("/v1/auth/token", json={"username": "u", "password": "p"}).status_code == 503
+    assert client.post("/v1/auth/refresh", json={"refresh_token": "x"}).status_code == 503
+
+
+def test_rate_limit_storage_uri_plumbing(tmp_path) -> None:
+    from app.api.main import create_app
+
+    app = create_app(
+        api_key="k",
+        store_path=str(tmp_path / "t.db"),
+        rate_limit_storage="redis://localhost:6379/0",
+    )
+    assert "redis" in type(app.state.limiter._storage).__name__.lower()
+    app2 = create_app(api_key="k", store_path=str(tmp_path / "t2.db"))
+    assert "memory" in type(app2.state.limiter._storage).__name__.lower()

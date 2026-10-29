@@ -1,20 +1,26 @@
-# Asset Intelligence — runtime dependencies (Meta-only: no openai/anthropic/cohere).
+# Asset Intelligence -- runtime dependencies (Meta-only: no openai/anthropic/cohere).
 # Floor pins; sbom.txt freeze lands Day 9 per PRIVATE_DEV_GUIDE.md.
-# NOTE: opentelemetry-instrumentation-fastapi is intentionally unpinned —
+# NOTE: opentelemetry-instrumentation-fastapi is intentionally unpinned --
 # its 0.x line ships beta tags that a floor pin would exclude from resolution.
 httpx>=0.27
 tenacity>=9.0
 pydantic>=2.0
 python-dotenv>=1.0
 numpy>=1.26
-pillow>=10.0
+pillow>=13.0.0  # Aikido 2026-10: fixes 54 flagged CVEs (heap overflows, RCE)
 meta_sam_parser>=0.1.0
 fastapi>=0.115
 python-multipart>=0.0.12
 uvicorn>=0.30
 slowapi>=0.1.9
+starlette>=1.3.1  # Aikido 2026-10: 8 CVEs (SSRF/DoS); transitive via fastapi, direct floor forces the fix
 opentelemetry-api>=1.28
 opentelemetry-sdk>=1.28
 opentelemetry-exporter-otlp-proto-http>=1.28
 opentelemetry-instrumentation-fastapi
 prometheus-client>=0.20
+
+# Auth (JWT issue/refresh) + rate-limit storage (Valkey speaks RESP; redis-py client)
+pyjwt>=2.0
+argon2-cffi>=23.0
+redis>=5.0

@@ -2,8 +2,9 @@
 
 Single mechanism: `X-API-Key` header compared against `API_KEY`. When unset,
 the documented dev default from `.env.example` applies with a loud warning —
-convenient for `docker compose up` demos, never for anything shared. JWT/SSO
-is a post-hackathon item (see module docstring rationale in `app/api/main.py`).
+convenient for `docker compose up` demos, never for anything shared. JWT
+issue/refresh (HS256 access + rotating refresh) lives in `app/api/jwt_auth.py`
+and is accepted as a Bearer alternative; SSO remains post-hackathon.
 """
 
 from __future__ import annotations

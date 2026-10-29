@@ -11,12 +11,19 @@ services:
       STORE_PATH: /data/inspections.db
       # Full path: the OTLP/HTTP exporter posts exactly here (bare host 404s).
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
+      RATE_LIMIT_STORAGE_URI: redis://valkey:6379
+      # Live-verified IDs win over any stale .env (no Llama on the live API).
+      VISION_MODEL_ID: muse-spark-1.3
+      FALLBACK_VISION_MODEL_ID: muse-spark-1.3
+      REASONING_MODEL_ID: muse-spark-1.3
+      PLANNING_MODEL_ID: muse-wonder-1.0
     ports:
       - "8000:8000"
     volumes:
       - ./data:/data
     depends_on:
       - otel-collector
+      - valkey
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"]
       interval: 30s
@@ -31,6 +38,16 @@ services:
     depends_on:
       api:
         condition: service_healthy
+
+  valkey:
+    image: valkey/valkey:8
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   otel-collector:
     image: otel/opentelemetry-collector:0.110.0
