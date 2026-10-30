@@ -31,7 +31,7 @@ from app.orchestrator.spark import DraftObservation, SparkReasoner
 from app.planner import WonderPlanner
 from app.sam_service import DecodedMask, SamService
 from app.validator import InspectionResult, validate_inspection
-from app.validator.schema import UsageSummary
+from app.validator.schema import ModelUsage, UsageSummary
 from app.vision import VisionExtractor, VisionObservation
 
 logger = logging.getLogger("asset_intel.pipeline")
@@ -65,6 +65,7 @@ class DraftResult(BaseModel):
     cost_priced: bool = False
     durations_ms: dict[str, float] = {}
     usage: UsageSummary = Field(default_factory=UsageSummary)
+    model_usage: list[ModelUsage] = []
 
 
 def _sum_usage(*usages: Any) -> UsageSummary:
@@ -129,6 +130,14 @@ class InspectionPipeline:
         wonder_cents, wonder_priced = estimate_chat_cost_cents(
             plan.model_id, plan.usage.prompt_tokens, plan.usage.completion_tokens
         )
+        wonder_leg = ModelUsage(
+            stage="wonder",
+            model=plan.model_id,
+            prompt_tokens=plan.usage.prompt_tokens,
+            completion_tokens=plan.usage.completion_tokens,
+            cost_cents=wonder_cents,
+            cost_priced=wonder_priced,
+        )
         total_cents = round(draft.cost_cents + wonder_cents, 4)
         usage = _sum_usage(draft.usage, plan.usage)
         if total_cents > BUDGET_ALERT_CENTS:
@@ -150,6 +159,7 @@ class InspectionPipeline:
             cost_cents=total_cents,
             cost_priced=bool(draft.cost_priced and wonder_priced),
             usage=usage,
+            model_usage=[*draft.model_usage, wonder_leg],
         )
         validate_started = time.perf_counter()
         with tracer.start_as_current_span("validate"):
@@ -203,7 +213,7 @@ class InspectionPipeline:
 
         durations_ms["spark"] = round((time.perf_counter() - spark_started) * 1000, 1)
         usage = _sum_usage(vision.usage, draft.usage)
-        cost_cents, priced = self._total_cost(vision, draft.usage, len(imgs))
+        cost_cents, priced, legs = self._total_cost(vision, draft.usage, len(imgs))
         result = DraftResult(
             request_id=rid,
             asset_id=meta.get("asset_id") or f"ASSET-{rid}",
@@ -222,6 +232,7 @@ class InspectionPipeline:
             cost_priced=priced,
             durations_ms=durations_ms,
             usage=usage,
+            model_usage=legs,
         )
         if sam_degraded:
             # ARCH §11 vision-only fallback: masks stay empty, uncertainty is
@@ -262,7 +273,7 @@ class InspectionPipeline:
 
     def _total_cost(
         self, vision: VisionObservation, spark_usage: ChatUsage, image_count: int
-    ) -> tuple[float, bool]:
+    ) -> tuple[float, bool, list[ModelUsage]]:
         sam_each, sam_priced = estimate_per_image_cost_cents(self._settings.sam_model_id)
         vis_cents, vis_priced = estimate_chat_cost_cents(
             vision.model_id, vision.usage.prompt_tokens, vision.usage.completion_tokens
@@ -272,8 +283,33 @@ class InspectionPipeline:
             spark_usage.prompt_tokens,
             spark_usage.completion_tokens,
         )
+        legs = [
+            ModelUsage(
+                stage="sam",
+                model=self._settings.sam_model_id,
+                images=image_count,
+                cost_cents=round(sam_each * image_count, 4),
+                cost_priced=sam_priced,
+            ),
+            ModelUsage(
+                stage="vision",
+                model=vision.model_id,
+                prompt_tokens=vision.usage.prompt_tokens,
+                completion_tokens=vision.usage.completion_tokens,
+                cost_cents=vis_cents,
+                cost_priced=vis_priced,
+            ),
+            ModelUsage(
+                stage="spark",
+                model=self._settings.reasoning_model_id,
+                prompt_tokens=spark_usage.prompt_tokens,
+                completion_tokens=spark_usage.completion_tokens,
+                cost_cents=spark_cents,
+                cost_priced=spark_priced,
+            ),
+        ]
         total = round(sam_each * image_count + vis_cents + spark_cents, 4)
-        return total, bool(sam_priced and vis_priced and spark_priced)
+        return total, bool(sam_priced and vis_priced and spark_priced), legs
 
     @staticmethod
     def _validate_images(images: Sequence[bytes]) -> list[bytes]:

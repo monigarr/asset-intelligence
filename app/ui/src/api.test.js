@@ -1,5 +1,5 @@
-﻿import { afterEach, describe, expect, it, vi } from 'vitest';
-import { submitReview } from './api.js';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { fetchOriginalBlobs, submitReview } from './api.js';
 
 describe('submitReview', () => {
   afterEach(() => {
@@ -29,5 +29,29 @@ describe('submitReview', () => {
     });
     await submitReview('req_1', 'accept', null, 'k');
     expect(body).toEqual({ decision: 'accept', note: null });
+  });
+});
+
+describe('fetchOriginalBlobs', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('walks /image indices until the first miss', async () => {
+    const seen = [];
+    vi.stubGlobal('fetch', async (url, init) => {
+      seen.push([url, init.headers]);
+      if (url.endsWith('image?image=0')) {
+        return { ok: true, blob: async () => ({ type: 'image/jpeg' }) };
+      }
+      return { ok: false };
+    });
+    const out = await fetchOriginalBlobs('req_1', 'k');
+    expect(seen.map(([url]) => url)).toEqual([
+      '/v1/inspections/req_1/image?image=0',
+      '/v1/inspections/req_1/image?image=1',
+    ]);
+    expect(seen[0][1]).toEqual({ 'X-API-Key': 'k' });
+    expect(out).toEqual([{ index: 0, blob: { type: 'image/jpeg' }, mime: 'image/jpeg' }]);
   });
 });

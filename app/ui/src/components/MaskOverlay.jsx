@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { decodeMaskRle } from '../rle.js';
+import { MIN_TARGET_PX, confidenceLabel, dashForLabel, pickMask } from './masks.js';
 
 const LABEL_COLORS = {
   crack: [239, 68, 68],
@@ -134,24 +135,28 @@ export default function MaskOverlay({
       drawBoxes();
 
       function drawBoxes() {
-        ctx.font = '12px system-ui, sans-serif';
+        ctx.font = '13px system-ui, sans-serif';
         for (const seg of segmentations) {
           const [r, g, b] = LABEL_COLORS[seg.label.toLowerCase()] || DEFAULT_COLOR;
           const [x1, y1, x2, y2] = seg.bbox;
           ctx.strokeStyle = `rgb(${r},${g},${b})`;
+          ctx.setLineDash(dashForLabel(seg.label));
           ctx.lineWidth = seg.mask_id === selectedMaskId ? 5 : 3;
           ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+          ctx.setLineDash([]);
           if (seg.mask_id === selectedMaskId) {
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 1;
             ctx.strokeRect(x1 - 3, y1 - 3, x2 - x1 + 6, y2 - y1 + 6);
           }
-          const text = `${seg.label} ${seg.confidence.toFixed(2)}`;
+          const text = confidenceLabel(seg.label, seg.confidence);
+          const ty = Math.max(13, y1 - 4);
+          const tx = Math.max(4, Math.min(x1, width - ctx.measureText(text).width - 4));
           ctx.lineWidth = 3;
           ctx.strokeStyle = '#000';
-          ctx.strokeText(text, x1, Math.max(12, y1 - 4));
+          ctx.strokeText(text, tx, ty);
           ctx.fillStyle = '#fff';
-          ctx.fillText(text, x1, Math.max(12, y1 - 4));
+          ctx.fillText(text, tx, ty);
         }
       }
     })();
@@ -165,19 +170,12 @@ export default function MaskOverlay({
     const rect = canvas.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * width;
     const y = ((e.clientY - rect.top) / rect.height) * height;
-    const hits = segmentations.filter(
-      (s) => x >= s.bbox[0] && x <= s.bbox[2] && y >= s.bbox[1] && y <= s.bbox[3]
-    );
-    hits.sort(
-      (a, b) =>
-        (a.bbox[2] - a.bbox[0]) * (a.bbox[3] - a.bbox[1]) -
-        (b.bbox[2] - b.bbox[0]) * (b.bbox[3] - b.bbox[1])
-    );
-    onMaskClick(hits.length ? hits[0].mask_id : null);
+    const slop = (MIN_TARGET_PX / 2) * (width / rect.width);
+    onMaskClick(pickMask(segmentations, x, y, slop));
   }
 
   return (
-    <div className="overlay-wrap">
+    <div className="overlay-wrap" data-tether-origin="1">
       <canvas
         ref={ref}
         onClick={onClick}
@@ -185,7 +183,7 @@ export default function MaskOverlay({
         role="img"
         aria-label={`Defect overlay with ${segmentations.length} annotated masks`}
       />
-      <div className="hint">Click a mask to highlight its evidence.</div>
+      <div className="hint">Click a mask to highlight its evidence. Masks require human measurement.</div>
     </div>
   );
 }

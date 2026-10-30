@@ -21,6 +21,7 @@ Routes (`v1` = API version):
 | `POST /v1/inspections` | Run SAM → Vision → Spark → Wonder → Validate on images + note |
 | `GET /v1/inspections/{request_id}` | Fetch a stored result |
 | `GET /v1/inspections/{request_id}/overlay` | Segmentation overlay image |
+| `GET /v1/inspections/{request_id}/image` | Normalized working image (no masks) |
 | `POST /v1/inspections/{request_id}/review` | Human review decision |
 | `GET /v1/inspections` | History list (`limit`, `review_status`, `asset_id` filters) |
 | `GET /v1/stats` | Summary counts, review rate, cost totals, latency p50/p95 |
@@ -122,7 +123,8 @@ previous stage's output); see `ARCHITECTURE.md` before attempting to parallelize
 
 - Ingress re-encodes every upload, dropping EXIF/GPS (`app/api/adapter.py`).
   The Meta API receives pixels + note text, never device metadata.
-- The store keeps validated results, rendered overlays, and review state
+- The store keeps validated results, rendered overlays, normalized working
+  images (EXIF-stripped, as the model saw them), and review state
   only — never raw uploads. Raw notes are not stored either, but evidence
   spans quote note text, so field notes with reporter PII survive inside
   stored observations. No redaction pass exists by design (redaction would

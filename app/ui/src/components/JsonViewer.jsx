@@ -1,30 +1,32 @@
-function EvidenceChip({ ev, active, onClick }) {
+import CostLine from './CostLine.jsx';
+
+function EvidenceChip({ ev, active, kind, onClick }) {
   const label =
     ev.source === 'maintenance_note'
       ? `note [${ev.span ? ev.span.join(':') : '?'}]`
       : `${ev.source}${ev.mask_id ? ` · ${ev.mask_id}` : ''}`;
   if (!onClick) {
     return (
-      <span className={`chip${active ? ' active' : ''}`} title="Evidence reference">
+      <span className={`chip chip-${kind}${active ? ' active' : ''}`} title="Evidence reference">
         {label}
       </span>
     );
   }
   return (
-    <button className={`chip${active ? ' active' : ''}`} onClick={onClick} title="Highlight evidence">
+    <button className={`chip chip-${kind}${active ? ' active' : ''}`} onClick={onClick} title="Highlight evidence">
       {label}
     </button>
   );
 }
 
-function NoteView({ note, span }) {
+function NoteView({ note, span, citedBy }) {
   if (!note) return <div className="hint">Field note is not stored after validation.</div>;
   if (!span) return <div className="note-view">{note}</div>;
   const [start, end] = span;
   return (
     <div className="note-view">
       {note.slice(0, start)}
-      <mark>{note.slice(start, end)}</mark>
+      <mark title={citedBy ? 'Cited by ' + citedBy : 'Cited evidence'}>{note.slice(start, end)}</mark>
       {note.slice(end)}
     </div>
   );
@@ -33,6 +35,7 @@ function NoteView({ note, span }) {
 export default function JsonViewer({
   result,
   note,
+  showNextStep = true,
   selectedMaskId,
   selectedSpan,
   onEvidenceClick,
@@ -41,10 +44,26 @@ export default function JsonViewer({
   return (
     <div>
       <h3>Field note</h3>
-      <NoteView note={note} span={selectedSpan} />
+      <NoteView note={note} span={selectedSpan} citedBy={selectedMaskId} />
+      {result.discrepancies.length > 0 && (
+        <div className="discrepancy-banner" role="alert">
+          <h3>Discrepancies ({result.discrepancies.length})</h3>
+          <ul>
+            {result.discrepancies.map((d, i) => (
+              <li key={i} className="warn">
+                {d}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <h3>Observations ({result.observations.length})</h3>
       {result.observations.map((ob, i) => (
-        <div className="obs" key={i}>
+        <div
+          className="obs"
+          key={i}
+          data-evidence-masks={(ob.evidence || []).map((ev) => ev.mask_id).filter(Boolean).join(' ')}
+        >
           <p>{ob.text}</p>
           <div className="evidence-chips">
             {ob.evidence.map((ev, j) => {
@@ -59,6 +78,7 @@ export default function JsonViewer({
                   key={j}
                   ev={ev}
                   active={active}
+                  kind={ev.source === 'maintenance_note' ? 'note' : 'mask'}
                   onClick={onEvidenceClick ? () => onEvidenceClick(ev) : null}
                 />
               );
@@ -67,26 +87,23 @@ export default function JsonViewer({
           </div>
         </div>
       ))}
-      <h3>Discrepancies ({result.discrepancies.length})</h3>
-      {result.discrepancies.length === 0 ? (
-        <div className="hint">None flagged.</div>
-      ) : (
-        <ul className="discrepancy-list">
-          {result.discrepancies.map((d, i) => (
-            <li key={i} className="warn">
-              {d}
-            </li>
-          ))}
-        </ul>
+      {result.discrepancies.length === 0 && (
+        <>
+          <h3>Discrepancies</h3>
+          <div className="hint">None flagged.</div>
+        </>
       )}
-      <h3>Recommended next step</h3>
-      <p>{result.recommended_next_step}</p>
+      {showNextStep && (
+        <>
+          <h3>Recommended next step</h3>
+          <p>{result.recommended_next_step}</p>
+        </>
+      )}
       <h3>Trace</h3>
       <div className="trace">
         {trace.sam} · {trace.vision}
         {trace.vision_fallback_used ? ' (fallback)' : ''} · {trace.reasoning} ·{' '}
-        {trace.planning} · {result.cost_cents?.toFixed(2)}¢
-        {result.cost_priced ? '' : ' (unpriced)'}
+        {trace.planning} · <CostLine item={result} />
       </div>
       <h3>Raw JSON</h3>
       <pre className="raw-json">{JSON.stringify(result, null, 2)}</pre>

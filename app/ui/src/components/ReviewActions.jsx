@@ -18,6 +18,7 @@ export default function ReviewActions({ disabled, onReview, status }) {
   const off = disabled || busy !== null;
   return (
     <div>
+      <p className="disclaimer">Does not certify safety. Requires qualified inspection.</p>
       <label className="review-note">
         Correction note
         <textarea

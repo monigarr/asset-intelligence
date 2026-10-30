@@ -492,3 +492,21 @@ def test_hourly_estimate_math_and_unpriced() -> None:
     assert priced is True
     assert cents == pytest.approx(0.5)
     assert estimate_hourly_cost_cents("muse-image-1.0", 1800.0, {}) == (0.0, False)
+
+
+def test_per_image_accepts_image_suffixed_alias() -> None:
+    from app.gateway.pricing import estimate_per_image_cost_cents
+
+    cents, priced = estimate_per_image_cost_cents(
+        "sam-3.1", {"META_PRICE_PER_IMAGE_CENTS_SAM_3_1_IMAGE": "0.250"}
+    )
+    assert (cents, priced) == (0.25, True)
+    both, both_priced = estimate_per_image_cost_cents(
+        "sam-3.1",
+        {
+            "META_PRICE_PER_IMAGE_CENTS_SAM_3_1": "0.50",
+            "META_PRICE_PER_IMAGE_CENTS_SAM_3_1_IMAGE": "0.250",
+        },
+    )
+    assert (both, both_priced) == (0.50, True)
+    assert estimate_per_image_cost_cents("sam-3.1", {}) == (0.0, False)

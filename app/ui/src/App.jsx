@@ -1,15 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { overlayUrl, submitInspection, submitReview } from './api.js';
 import { loadFixture, loadFixtureIndex } from './demo/fixtures.js';
 import JsonViewer from './components/JsonViewer.jsx';
 import MaskOverlay from './components/MaskOverlay.jsx';
+import MaskRail from './components/MaskRail.jsx';
+import NextStepCta from './components/NextStepCta.jsx';
+import ExportDocument from './components/ExportDocument.jsx';
+import { CostPill } from './components/CostLine.jsx';
+import { costText } from './components/insights.js';
 import MissingChecklist from './components/MissingChecklist.jsx';
 import ReviewActions from './components/ReviewActions.jsx';
 import UploadForm from './components/UploadForm.jsx';
 import Header from './components/Header.jsx';
 import AboutPanel from './components/AboutPanel.jsx';
+import SettingsPanel from './components/SettingsPanel.jsx';
 import InsightsPanel from './components/InsightsPanel.jsx';
-import { ChartIcon, CodeIcon, InfoIcon, PlayIcon } from './components/icons.jsx';
+import { ChartIcon, CodeIcon, GearIcon, InfoIcon, PlayIcon } from './components/icons.jsx';
 
 const FALLBACK_DIMS = { width: 800, height: 600 };
 
@@ -33,6 +39,66 @@ function imageDims(file) {
   });
 }
 
+// Evidence tether (DESIGN.md B): a 1px steel leader from the selected mask
+// centroid to its observation row. Static line (instant under reduced motion);
+// renders only when both endpoints exist.
+function TetherLine({ containerRef, selectedMaskId, segmentations, canvasW, canvasH }) {
+  const [line, setLine] = useState(null);
+
+  useEffect(() => {
+    function compute() {
+      const container = containerRef.current;
+      const seg = (segmentations || []).find((s) => s.mask_id === selectedMaskId);
+      if (!container || !seg) {
+        setLine(null);
+        return;
+      }
+      const canvas = container.querySelector('[data-tether-origin] canvas');
+      const row = container.querySelector('[data-evidence-masks~="' + selectedMaskId + '"]');
+      if (!canvas || !row) {
+        setLine(null);
+        return;
+      }
+      const rr0 = row.getBoundingClientRect();
+      const vh0 = window.innerHeight || 0;
+      if (rr0.bottom <= 0 || rr0.top >= vh0) {
+        const calm =
+          window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        try {
+          row.scrollIntoView({ block: 'nearest', behavior: calm ? 'auto' : 'smooth' });
+        } catch {
+          row.scrollIntoView();
+        }
+      }
+      const c = container.getBoundingClientRect();
+      const r = canvas.getBoundingClientRect();
+      const rr = row.getBoundingClientRect();
+      const sx = r.width / canvasW;
+      const sy = r.height / canvasH;
+      setLine({
+        x1: r.left - c.left + ((seg.bbox[0] + seg.bbox[2]) / 2) * sx,
+        y1: r.top - c.top + ((seg.bbox[1] + seg.bbox[3]) / 2) * sy,
+        x2: rr.left - c.left,
+        y2: rr.top - c.top + rr.height / 2,
+      });
+    }
+    compute();
+    window.addEventListener('resize', compute);
+    window.addEventListener('scroll', compute, { passive: true });
+    return () => {
+      window.removeEventListener('resize', compute);
+      window.removeEventListener('scroll', compute);
+    };
+  }, [containerRef, selectedMaskId, segmentations, canvasW, canvasH]);
+
+  if (!line) return null;
+  return (
+    <svg className="tether-svg" aria-hidden="true">
+      <line x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
+    </svg>
+  );
+}
+
 export default function App() {
   const [mode, setMode] = useState('demo');
   const [busy, setBusy] = useState(false);
@@ -44,10 +110,75 @@ export default function App() {
   const [fixtureLoading, setFixtureLoading] = useState(true);
   const [fixtureCase, setFixtureCase] = useState('');
   const [tab, setTab] = useState(0);
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState(() => {
+    try {
+      return localStorage.getItem('assetintel.apiKey') || '';
+    } catch {
+      return '';
+    }
+  });
   const [selectedMaskId, setSelectedMaskId] = useState(null);
   const [selectedSpan, setSelectedSpan] = useState(null);
   const [reviewStatus, setReviewStatus] = useState('');
+  const resultRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      if (apiKey) localStorage.setItem('assetintel.apiKey', apiKey);
+      else localStorage.removeItem('assetintel.apiKey');
+    } catch {
+      /* private mode: key lives for this session only */
+    }
+  }, [apiKey]);
+
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem('assetintel.theme');
+      if (saved === 'light' || saved === 'dark' || saved === 'contrast') return saved;
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+    } catch {
+      /* ignore */
+    }
+    return 'light';
+  });
+  const [fontScale, setFontScale] = useState(() => {
+    try {
+      const v = parseFloat(localStorage.getItem('assetintel.fontScale') || '');
+      if (v >= 0.875 && v <= 1.25) return v;
+    } catch {
+      /* ignore */
+    }
+    return 1;
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.setProperty('--font-scale', String(fontScale));
+    try {
+      localStorage.setItem('assetintel.theme', theme);
+      localStorage.setItem('assetintel.fontScale', String(fontScale));
+    } catch {
+      /* private mode: prefs live for this session only */
+    }
+  }, [theme, fontScale]);
+
+  const [profile, setProfile] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('assetintel.profile') || '{}') || {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('assetintel.profile', JSON.stringify(profile));
+    } catch {
+      /* private mode: profile lives for this session only */
+    }
+  }, [profile]);
 
   const demo = mode === 'demo';
   const fixtureLabel = (fixtures.find((f) => f.id === fixtureId) || {}).label || '';
@@ -62,6 +193,12 @@ export default function App() {
   const segs = (result ? result.segmentations : []).filter(
     (s) => s.source_image === `image_${tab}`
   );
+  const headerStatus = (() => {
+    if (!result) return 'no inspection loaded';
+    const cost = costText(result);
+    const costPart = cost.priced ? `${cost.text} estimated` : 'not yet priced';
+    return `${result.asset_id} · ${result.request_id} · ${costPart}`;
+  })();
 
   function switchTab(next) {
     setMode(next);
@@ -121,7 +258,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function onSubmit({ files, note: n, assetId, apiKey: key }) {
+  async function onSubmit({ files, note: n, assetId }) {
     setBusy(true);
     setError('');
     setReviewStatus('');
@@ -131,12 +268,11 @@ export default function App() {
         images: files,
         note: n,
         assetMeta: assetId ? { asset_id: assetId } : {},
-        apiKey: key,
+        apiKey,
       });
       setMode('new');
       setApiData({ result: out, note: n, images: loaded });
       setTab(0);
-      setApiKey(key);
       setSelectedMaskId(null);
       setSelectedSpan(null);
     } catch (e) {
@@ -160,7 +296,7 @@ export default function App() {
   return (
     <div className="app">
       <Header
-        status={result ? `${result.asset_id} \u00b7 ${result.request_id}` : 'no inspection loaded'}
+        status={headerStatus}
       />
 
 
@@ -168,7 +304,7 @@ export default function App() {
         <button
           role="tab"
           aria-selected={demo}
-          className={demo ? 'active' : ''}
+          className={demo ? 'active tab-demo' : 'tab-demo'}
           onClick={() => switchTab('demo')}
         >
           <PlayIcon size={16} /> Demo
@@ -176,26 +312,34 @@ export default function App() {
         <button
           role="tab"
           aria-selected={mode === 'new'}
-          className={mode === 'new' ? 'active' : ''}
+          className={mode === 'new' ? 'active tab-new' : 'tab-new'}
           onClick={() => switchTab('new')}
         >
           <CodeIcon size={16} /> New inspection
         </button>
         <button
           role="tab"
-          aria-selected={mode === 'about'}
-          className={mode === 'about' ? 'active' : ''}
-          onClick={() => switchTab('about')}
-        >
-          <InfoIcon size={16} /> About
-        </button>
-        <button
-          role="tab"
           aria-selected={mode === 'insights'}
-          className={mode === 'insights' ? 'active' : ''}
+          className={mode === 'insights' ? 'active tab-insights' : 'tab-insights'}
           onClick={() => switchTab('insights')}
         >
           <ChartIcon size={16} /> Insights
+        </button>
+        <button
+          role="tab"
+          aria-selected={mode === 'settings'}
+          className={mode === 'settings' ? 'active tab-settings' : 'tab-settings'}
+          onClick={() => switchTab('settings')}
+        >
+          <GearIcon size={16} /> Settings
+        </button>
+        <button
+          role="tab"
+          aria-selected={mode === 'about'}
+          className={mode === 'about' ? 'active tab-about' : 'tab-about'}
+          onClick={() => switchTab('about')}
+        >
+          <InfoIcon size={16} /> About
         </button>
       </div>
 
@@ -237,20 +381,33 @@ export default function App() {
         </div>
       )}
 
+      {mode === 'settings' && (
+        <SettingsPanel
+          apiKey={apiKey}
+          onApiKey={setApiKey}
+          theme={theme}
+          onTheme={setTheme}
+          fontScale={fontScale}
+          onFontScale={(v) => setFontScale(Math.min(1.25, Math.max(0.875, Math.round(v * 8) / 8)))}
+          profile={profile}
+          onProfile={setProfile}
+        />
+      )}
+
       {mode === 'about' && <AboutPanel />}
 
-      {mode === 'insights' && <InsightsPanel apiKey={apiKey} onApiKey={setApiKey} />}
+      {mode === 'insights' && <InsightsPanel apiKey={apiKey} onApiKey={setApiKey} profile={profile} />}
 
       {mode === 'new' && (
         <div className="panel">
           <h2>New inspection</h2>
-          <UploadForm onSubmit={onSubmit} busy={busy} error={error} />
+          <UploadForm onSubmit={onSubmit} busy={busy} error={error} apiKeySet={!!apiKey} />
         </div>
       )}
 
       {result && (mode === 'demo' || mode === 'new') && (
-        <div className="layout">
-          <div>
+        <div className="layout result-layout" ref={resultRef}>
+          <div className="ledger-sticky">
             <div className="panel">
               <h2>
                 Overlay {demo && fixtureLabel && (
@@ -288,22 +445,36 @@ export default function App() {
                   setSelectedSpan(null);
                 }}
               />
-            </div>
-            <div className="panel">
-              <h2>Human review {result.human_review_required ? '(required)' : ''}</h2>
-              <ReviewActions
-                disabled={mode !== 'new'}
-                status={reviewStatus}
-                onReview={onReview}
+              <MaskRail
+                segmentations={segs}
+                selectedMaskId={selectedMaskId}
+                onSelect={(id) => {
+                  setSelectedMaskId(id);
+                  setSelectedSpan(null);
+                }}
               />
             </div>
           </div>
           <div>
-            <div className="panel">
-              <h2>Missing information</h2>
-              <MissingChecklist items={result.missing_information} />
+            <div className="cta-group">
+              <CostPill item={result} />
+              <NextStepCta text={result.recommended_next_step} />
+              <div className="panel">
+                <h2>Human review {result.human_review_required ? '(required)' : ''}</h2>
+                <ReviewActions
+                  disabled={mode !== 'new'}
+                  status={reviewStatus}
+                  onReview={onReview}
+                />
+              </div>
+              {mode === 'new' && (
+                <div className="panel">
+                  <h2>Export</h2>
+                  <ExportDocument record={result} profile={profile} apiKey={apiKey} />
+                </div>
+              )}
             </div>
-            <div className="panel">
+            <div className="panel evidence-card">
               <h2>Evidence</h2>
               <JsonViewer
                 result={result}
@@ -311,9 +482,21 @@ export default function App() {
                 selectedMaskId={selectedMaskId}
                 selectedSpan={selectedSpan}
                 onEvidenceClick={onEvidenceClick}
+                showNextStep={false}
               />
             </div>
+            <div className="panel">
+              <h2>Missing information</h2>
+              <MissingChecklist items={result.missing_information} />
+            </div>
           </div>
+          <TetherLine
+            containerRef={resultRef}
+            selectedMaskId={selectedMaskId}
+            segmentations={segs}
+            canvasW={canvasW}
+            canvasH={canvasH}
+          />
         </div>
       )}
     </div>

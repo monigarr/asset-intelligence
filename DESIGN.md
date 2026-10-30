@@ -1,6 +1,6 @@
-﻿# DESIGN.md — Asset Intelligence / Manage Assets
+# DESIGN.md — Asset Intelligence / Manage Assets
 **For:** Muse Code, Cursor, and frontend agents
-**Version:** 1.1 (2026-10-29, verified against `5a83c3e`) — marketing/ reorg paths + BRAND_KIT v2.1 companion
+**Version:** 1.2 (2026-10-29, implements C.1-C.3 except brand-commit; axe 0 violations, report in live_reports/) — marketing/ reorg paths + BRAND_KIT v2.1 companion
 **Workspace:** `\\Pc2\e\Meta_Global_AI_Hackathon\asset-intelligence`
 **Product:** Asset Intelligence Review Console (main UI)
 **Stack:** React + Vite + plain CSS variables + HTML Canvas (SAM overlay) + FastAPI backend. No Tailwind, no TypeScript, no webfonts, no chart libs.
@@ -11,6 +11,8 @@
 ---
 
 ## What changed from the 2026-10-26 draft (read this first)
+
+v1.2 (2026-10-29): C.1 + C.2 + C.3 (except brand-commit OWNER DECISION) implemented and verified: mask rail keyboard path, dash redundancy, SAM confidence copy, axe color-contrast 0 violations (4 tabs x 1280/390), --mono/--alert/--discrepancy tokens, liability disclaimer, evidence tether, two-pane ledger, missing chips, discrepancy banner, shared CostLine, note-span cite tooltip, blueprint empty state (copy omits EXIF-stripping claim - no stripping code exists), print ledger, 390px hscroll fixed. Owner still owns: blue-vs-green accent, logo/favicon.
 
 v1.1 (2026-10-29): `marketing/` reorganized (parent set under `manage_assets_inc/`, new AI set at root); all paths current; `BRAND_KIT.md` v2.1 is now the companion brand law.
 
@@ -40,7 +42,7 @@ The prior draft described a codebase that does not exist. Corrected:
 - OWNER DECISION: reconcile UI blue `#1d4ed8` with logo green `#5BBC7A`. Options: (a) keep blue UI + monochrome logo usage in header; (b) migrate primary actions to logo green; (c) slate-ink chrome with green reserved for “verified/accept” semantics. Do not mix blue CTAs and green CTAs without deciding.
 - Type must stay readable at 13px in truck-cab sunlight. No purple anywhere; no Inter/Roboto-as-personality (currently system stack — fine); no acid-green dark theme.
 
-**What exists today (verified):** Four-tab console. Demo tab: 10-fixture dropdown, SAM overlay canvas (label-colored fills + 3px bbox strokes, 5px + white halo when selected), evidence chips (keyboard-operable buttons), missing-info checklist, Accept/Reject with “Human review (required)”. New inspection tab: drag-drop upload, note, asset ID, API key + key-request hint. About tab: builder/hackathon/product info. Insights tab: stat cards, filterable/sortable history table, per-call stage timeline, priced/unpriced cost honesty. Canvas has `role="img"` + label; tablist ARIA + `:focus-visible` shipped.
+**What exists today (verified):** Five-tab console (Demo / New inspection / Insights / Settings / About) with light/dark/high-contrast themes and 87-125% text scaling in Settings. Demo tab: 10-fixture dropdown, SAM overlay canvas (label-colored fills + 3px bbox strokes, 5px + white halo when selected), evidence chips (keyboard-operable buttons), missing-info checklist, Accept/Reject with “Human review (required)”. New inspection tab: drag-drop upload, note, asset ID, API key + key-request hint. About tab: builder/hackathon/product info. Insights tab: stat cards, filterable/sortable history table, per-call stage timeline, priced/unpriced cost honesty. Canvas has `role="img"` + label; tablist ARIA + `:focus-visible` shipped.
 
 **What feels wrong (verified gaps only):** Canvas mask picking is mouse-only (no keyboard path); small bboxes are small targets (glove problem is real); masks are distinguished by hue alone (no pattern/label redundancy for colorblind users); confidence renders as a bare number (`crack 0.87` — 0.87 of what?); no liability disclaimer next to Accept; no contrast audit has ever run; no print stylesheet; observations carry equal visual weight.
 
@@ -119,14 +121,14 @@ The prior draft described a codebase that does not exist. Corrected:
 - Direction: system-ui body (today) + `ui-monospace, SFMono-Regular, Menlo, Consolas, monospace` utility face for `mask_id`, spans, cost, `model_trace`, timestamps. Distinctive enough via pairing + tracking, zero downloads.
 - OPTIONAL phase (owner call): self-hosted display face for the header/asset-ID only, subset to latin, preloaded, with system fallback. Never a render-blocking CDN link.
 
-**Layout concept in one sentence:** Keep the four tabs; evolve Demo/New results toward a two-pane forensic viewer (canvas-led left, evidence ledger right) while Insights keeps its cards → filters → table → detail rhythm.
+**Layout concept in one sentence:** Keep the five tabs (Demo / New inspection / Insights / Settings / About); evolve Demo/New results toward a two-pane forensic viewer (canvas-led left, evidence ledger right) while Insights keeps its cards → filters → table → detail rhythm.
 
 **ASCII wireframe — result view, 1440px (target, not current):**
 
 ```
 +----------------------------------------------------------------------------------+
 | Header: Asset Intelligence • by ManageAssets.ca | DEMO-DRAIN-001 • 11¢ (mono)     |
-| Tabs: Demo | New inspection | About | Insights                                   |
+| Tabs: Demo | New inspection | Insights | Settings | About                 |
 +------------------------------------------+---------------------------------------+
 | IMAGE CANVAS                             | LEDGER                                |
 | ┌─────────────────────────────────┐     | Observations (3)                      |
@@ -154,28 +156,28 @@ Conventions: no new npm dependencies; every item keeps `pytest`, `vitest run`, `
 
 ### 1. Must-fix this pass (blocking taste / readability / a11y)
 
-- [ ] **Canvas keyboard picking + glove targets.** `app/ui/src/components/MaskOverlay.jsx`: add a keyboard path (focusable listbox of masks mirroring the canvas, or roving-focus regions) that drives the same `onMaskClick` → chip highlight path. Expand hit slop beyond raw bbox (min 24px target). Acceptance: full inspection review completable keyboard-only; tour asserts chip→mask and mask→chip both ways.
-- [ ] **Mask redundancy (colorblind).** Same file: add per-label pattern or shape redundancy (e.g., dashed vs solid stroke styles + always-on label tags), not hue alone. Keep fills subtle so cracks stay visible. Acceptance: masks distinguishable in grayscale screenshot.
-- [ ] **Confidence context copy.** Same file: label reads `{label} · SAM {confidence}` plus a ledger hint that masks require human measurement. Acceptance: no bare `0.87` copy anywhere.
-- [ ] **Contrast audit for real.** Run axe on all four tabs at 1280px and 390px; fix what fails (candidate: 12–13px muted text, chip contrast, canvas labels on bright photos). Acceptance: 0 axe contrast violations; paste the report in the PR, not ratios from memory.
-- [ ] **Mono utility face.** `app/ui/src/styles.css`: add `--mono` system-mono stack; apply to evidence refs, cost, `model_trace`, timestamps, asset IDs. Acceptance: no new font downloads (network tab clean), refs scannable.
-- [ ] **Liability disclaimer (owner wording).** Near Accept in Demo/New results: “Does not certify safety. Requires qualified inspection.” Acceptance: visible without scrolling on 900px-tall viewport.
+- [x] **Canvas keyboard picking + glove targets.** `app/ui/src/components/MaskOverlay.jsx`: add a keyboard path (focusable listbox of masks mirroring the canvas, or roving-focus regions) that drives the same `onMaskClick` → chip highlight path. Expand hit slop beyond raw bbox (min 24px target). Acceptance: full inspection review completable keyboard-only; tour asserts chip→mask and mask→chip both ways.
+- [x] **Mask redundancy (colorblind).** Same file: add per-label pattern or shape redundancy (e.g., dashed vs solid stroke styles + always-on label tags), not hue alone. Keep fills subtle so cracks stay visible. Acceptance: masks distinguishable in grayscale screenshot.
+- [x] **Confidence context copy.** Same file: label reads `{label} · SAM {confidence}` plus a ledger hint that masks require human measurement. Acceptance: no bare `0.87` copy anywhere.
+- [x] **Contrast audit for real.** Run axe on all five tabs at 1280px and 390px; fix what fails (candidate: 12–13px muted text, chip contrast, canvas labels on bright photos). Acceptance: 0 axe contrast violations; paste the report in the PR, not ratios from memory.
+- [x] **Mono utility face.** `app/ui/src/styles.css`: add `--mono` system-mono stack; apply to evidence refs, cost, `model_trace`, timestamps, asset IDs. Acceptance: no new font downloads (network tab clean), refs scannable.
+- [x] **Liability disclaimer (owner wording).** Near Accept in Demo/New results: “Does not certify safety. Requires qualified inspection.” Acceptance: visible without scrolling on 900px-tall viewport.
 
 ### 2. High-impact visual upgrades
 
-- [ ] **Evidence tether (signature).** New `TetherLine` in `MaskOverlay.jsx` or sibling: absolutely-positioned SVG leader from selected mask centroid to active observation chip/row. Draw only when both endpoints exist; instant under reduced-motion. Acceptance: e2e tour asserts line endpoints within tolerance; keyboard selection draws it too.
-- [ ] **Two-pane ledger rhythm.** `App.jsx` result layout + `styles.css`: canvas-led left column (sticky on desktop), ledger right; adopt Insights’ panel rhythm for consistency. Mobile stacks (existing 900px breakpoint) with chip-highlight preserved. Acceptance: 1440px + 390px screenshots, no horizontal scroll.
-- [ ] **Missing info as high-visibility chips.** `MissingChecklist.jsx` + tokens: tape-yellow chip treatment at verified contrast, mono uppercase. Acceptance: glanceable; axe-clean.
-- [ ] **Discrepancy banner.** `JsonViewer.jsx`: rust-toned banner above observations when discrepancies exist; distinct from info styling. Acceptance: cannot be mistaken for an observation.
-- [ ] **Mask rail (PROPOSAL).** Pill buttons under canvas mirroring masks (`mask_1 crack 0.87`), 32px+ targets, arrow-key cycling, driving the same selection state. Acceptance: usable with gloves (pointer) and keyboard.
-- [ ] **Cost + model trace footer.** Extend the existing `JsonViewer` trace row (already `sam · vision · reasoning · planning · cost`) with priced/unpriced honesty styling shared with Insights’ `CostLine`. Real model IDs only — never Llama. Acceptance: identical cost text for the same call in ledger and Insights.
+- [x] **Evidence tether (signature).** New `TetherLine` in `MaskOverlay.jsx` or sibling: absolutely-positioned SVG leader from selected mask centroid to active observation chip/row. Draw only when both endpoints exist; instant under reduced-motion. Acceptance: e2e tour asserts line endpoints within tolerance; keyboard selection draws it too.
+- [x] **Two-pane ledger rhythm.** `App.jsx` result layout + `styles.css`: canvas-led left column (sticky on desktop), ledger right; adopt Insights’ panel rhythm for consistency. Mobile stacks (existing 900px breakpoint) with chip-highlight preserved. Acceptance: 1440px + 390px screenshots, no horizontal scroll.
+- [x] **Missing info as high-visibility chips.** `MissingChecklist.jsx` + tokens: tape-yellow chip treatment at verified contrast, mono uppercase. Acceptance: glanceable; axe-clean.
+- [x] **Discrepancy banner.** `JsonViewer.jsx`: rust-toned banner above observations when discrepancies exist; distinct from info styling. Acceptance: cannot be mistaken for an observation.
+- [x] **Mask rail (PROPOSAL).** Pill buttons under canvas mirroring masks (`mask_1 crack 0.87`), 32px+ targets, arrow-key cycling, driving the same selection state. Acceptance: usable with gloves (pointer) and keyboard.
+- [x] **Cost + model trace footer.** Extend the existing `JsonViewer` trace row (already `sam · vision · reasoning · planning · cost`) with priced/unpriced honesty styling shared with Insights’ `CostLine`. Real model IDs only — never Llama. Acceptance: identical cost text for the same call in ledger and Insights.
 
 ### 3. Nice-to-have craft
 
-- [ ] **Note-span underline.** When a chip is selected, underline the cited span in the field-note view with a “cited by {mask}” tooltip. (Reverse of today’s chip→mask highlight.)
-- [ ] **Empty-state blueprint.** `UploadForm.jsx` empty state: 1px-grid dashed drop zone, “Drop 1–5 photos + note — EXIF GPS stripped.” Keep the existing dropzone behavior.
-- [ ] **Print ledger.** `@media print` in `styles.css`: hide canvas/nav, render the ledger as a filing-ready report with the evidence table + disclaimer.
-- [ ] **Brand commit (OWNER DECISION).** Pick canonical logo (parent M at `marketing/manage_assets_inc/logo.svg` vs AI set), wire favicon + header mark, resolve the blue-vs-green accent question. Until then: no logo in UI, text wordmark stays. (Assets already tracked; see BRAND_KIT.md v2.1.)
+- [x] **Note-span underline.** When a chip is selected, underline the cited span in the field-note view with a “cited by {mask}” tooltip. (Reverse of today’s chip→mask highlight.)
+- [x] **Empty-state blueprint.** `UploadForm.jsx` empty state: 1px-grid dashed drop zone, “Drop 1–5 photos + note — EXIF GPS stripped.” Keep the existing dropzone behavior.
+- [x] **Print ledger.** `@media print` in `styles.css`: hide canvas/nav, render the ledger as a filing-ready report with the evidence table + disclaimer.
+- [ ] **Brand commit (OWNER DECISION - partial 2026-10-29).** Logo + favicon wired (icon_ai header mark, simple_icon favicon, BRAND_KIT v2.2); still open: blue-vs-green accent.
 
 ---
 

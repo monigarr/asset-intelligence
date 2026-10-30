@@ -7,21 +7,23 @@ import {
   rejectionMessage,
 } from './fileList.js';
 
-export default function UploadForm({ onSubmit, busy, error }) {
+export default function UploadForm({ onSubmit, busy, error, apiKeySet }) {
   const [files, setFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
   const [rejected, setRejected] = useState([]);
   const [dragging, setDragging] = useState(false);
   const [note, setNote] = useState('');
   const [assetId, setAssetId] = useState('');
-  const [apiKey, setApiKey] = useState('');
   const inputRef = useRef(null);
   const previewsRef = useRef([]);
   previewsRef.current = previews;
 
   useEffect(() => () => previewsRef.current.forEach((u) => URL.revokeObjectURL(u)), []);
 
-  const valid = files.length >= 1 && files.length <= MAX_FILES && !busy;
+  const valid = files.length >= 1 && files.length <= MAX_FILES && !busy && apiKeySet;
+  const zoneClass = ['dropzone', dragging && 'dragging', files.length === 0 && !dragging && 'blueprint']
+    .filter(Boolean)
+    .join(' ');
 
   function addIncoming(list) {
     const { files: next, rejected: rej } = mergeFiles(files, Array.from(list || []));
@@ -42,11 +44,11 @@ export default function UploadForm({ onSubmit, busy, error }) {
       className="upload-form"
       onSubmit={(e) => {
         e.preventDefault();
-        if (valid) onSubmit({ files, note, assetId, apiKey });
+        if (valid) onSubmit({ files, note, assetId });
       }}
     >
       <div
-        className={dragging ? 'dropzone dragging' : 'dropzone'}
+        className={zoneClass}
         onDragOver={(e) => {
           e.preventDefault();
           setDragging(true);
@@ -61,7 +63,7 @@ export default function UploadForm({ onSubmit, busy, error }) {
         <p>
           Inspection photos ({files.length}/{MAX_FILES}) — JPEG/PNG/WebP, ≤15MB each
         </p>
-        <p className="hint">Drag &amp; drop here, or</p>
+        <p className="hint">Drop 1-5 photos + field note. Drag &amp; drop here, or</p>
         <button
           type="button"
           disabled={busy}
@@ -126,20 +128,9 @@ export default function UploadForm({ onSubmit, busy, error }) {
           onChange={(e) => setAssetId(e.target.value)}
         />
       </label>
-      <label>
-        API key
-        <input
-          type="text"
-          value={apiKey}
-          placeholder="local-dev-key-123"
-          onChange={(e) => setApiKey(e.target.value)}
-        />
-        <span className="hint">
-          Need an API key? Contact{' '}
-          <a href="mailto:monica@manageassets.net">monica@manageassets.net</a>{' '}
-          to request one.
-        </span>
-      </label>
+      {!apiKeySet && (
+        <p className="hint">Add your API key in Settings to run inspections.</p>
+      )}
       {error && <div className="error">{error}</div>}
       <div>
         <button type="submit" className="primary" disabled={!valid}>

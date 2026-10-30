@@ -111,6 +111,18 @@ class UsageSummary(BaseModel):
     total_tokens: int = 0
 
 
+class ModelUsage(BaseModel):
+    """One factual per-model cost leg: measured tokens x priced rate."""
+
+    stage: str  # sam | vision | spark | wonder
+    model: str  # exact model id, e.g. muse-spark-1.3
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    images: int = 0  # nonzero only for the per-image sam leg
+    cost_cents: float = 0.0
+    cost_priced: bool = False
+
+
 class InspectionResult(BaseModel):
     request_id: str
     asset_id: str
@@ -126,6 +138,7 @@ class InspectionResult(BaseModel):
     cost_priced: bool = False
     durations_ms: dict[str, float] = {}
     usage: UsageSummary = Field(default_factory=UsageSummary)
+    model_usage: list[ModelUsage] = []
 
     @field_validator("recommended_next_step")
     @classmethod

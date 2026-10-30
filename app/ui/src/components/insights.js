@@ -24,6 +24,15 @@ export function costText(item) {
   return { text: `${Number(item.cost_cents).toFixed(2)}¢`, priced: true };
 }
 
+export function formatUSD(cents) {
+  const dollars = Number(cents) / 100;
+  if (!Number.isFinite(dollars)) return '$0.00';
+  let s = dollars.toFixed(6).replace(/0+$/, '');
+  if (s.endsWith('.')) return '$' + s + '00';
+  if (s.split('.')[1].length === 1) s += '0';
+  return '$' + s;
+}
+
 export function formatLatency(ms) {
   if (ms == null) return '—';
   if (ms < 1000) return `${Math.round(ms)} ms`;

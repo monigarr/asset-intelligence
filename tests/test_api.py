@@ -157,6 +157,18 @@ def test_overlay_png_matches_upload(tmp_path) -> None:
         assert out.size == (16, 12)
 
 
+def test_original_image_matches_upload(tmp_path) -> None:
+    img = _jpeg(16, 12)
+    client = _client(tmp_path, _FakePipeline(_result(rle_size=[12, 16])))
+    rid = _post(client, [("images", ("a.jpg", img, "image/jpeg"))]).json()["request_id"]
+    res = client.get(f"/v1/inspections/{rid}/image?image=0", headers=KEY)
+    assert res.status_code == 200
+    assert res.headers["content-type"] == "image/jpeg"
+    with Image.open(io.BytesIO(res.content)) as out:
+        assert out.size == (16, 12)
+        assert dict(out.getexif()) == {}
+
+
 def test_exif_stripped_and_transposed(tmp_path) -> None:
     fake = _FakePipeline(_result(with_mask=False))
     client = _client(tmp_path, fake)
@@ -256,10 +268,12 @@ def test_unknown_ids(tmp_path) -> None:
     client = _client(tmp_path, _FakePipeline(_result(with_mask=False)))
     assert client.get("/v1/inspections/nope", headers=KEY).status_code == 404
     assert client.get("/v1/inspections/nope/overlay", headers=KEY).status_code == 404
+    assert client.get("/v1/inspections/nope/image", headers=KEY).status_code == 404
     assert client.post("/v1/inspections/nope/review", headers=KEY,
                        json={"decision": "accept"}).status_code == 404
     rid = _post(client, [("images", ("a.jpg", _jpeg(), "image/jpeg"))]).json()["request_id"]
     assert client.get(f"/v1/inspections/{rid}/overlay?image=9", headers=KEY).status_code == 404
+    assert client.get(f"/v1/inspections/{rid}/image?image=9", headers=KEY).status_code == 404
     bad = client.post(f"/v1/inspections/{rid}/review", headers=KEY,
                       json={"decision": "maybe"})
     assert bad.status_code == 422

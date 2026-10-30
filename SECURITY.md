@@ -40,8 +40,9 @@
 
 ## 4. Data minimization and privacy (PRD §7, ARCH §9)
 
-- Storage keeps only the validated result, rendered PNG overlays, and review
-  state -- never raw uploads or notes (`app/api/store.py`).
+- Storage keeps only the validated result, rendered PNG overlays, the
+  normalized EXIF-stripped working image, and review state -- never raw
+  upload bytes or notes (`app/api/store.py`).
 - SQLite records expire after 24 h (opportunistic TTL prune on access).
 - Logs carry `request_id`, counts, and cost -- never image bytes
   (`app/api/main.py` `inspection_complete`). Prometheus labels use route

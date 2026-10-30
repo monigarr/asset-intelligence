@@ -3,6 +3,7 @@ import {
   costText,
   formatLatency,
   formatTime,
+  formatUSD,
   sortRows,
   stageLabel,
   statusOf,
@@ -35,6 +36,17 @@ describe('costText', () => {
       text: '12.50¢',
       priced: true,
     });
+  });
+});
+
+describe('formatUSD', () => {
+  it('renders dollars with trimmed precision', () => {
+    expect(formatUSD(59.2)).toBe('$0.592');
+    expect(formatUSD(125.222)).toBe('$1.25222');
+    expect(formatUSD(75.23)).toBe('$0.7523');
+    expect(formatUSD(150)).toBe('$1.50');
+    expect(formatUSD(0)).toBe('$0.00');
+    expect(formatUSD(NaN)).toBe('$0.00');
   });
 });
 

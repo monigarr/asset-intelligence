@@ -171,7 +171,7 @@ TASK: Produce JSON matching schema. If dimension missing, list in missing_inform
 - **Reasoning:** vision_observations + masks → Muse Spark 1.3 → draft JSON (JSON mode)
 - **Planning:** draft + vision → Muse Wonder → discrepancies + missing + next step
 - **Validation:** Pydantic validator → if fail, return 422 with trace; if pass, attach cost + model_trace
-- **Persistence (ephemeral for demo):** SQLite + overlay BLOBs, 24h TTL, no PII logging (MinIO returns with M3)
+- **Persistence (ephemeral for demo):** SQLite + overlay/original BLOBs, 24h TTL, no PII logging (MinIO returns with M3)
 - **Review:** UI polls or SSE streams result, shows SAM overlay, human approves
 - **Total cost tracked:** cost_cents = sam_tokens + vision_tokens + spark_tokens + wonder_tokens
 
@@ -184,7 +184,7 @@ TASK: Produce JSON matching schema. If dimension missing, list in missing_inform
 | Open-weights fallback | Deferred (no live Llama model) | Was: Scout/Maverick via partners; re-add when verified |
 | Validation | Pydantic v2, JSON Schema | Fail-closed |
 | Auth | X-API-Key + JWT issue/refresh (HS256, Argon2) | Bearer or key; SSO post-hackathon |
-| Storage | SQLite + overlay BLOBs (demo); Postgres/MinIO M3 | Zero cloud dep for local |
+| Storage | SQLite + overlay/original BLOBs (demo); Postgres/MinIO M3 | Zero cloud dep for local |
 | Queue (future) | Modal Queues or Valkey | Batch inspections |
 | Observability | OpenTelemetry, Prometheus, stdlib logging | OTEL traces per model call |
 | Packaging | Docker, docker-compose, Makefile | docker compose up wins |

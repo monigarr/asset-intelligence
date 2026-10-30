@@ -6,13 +6,15 @@ import {
   fetchStats,
   submitReview,
 } from '../api.js';
+import CostLine from './CostLine.jsx';
+import ExportDocument from './ExportDocument.jsx';
 import JsonViewer from './JsonViewer.jsx';
 import MissingChecklist from './MissingChecklist.jsx';
 import ReviewActions from './ReviewActions.jsx';
 import {
-  costText,
   formatLatency,
   formatTime,
+  formatUSD,
   sortRows,
   stageLabel,
   statusOf,
@@ -21,6 +23,24 @@ import {
 } from './insights.js';
 
 const STAGE_ORDER = ['sam', 'vision', 'spark', 'wonder', 'validate'];
+
+function UsageCell({ item }) {
+  const legs = Array.isArray(item.model_usage) ? item.model_usage : [];
+  if (legs.length === 0) {
+    return <span className="mono">{item.usage_total_tokens || 0} tokens</span>;
+  }
+  return (
+    <span className="usage-cell">
+      {legs.map((leg, i) => (
+        <span key={i} className="mono usage-line">
+          {leg.stage === 'sam'
+            ? `${leg.model} ${leg.images} img`
+            : `${leg.model} ${leg.prompt_tokens}/${leg.completion_tokens}`}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 function Stat({ label, value, hint }) {
   return (
@@ -56,17 +76,7 @@ function StageTimeline({ durations }) {
   );
 }
 
-function CostLine({ item }) {
-  const cost = costText(item);
-  if (!cost.priced) return <span className="muted">not yet priced</span>;
-  return (
-    <span>
-      {cost.text} <span className="muted">estimated</span>
-    </span>
-  );
-}
-
-function DetailCard({ record, onClose, apiKey, onReviewed }) {
+function DetailCard({ record, onClose, apiKey, onReviewed, profile }) {
   const status = statusOf({ review_status: record.review_status });
   const sum = summarize(record);
   const trace = record.model_trace || {};
@@ -119,7 +129,7 @@ function DetailCard({ record, onClose, apiKey, onReviewed }) {
   const hasPayload = Array.isArray(record.observations);
 
   return (
-    <div className="panel">
+    <div className="panel detail-card">
       <h2>
         Inspection detail <span className="muted">({record.request_id})</span>
       </h2>
@@ -168,6 +178,8 @@ function DetailCard({ record, onClose, apiKey, onReviewed }) {
       )}
       <h3>Review decision</h3>
       <ReviewActions onReview={handleReview} status={reviewStatus} />
+      <h3>Export</h3>
+      <ExportDocument record={record} profile={profile} apiKey={apiKey} />
       <p>
         <button type="button" onClick={onClose}>
           Close detail
@@ -177,7 +189,7 @@ function DetailCard({ record, onClose, apiKey, onReviewed }) {
   );
 }
 
-export default function InsightsPanel({ apiKey, onApiKey }) {
+export default function InsightsPanel({ apiKey, onApiKey, profile }) {
   const [keyInput, setKeyInput] = useState('');
   const [stats, setStats] = useState(null);
   const [rows, setRows] = useState([]);
@@ -247,6 +259,7 @@ export default function InsightsPanel({ apiKey, onApiKey }) {
           cost. An API key is required to load inspection history.
         </p>
         <form
+          className="key-form"
           onSubmit={(e) => {
             e.preventDefault();
             if (keyInput.trim()) onApiKey(keyInput.trim());
@@ -381,9 +394,10 @@ export default function InsightsPanel({ apiKey, onApiKey }) {
                     Latency{sortMark('latency_ms_total')}
                   </button>
                 </th>
+                <th>Model usage</th>
                 <th aria-sort={ariaSort('cost_cents')}>
                   <button type="button" onClick={() => toggleSort('cost_cents')}>
-                    Cost{sortMark('cost_cents')}
+                    Model cost{sortMark('cost_cents')}
                   </button>
                 </th>
               </tr>
@@ -401,18 +415,21 @@ export default function InsightsPanel({ apiKey, onApiKey }) {
                         aria-current={selected ? 'true' : undefined}
                         onClick={() => selectRow(item.request_id)}
                       >
-                        {formatTime(item.created_at)}
+                        <span className="mono">{formatTime(item.created_at)}</span>
                       </button>
                     </td>
-                    <td>{item.asset_id}</td>
+                    <td className="mono">{item.asset_id}</td>
                     <td>
                       <span className={`status-chip ${toneClass(status.tone)}`}>
                         {status.word}
                       </span>
                     </td>
-                    <td>{formatLatency(item.latency_ms_total)}</td>
+                    <td className="mono">{formatLatency(item.latency_ms_total)}</td>
                     <td>
-                      <CostLine item={item} />
+                      <UsageCell item={item} />
+                    </td>
+                    <td className="mono">
+                      {item.cost_priced ? formatUSD(item.cost_cents) : 'not yet priced'}
                     </td>
                   </tr>
                 );
@@ -431,6 +448,7 @@ export default function InsightsPanel({ apiKey, onApiKey }) {
         <DetailCard
           record={detail}
           apiKey={apiKey}
+          profile={profile}
           onClose={() => {
             setDetail(null);
             setSelectedId(null);

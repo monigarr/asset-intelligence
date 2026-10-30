@@ -2,7 +2,7 @@
 
 Routes: POST /v1/inspections (multipart upload → validated result),
 GET /v1/inspections (history list), GET /v1/inspections/{id},
-GET .../overlay?image=N, POST .../review, GET /v1/stats (summary),
+GET .../overlay?image=N, GET .../image?image=N, POST .../review, GET /v1/stats,
 plus /healthz and /metrics (no auth).
 
 Notes:
@@ -248,7 +248,8 @@ def create_app(
             i: render_overlay(n.data, _decoded_for(result, i, n.width, n.height))
             for i, n in enumerate(normalized)
         }
-        record = active_store.save(result, overlays)
+        originals = {i: (n.mime, n.data) for i, n in enumerate(normalized)}
+        record = active_store.save(result, overlays, originals)
         COST_CENTS.observe(result.cost_cents)
         logger.info(
             "inspection_complete",
@@ -292,6 +293,16 @@ def create_app(
         if png is None:
             raise HTTPException(404, "unknown inspection or image index")
         return Response(png, media_type="image/png")
+
+    @app.get("/v1/inspections/{request_id}/image")
+    async def get_original_image(
+        request_id: str, image: int = 0, key: str = Depends(require_key)
+    ) -> Response:
+        found = active_store.get_original(request_id, image)
+        if found is None:
+            raise HTTPException(404, "unknown inspection or image index")
+        data, mime = found
+        return Response(data, media_type=mime)
 
     @app.post("/v1/inspections/{request_id}/review")
     async def review_inspection(

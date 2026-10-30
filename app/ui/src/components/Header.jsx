@@ -1,12 +1,15 @@
-import { ABOUT } from './about.js';
+import { ABOUT, TAGLINE } from './about.js';
 import { GithubIcon, MailIcon } from './icons.jsx';
 
 export default function Header({ status }) {
   return (
     <header className="app-header">
       <div className="brand">
-        <span className="brand-name">Asset Intelligence</span>
-        <span className="brand-sub">by ManageAssets.ca</span>
+        <img className="brand-mark" src="/logo.png" alt="Asset Intelligence logo" />
+        <span className="brand-text">
+          <span className="brand-name">Asset Intelligence</span>
+          <span className="brand-sub">{TAGLINE}</span>
+        </span>
       </div>
       <div className="head-right">
         <nav className="main-nav" aria-label="Main">
@@ -31,7 +34,7 @@ export default function Header({ status }) {
             <span className="sr-only">GitHub</span>
           </a>
         </nav>
-        {status ? <span className="sub">{status}</span> : null}
+        {status ? <span className="head-status">{status}</span> : null}
       </div>
     </header>
   );

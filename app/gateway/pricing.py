@@ -9,6 +9,7 @@ All built-in prices are 0.0 placeholders and every estimate reports
     META_PRICE_PER_1K_CENTS_<MODEL>_OUTPUT       split: output rate
     META_PRICE_PER_1K_CENTS_<MODEL>_CACHED_INPUT split: cached-input rate
     META_PRICE_PER_IMAGE_CENTS_<MODEL>           USD cents per image
+    META_PRICE_PER_IMAGE_CENTS_<MODEL>_IMAGE     alias (same meaning, explicit unit)
     META_PRICE_PER_1_HOUR_<MODEL>_OUTPUT         USD cents per hour (time-metered)
 
 `<MODEL>` is the model id uppercased with non-alphanumerics as `_`, e.g.
@@ -121,9 +122,15 @@ def price_split_1k_cents(
 def price_per_image_cents(
     model_id: str, environ: Mapping[str, str] | None = None
 ) -> tuple[float, bool]:
-    """Return (cents per image, priced). `priced` is False on placeholder."""
+    """Return (cents per image, priced). `priced` is False on placeholder.
+
+    Accepts the canonical ``META_PRICE_PER_IMAGE_CENTS_<MODEL>`` var and the
+    ``..._<MODEL>_IMAGE`` alias (same value, explicit unit)."""
     env = os.environ if environ is None else environ
-    override = _env_price(f"META_PRICE_PER_IMAGE_CENTS_{_model_env_token(model_id)}", env)
+    base = f"META_PRICE_PER_IMAGE_CENTS_{_model_env_token(model_id)}"
+    override = _env_price(base, env)
+    if override is None:
+        override = _env_price(f"{base}_IMAGE", env)
     if override is not None:
         return override, True
     return _PLACEHOLDER_PER_IMAGE_CENTS.get(model_id, 0.0), False

@@ -2,7 +2,7 @@
 **For:** Muse Code, Cursor, frontend agents — aligned to DESIGN.md v1.1 2026-10-29 verified `5a83c3e`
 **Parent:** ManageAssets.net — Infrastructure Intelligence For The Real World
 **Product:** Asset Intelligence — AI Field Evidence Intelligence Platform
-**Version:** 2.1 — Aligned to DESIGN.md v1.1; marketing/ paths current as of 2026-10-29 reorg
+**Version:** 2.2 (2026-10-29, owner logo + tab/pill wayfinding recorded; CTA blue still singles action color) — Aligned to DESIGN.md v1.1; marketing/ paths current as of 2026-10-29 reorg
 **Owner:** Manage Assets Inc. / Monica Peters
 **Status:** VERIFIED vs repo on 2026-10-29. Proposals labeled PROPOSAL, owner calls labeled OWNER DECISION.
 
@@ -52,7 +52,7 @@ Extracted from `marketing/manage_assets_inc/brand_kit.png` (parent set + PDF):
 --warn: #b45309; --radius: 6px;
 system font stack, 14px body
 ```
-Flat 6px-radius panels, four tabs (Demo / New inspection / About / Insights), Accept/Reject under “Human review (required)”, keyboard-operable evidence chips, SAM overlay label-colored fills 35% + 3px bbox strokes + 5px white halo when selected, `role="img"` + label, tablist ARIA + `:focus-visible`.
+Carded panels, five tabs (Demo / New inspection / Insights / Settings / About), Accept/Reject under “Human review (required)”, keyboard-operable evidence chips, SAM overlay label-colored fills 35% + 3px bbox strokes + 5px white halo when selected, `role="img"` + label, tablist ARIA + `:focus-visible`.
 
 **OWNER DECISION (blocking rebrand):**
 Reconcile UI blue `#1d4ed8` with logo green `#5BBC7A`. Options:
@@ -82,7 +82,7 @@ Do not mix blue CTAs and green CTAs without deciding.
 - Never stretch, never add drop shadow, never recolor Forest to lime or purple-indigo gradient.
 - On field photos, use white container 4px radius (verified `--radius: 6px` but 4px for icon container) + 1px Fog border.
 - For Asset Intelligence outside product, include “by ManageAssets.ca” 10px system uppercase tracking 0.08em below lockup when used (matches DESIGN.md header pattern).
-- Until OWNER DECISION: no logo in UI, text wordmark stays per DESIGN.md “Brand commit” item.
+- DECIDED 2026-10-29: logo in UI - icon_ai mark (trimmed, app/ui/public/logo.png) + text wordmark + tagline. Favicon simple_icon (app/ui/public/icon.png).
 
 ---
 
@@ -170,7 +170,10 @@ File: `asset_intelligence_app_icon_1024.png` [MISSING] + `asset_intelligence_sim
 - **Evidence tether (signature PROPOSAL):** 1px steel line #18181b or Forest #5BBC7A pending OWNER DECISION, Lake dot optional. Draw only when both endpoints exist, instant under `prefers-reduced-motion`. From MaskOverlay.jsx to observation row.
 - **Ledger chips:** Inspection / Needs Review / Approved / Uncertain (AI) per parent 09 System Details, but styled with verified tokens: Approved Forest tint (if option c), Needs Review tape yellow #ffc93a (PROPOSAL, verify contrast), Uncertain rust #c43a31.
 - **Top bar:** DESIGN.md target: “Asset Intelligence • by ManageAssets.ca | DEMO-DRAIN-001 • 11¢ (mono)”. Keep text wordmark until brand commit. Cost honesty: priced estimate with ¢, unpriced “not yet priced”.
-- **Blueprint grid:** 1px #d4d4d8 24px intervals opacity 0.4 for empty state “Drop 1–5 photos + note — EXIF GPS stripped”.
+- **Blueprint grid:** 1px #d4d4d8 24px intervals opacity 0.4 (shipped as rgba line wash on dropzone).
+- **Tab wayfinding (DECIDED 2026-10-29):** Demo Lake #4380B2, New inspection accent #1d4ed8, About Stone muted, Insights Forest #5BBC7A - 3px tab markers + tinted icons, navigation only, action buttons stay blue.
+- **Pill categories (DECIDED 2026-10-29):** mask refs + mask rail Lake tint, note refs neutral, missing + needs-review tape #ffc93a, accepted forest tint, rejected rust tint, cost pill forest (priced) / neutral (unpriced).
+- **CTA group (DECIDED 2026-10-29):** next step + human review framed in --stone-deep #0E1619 parent card with cost pill on top (Demo + New inspection). for empty state “Drop 1–5 photos + note — EXIF GPS stripped”.
 
 ---
 
@@ -185,10 +188,10 @@ File: `asset_intelligence_app_icon_1024.png` [MISSING] + `asset_intelligence_sim
 - Do NOT invent brand facts: logo shortlist lives in tracked `marketing/`; header keeps text wordmark until brand decision lands.
 
 **OWNER DECISION checklist (required before rebrand):**
-- [ ] Pick canonical logo file (`manage_assets_inc/logo.svg` vs `logo1–3.png` vs AI set `final_simple_logo_*`)
-- [ ] Commit SVG, wire favicon + header mark
+- [x] Pick canonical logo file - DECIDED 2026-10-29: header `asset_intelligence_icon_ai.png`, favicon `asset_intelligence_simple_icon.png` (both trimmed of transparent padding into app/ui/public/).
+- [x] Commit SVG, wire favicon + header mark - wired 2026-10-29 as trimmed PNGs (no SVG cut of the AI set exists).
 - [ ] Resolve blue-vs-green accent: option (a) blue UI + monochrome logo, (b) migrate to green, (c) slate-ink chrome with green reserved for verified/accept
-- [ ] Run axe contrast audit at 1280px and 390px on all four tabs, paste report in PR
+- [x] Run axe contrast audit - done 2026-10-29: axe-core 4.14.0 color-contrast rule, 0 violations, 4 tabs x 1280/390; report live_reports/axe-contrast-2026-10-29.md (no PR in this flow).
 
 ---
 

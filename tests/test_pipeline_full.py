@@ -198,6 +198,37 @@ def test_run_full_cost_includes_wonder(monkeypatch: pytest.MonkeyPatch) -> None:
     assert out.cost_priced is False
 
 
+def test_run_full_model_usage_legs_sum_to_totals(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.orchestrator.spark import SparkReasoner
+
+    monkeypatch.setenv("META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_INPUT", "0.125")
+    monkeypatch.setenv("META_PRICE_PER_1K_CENTS_MUSE_SPARK_1_3_OUTPUT", "0.425")
+    monkeypatch.setenv("META_PRICE_PER_1K_CENTS_MUSE_WONDER_1_0_INPUT", "0.4")
+    monkeypatch.setenv("META_PRICE_PER_1K_CENTS_MUSE_WONDER_1_0_OUTPUT", "2.0")
+    monkeypatch.setenv("META_PRICE_PER_IMAGE_CENTS_SAM_3_1", "0.25")
+    pipe = InspectionPipeline(
+        sam=_FakeSam(),  # type: ignore[arg-type]
+        vision=_FakeVision(),  # type: ignore[arg-type]
+        spark=SparkReasoner(client=_spark_client(_spark_ok), settings=_settings()),
+        wonder=_FakeWonder(_plan()),  # type: ignore[arg-type]
+        settings=_settings(),
+    )
+    out = pipe.run_full([JPEG], note="Crack seen")
+    assert out.cost_priced is True
+    assert [leg.stage for leg in out.model_usage] == ["sam", "vision", "spark", "wonder"]
+    assert [leg.model for leg in out.model_usage] == [
+        "sam-3.1",
+        "muse-spark-1.3",
+        "muse-spark-1.3",
+        "muse-wonder-1.0",
+    ]
+    assert out.model_usage[0].images == 1
+    assert sum(leg.cost_cents for leg in out.model_usage) == pytest.approx(out.cost_cents)
+    assert sum(leg.prompt_tokens for leg in out.model_usage) == out.usage.prompt_tokens
+    assert sum(leg.completion_tokens for leg in out.model_usage) == out.usage.completion_tokens
+    assert all(leg.cost_priced for leg in out.model_usage)
+
+
 def test_full_chain_all_real_components() -> None:
     img = Image.new("RGB", (32, 24), (200, 200, 200))
     buf = BytesIO()

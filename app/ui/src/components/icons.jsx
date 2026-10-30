@@ -79,3 +79,18 @@ export function ChartIcon(props) {
     </Stroke>
   );
 }
+export function GearIcon(props) {
+  return (
+    <Stroke {...props}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2v3" />
+      <path d="M12 19v3" />
+      <path d="M2 12h3" />
+      <path d="M19 12h3" />
+      <path d="M4.9 4.9l2.1 2.1" />
+      <path d="M17 17l2.1 2.1" />
+      <path d="M19.1 4.9L17 7" />
+      <path d="M7 17l-2.1 2.1" />
+    </Stroke>
+  );
+}

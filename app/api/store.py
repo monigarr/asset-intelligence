@@ -1,9 +1,10 @@
-"""Ephemeral inspection store (Day 7): SQLite records + overlay BLOBs, 24h TTL.
+"""Ephemeral inspection store (Day 7): SQLite records + overlay/original BLOBs, 24h TTL.
 
 Demo posture per ARCHITECTURE.md §5: SQLite file (or :memory:), no cloud.
 Production path (M3) is Postgres + MinIO/R2; the compose file already runs
-MinIO reserved for that move. No raw uploads or notes are stored -- only the
-validated result, rendered overlays, and review state (data minimization).
+MinIO reserved for that move. Raw upload bytes and notes are never kept --
+only the validated result, rendered overlays, the normalized EXIF-stripped
+working image (exact pixels the model saw), and review state.
 """
 
 from __future__ import annotations
@@ -66,12 +67,21 @@ class InspectionStore:
                 "request_id TEXT NOT NULL, image_index INTEGER NOT NULL, "
                 "png BLOB NOT NULL, PRIMARY KEY (request_id, image_index))"
             )
+            self._db.execute(
+                "CREATE TABLE IF NOT EXISTS originals ("
+                "request_id TEXT NOT NULL, image_index INTEGER NOT NULL, "
+                "mime TEXT NOT NULL, data BLOB NOT NULL, "
+                "PRIMARY KEY (request_id, image_index))"
+            )
             self._db.commit()
 
     def save(
-        self, result: InspectionResult, overlays: Mapping[int, bytes]
+        self,
+        result: InspectionResult,
+        overlays: Mapping[int, bytes],
+        originals: Mapping[int, tuple[str, bytes]] | None = None,
     ) -> InspectionRecord:
-        """Persist a validated result + overlays. Returns the stored record."""
+        """Persist a validated result + image BLOBs. Returns the stored record."""
         # model_construct: result is already valid; full re-validation would
         # demand note/image_count context the store intentionally never keeps.
         record = InspectionRecord.model_construct(
@@ -91,6 +101,15 @@ class InspectionStore:
                 " VALUES (?, ?, ?)",
                 [(record.request_id, idx, png) for idx, png in overlays.items()],
             )
+            if originals:
+                self._db.executemany(
+                    "INSERT OR REPLACE INTO originals (request_id, image_index, mime, data)"
+                    " VALUES (?, ?, ?, ?)",
+                    [
+                        (record.request_id, idx, mime, data)
+                        for idx, (mime, data) in originals.items()
+                    ],
+                )
             self._db.commit()
         return record
 
@@ -119,6 +138,19 @@ class InspectionStore:
                 (request_id, image_index),
             ).fetchone()
         return bytes(row[0]) if row else None
+
+    def get_original(
+        self, request_id: str, image_index: int
+    ) -> tuple[bytes, str] | None:
+        """Stored (data, mime) working image, or None when unknown/expired."""
+        with self._lock:
+            self._prune_locked(datetime.now(UTC).isoformat())
+            row = self._db.execute(
+                "SELECT data, mime FROM originals WHERE request_id = ?"
+                " AND image_index = ?",
+                (request_id, image_index),
+            ).fetchone()
+        return (bytes(row[0]), str(row[1])) if row else None
 
     def list(
         self,
@@ -171,6 +203,7 @@ class InspectionStore:
                 "latency_ms_total": round(sum(float(v) for v in durations.values()), 1),
                 "cost_cents": result.get("cost_cents", 0.0),
                 "cost_priced": bool(result.get("cost_priced", False)),
+                "model_usage": result.get("model_usage") or [],
                 "model_trace": result.get("model_trace") or {},
                 "usage_total_tokens": (result.get("usage") or {}).get("total_tokens", 0),
                 "observation_count": len(result.get("observations") or []),
@@ -252,6 +285,10 @@ class InspectionStore:
         if cur.rowcount:
             self._db.execute(
                 "DELETE FROM overlays WHERE request_id NOT IN"
+                " (SELECT request_id FROM inspections)"
+            )
+            self._db.execute(
+                "DELETE FROM originals WHERE request_id NOT IN"
                 " (SELECT request_id FROM inspections)"
             )
             self._db.commit()

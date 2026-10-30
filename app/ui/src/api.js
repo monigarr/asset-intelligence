@@ -79,15 +79,28 @@ export async function fetchInspection(requestId, apiKey) {
   return res.json();
 }
 
-export async function fetchOverlays(requestId, apiKey, maxImages = 5) {
+async function fetchIndexedBlobs(requestId, apiKey, route, fallbackMime, maxImages) {
   const out = [];
   for (let i = 0; i < maxImages; i += 1) {
-    const res = await fetch(`/v1/inspections/${encodeURIComponent(requestId)}/overlay?image=${i}`, {
+    const res = await fetch(`/v1/inspections/${encodeURIComponent(requestId)}/${route}?image=${i}`, {
       headers: apiKey ? { 'X-API-Key': apiKey } : {},
     });
     if (!res.ok) break; // indices are contiguous; first miss ends the set
     const blob = await res.blob();
-    out.push({ index: i, url: URL.createObjectURL(blob) });
+    out.push({ index: i, blob, mime: blob.type || fallbackMime });
   }
   return out;
+}
+
+export async function fetchOverlayBlobs(requestId, apiKey, maxImages = 5) {
+  return fetchIndexedBlobs(requestId, apiKey, 'overlay', 'image/png', maxImages);
+}
+
+export async function fetchOriginalBlobs(requestId, apiKey, maxImages = 5) {
+  return fetchIndexedBlobs(requestId, apiKey, 'image', 'application/octet-stream', maxImages);
+}
+
+export async function fetchOverlays(requestId, apiKey, maxImages = 5) {
+  const raws = await fetchOverlayBlobs(requestId, apiKey, maxImages);
+  return raws.map((r) => ({ index: r.index, url: URL.createObjectURL(r.blob) }));
 }
