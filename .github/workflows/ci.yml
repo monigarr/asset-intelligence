@@ -4,10 +4,10 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Install deps
@@ -24,16 +24,16 @@ jobs:
       - name: SBOM
         run: pip freeze > sbom.txt
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom
           path: sbom.txt
 
   ui:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -46,9 +46,9 @@ jobs:
           npm test
 
   docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Prepare env file
         run: cp .env.example .env
       - name: Validate compose
@@ -57,12 +57,12 @@ jobs:
         run: docker compose build api
 
   live:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       META_API_KEY: ${{ secrets.META_API_KEY }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Install deps
@@ -80,8 +80,8 @@ jobs:
           META_API_TIMEOUT_S: '180'
         run: python -m eval.run --mode live --cases-dir eval/cases/synthetic --suites clear --limit 5 --out eval-live.json --skip-gates latency_p95_ms
       - name: Upload live report
-        if: ${{ env.META_API_KEY != '' }}
-        uses: actions/upload-artifact@v4
+        if: ${{ always() && env.META_API_KEY != '' }}
+        uses: actions/upload-artifact@v7
         with:
           name: eval-live
           path: eval-live.json
