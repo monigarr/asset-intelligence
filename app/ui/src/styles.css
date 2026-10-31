@@ -495,3 +495,6 @@ button.nav-icon { font: inherit; }
 .app-footer { border-top: 1px solid var(--border); margin-top: 24px; padding: 12px 4px 4px; color: var(--muted); font-size: 12px; text-align: center; }
 .app-footer p { margin: 4px 0; }
 .app-footer a { color: inherit; }
+
+.about-nav { font-size: 13px; margin: 0 0 12px; color: var(--muted); }
+.about-nav a { color: inherit; }

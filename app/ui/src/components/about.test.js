@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ABOUT, TAGLINE, YOUTUBE_URL } from './about.js';
+import { ABOUT, SECTIONS, TAGLINE, YOUTUBE_URL } from './about.js';
 
 describe('about content', () => {
   it('links to the repo, hackathon, and product', () => {
@@ -9,15 +9,32 @@ describe('about content', () => {
     expect(ABOUT.companyUrl).toBe('https://manageassets.ca/');
   });
 
-  it('has a short public blurb and credits', () => {
-    expect(ABOUT.blurb.length).toBeGreaterThan(20);
-    expect(ABOUT.blurb.length).toBeLessThan(400);
+  it('has three navigable sections', () => {
+    expect(SECTIONS.map((s) => s.id)).toEqual(['about-product', 'extend-customize', 'licensing']);
+    expect(SECTIONS.map((s) => s.label)).toEqual(['About', 'Extend & Customize', 'Licensing & Open Source']);
+  });
+
+  it('states product purpose and builder credits', () => {
+    expect(ABOUT.productLine).toBe('Evidence-linked inspection intelligence');
+    expect(ABOUT.purpose).toContain('human review and approval');
     expect(ABOUT.builder).toBe('Monica Peters');
-    expect(ABOUT.company).toBe('Manage Assets Inc.');
     expect(ABOUT.builderRoles).toContain('Forward Deployed Engineer');
-    expect(ABOUT.approach).toContain('Human-approved decisions');
-    expect(ABOUT.projectLine).toContain('Open-Source Extension');
-    expect(ABOUT.productBlurb).toContain('Self-hosted');
+    expect(ABOUT.founderLine).toContain('solo developer');
+    expect(ABOUT.company).toBe('Manage Assets Inc.');
+    expect(ABOUT.builtForBlurb).toContain('United States and Canada');
+    expect(ABOUT.hackathonLine).toContain('Meta AI stack');
+    expect(ABOUT.videoNote).toBe('Coming soon.');
+  });
+
+  it('states extend and licensing terms', () => {
+    expect(ABOUT.extendLead).toContain('engineering support');
+    expect(ABOUT.extendBody).toContain('professional engineering services');
+    expect(ABOUT.servicesEmail).toBe('monica@ManageAssets.net');
+    expect(ABOUT.licenseName).toBe('Apache License 2.0');
+    expect(ABOUT.licenseUrl).toContain('LICENSE');
+    expect(ABOUT.licenseBlurb).toContain('free to use');
+    expect(ABOUT.distinction).toContain('proprietary commercial software');
+    expect(ABOUT.attribution).toContain('Copyright 2026 Monica Peters');
   });
 
   it('tagline is one short sentence', () => {
