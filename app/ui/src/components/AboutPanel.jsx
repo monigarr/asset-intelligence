@@ -12,7 +12,7 @@ export default function AboutPanel() {
         ))}
       </nav>
       <section id="about-product" aria-label="About">
-        <h3>Asset Intelligence</h3>
+        <h3 className="section-title">Asset Intelligence</h3>
         <p>
           <strong>{ABOUT.productLine}</strong>
         </p>
@@ -42,7 +42,7 @@ export default function AboutPanel() {
         </p>
       </section>
       <section id="extend-customize" aria-label="Extend and customize">
-        <h3>{ABOUT.extendHeading}</h3>
+        <h3 className="section-title">{ABOUT.extendHeading}</h3>
         <p>
           <strong>{ABOUT.extendLead}</strong>
         </p>
@@ -56,7 +56,7 @@ export default function AboutPanel() {
         </p>
       </section>
       <section id="licensing" aria-label="Licensing and open source">
-        <h3>{ABOUT.licenseHeading}</h3>
+        <h3 className="section-title">{ABOUT.licenseHeading}</h3>
         <p>{ABOUT.licenseBlurb}</p>
         <p>
           <a href={ABOUT.licenseUrl} target="_blank" rel="noreferrer">
