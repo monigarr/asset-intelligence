@@ -215,7 +215,6 @@ export default function App() {
     setError('');
     try {
       const loaded = await loadFixture(id);
-      setMode('demo');
       setFixtureId(id);
       setFixtureCase(`${loaded.data.suite} \u00b7 ${loaded.data.case_id}`);
       setDemoData({
