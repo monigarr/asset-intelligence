@@ -21,6 +21,7 @@ export default function SettingsPanel({ apiKey, onApiKey, theme, onTheme, fontSc
   return (
     <div className="panel">
       <h2>Settings</h2>
+      <div className="settings-section settings-api">
       <form
         className="key-form"
         onSubmit={save}
@@ -52,6 +53,8 @@ export default function SettingsPanel({ apiKey, onApiKey, theme, onTheme, fontSc
         </div>
       </form>
       {saved && <p className="hint">API key saved in this browser.</p>}
+      </div>
+      <div className="settings-section settings-appearance">
       <h3>Appearance</h3>
       <div className="segmented" role="radiogroup" aria-label="Theme">
         {['light', 'dark', 'contrast'].map((t) => (
@@ -86,6 +89,8 @@ export default function SettingsPanel({ apiKey, onApiKey, theme, onTheme, fontSc
           A+
         </button>
       </div>
+      </div>
+      <div className="settings-section settings-export">
       <h3>Export identity</h3>
       <p>Your full name, email, and export signature are added to the footer of every document you export from this interface.</p>
       <div className="key-form">
@@ -119,6 +124,7 @@ export default function SettingsPanel({ apiKey, onApiKey, theme, onTheme, fontSc
             onChange={(e) => onProfile({ ...profile, signature: e.target.value })}
           />
         </label>
+      </div>
       </div>
     </div>
   );

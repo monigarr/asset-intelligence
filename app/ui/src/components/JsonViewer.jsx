@@ -57,6 +57,7 @@ export default function JsonViewer({
           </ul>
         </div>
       )}
+      <div className="obs-section">
       <h3>Observations ({result.observations.length})</h3>
       {result.observations.map((ob, i) => (
         <div
@@ -87,6 +88,7 @@ export default function JsonViewer({
           </div>
         </div>
       ))}
+      </div>
       {result.discrepancies.length === 0 && (
         <>
           <h3>Discrepancies</h3>
@@ -94,10 +96,10 @@ export default function JsonViewer({
         </>
       )}
       {showNextStep && (
-        <>
+        <div className="nextstep-banner">
           <h3>Recommended next step</h3>
           <p>{result.recommended_next_step}</p>
-        </>
+        </div>
       )}
       <h3>Trace</h3>
       <div className="trace">

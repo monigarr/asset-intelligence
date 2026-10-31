@@ -490,7 +490,17 @@ button.nav-icon { font: inherit; }
 .usage-breakdown tfoot td { font-weight: 700; border-top: 2px solid var(--border); }
 .detail-row > td { padding: 12px; background: var(--card); }
 .detail-card h3 { font-size: 14px; font-weight: 700; color: var(--text); margin: 16px 0 8px; }
-.detail-card .discrepancy-banner h3 { color: var(--discrepancy); }
+.detail-card .discrepancy-banner { background: #b3261e; border-color: #b3261e; color: #fff; }
+.detail-card .discrepancy-banner h3 { color: #fff; }
+.detail-card .discrepancy-banner .warn { color: #fff; }
+.detail-card .obs-section { background: #166534; border: 1px solid #166534; border-radius: var(--radius); padding: 8px 10px; margin: 8px 0; color: #fff; }
+.detail-card .obs-section h3 { color: #fff; margin: 0 0 4px; }
+.detail-card .obs-section .obs { border-top-color: rgba(255,255,255,0.35); }
+.detail-card .obs-section .chip { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.55); color: #fff; }
+.detail-card .obs-section .uncertainty { color: #fff; }
+.detail-card .nextstep-banner { background: #1e3a5f; border: 1px solid #1e3a5f; border-radius: var(--radius); padding: 8px 10px; margin: 8px 0; color: #fff; }
+.detail-card .nextstep-banner h3 { color: #fff; margin: 0 0 4px; }
+.detail-card .nextstep-banner p { margin: 0; max-width: 62ch; }
 .detail-card .review-note { font-weight: 700; font-size: 14px; }
 .detail-card .review-note textarea { font-weight: 400; font-size: 14px; }
 
@@ -514,3 +524,9 @@ button.nav-icon { font: inherit; }
 .about-nav a:hover { text-decoration: underline; }
 :root[data-theme="dark"] .about-nav a { color: #18181b; }
 :root[data-theme="contrast"] .about-nav a { color: #18181b; }
+/* Settings section cards: one tinted card per section for scannability. */
+.settings-section { border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; margin: 12px 0; }
+.settings-section h3:first-child { margin-top: 0; }
+.settings-api { background: var(--lake-tint); }
+.settings-appearance { background: var(--forest-tint); }
+.settings-export { background: var(--rust-tint); }
