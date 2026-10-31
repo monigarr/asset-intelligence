@@ -1,6 +1,6 @@
 # Deployment
 
-> Doc version: 1.0 | Updated: 2026-10-31 | Verified against: `2b6e515`
+> Doc version: 1.1 | Updated: 2026-10-31 | Verified against: `379af51`
 
 Three ways to run this repo, pick one row and follow it. New engineers start
 with [Getting Started](GETTING_STARTED.md) for clone, venv, and install.
@@ -53,6 +53,8 @@ Data lives in `./data` (SQLite, 24h TTL). Stop with `docker compose down`.
 One Docker container (API plus UI behind nginx on port 7860), built from
 `deploy/hf/`. Same pipeline and review UI, demo-grade persistence: history
 resets when the Space restarts unless a Storage Bucket is attached.
+
+Live: https://huggingface.co/spaces/monigarr/asset-intelligence (app: https://monigarr-asset-intelligence.hf.space).
 
 Prerequisites (owner, one time):
 

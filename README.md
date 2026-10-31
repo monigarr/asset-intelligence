@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](Dockerfile)
 
 > **[Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) — Startup Track / Push the Frontier**
-> README v2.4 · Updated 2026-10-29 · Verified against `5a83c3e` · Meta-only stack, no OpenAI
+> README v2.5 · Updated 2026-10-31 · Verified against `379af51` · Meta-only stack, no OpenAI
 
 **One-liner:** Asset Intelligence gives machines a new capability — seeing infrastructure
 defects (SAM 3.1), understanding field notes (Muse Spark 1.3 Vision), reasoning with cited
@@ -64,6 +64,8 @@ checklist → human approve/reject. Run from a local drive, not a UNC path (Dock
 path above reproduces every beat of it live.
 
 Live demo and production paths: see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) (Hugging Face Space demo, production plan pointer).
+
+**Live demo Space:** https://huggingface.co/spaces/monigarr/asset-intelligence (public; request an API key to run inspections).
 
 ## Architecture — Five Meta Stages, One Verifiable Pipeline
 
