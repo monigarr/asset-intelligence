@@ -150,3 +150,6 @@ gitleaks-report.json
 
 docs/PRIVATE_AUDIT.md
 
+
+# Production deployment plan (owner-only, never commit)
+DEPLOYMENT_PRODUCTION_PLAN.md
