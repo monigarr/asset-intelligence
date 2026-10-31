@@ -491,3 +491,7 @@ button.nav-icon { font: inherit; }
 .detail-card .discrepancy-banner h3 { color: var(--discrepancy); }
 .detail-card .review-note { font-weight: 700; font-size: 14px; }
 .detail-card .review-note textarea { font-weight: 400; font-size: 14px; }
+
+.app-footer { border-top: 1px solid var(--border); margin-top: 24px; padding: 12px 4px 4px; color: var(--muted); font-size: 12px; text-align: center; }
+.app-footer p { margin: 4px 0; }
+.app-footer a { color: inherit; }

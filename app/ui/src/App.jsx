@@ -15,6 +15,7 @@ import Header from './components/Header.jsx';
 import AboutPanel from './components/AboutPanel.jsx';
 import SettingsPanel from './components/SettingsPanel.jsx';
 import InsightsPanel from './components/InsightsPanel.jsx';
+import Footer from './components/Footer.jsx';
 import { ChartIcon, CodeIcon, GearIcon, InfoIcon, PlayIcon } from './components/icons.jsx';
 
 const FALLBACK_DIMS = { width: 800, height: 600 };
@@ -499,6 +500,9 @@ export default function App() {
           />
         </div>
       )}
+
+      <Footer />
+
     </div>
   );
 }
