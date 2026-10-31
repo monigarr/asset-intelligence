@@ -169,7 +169,7 @@ File: `asset_intelligence_app_icon_1024.png` [MISSING] + `asset_intelligence_sim
 - **SAM overlay:** Stroke only, 3px selected + white halo (verified), fills subtle 35% alpha (verified). Add pattern/shape redundancy per C.1 colorblind fix, not hue alone — keep cracks visible.
 - **Evidence tether (signature PROPOSAL):** 1px steel line #18181b or Forest #5BBC7A pending OWNER DECISION, Lake dot optional. Draw only when both endpoints exist, instant under `prefers-reduced-motion`. From MaskOverlay.jsx to observation row.
 - **Ledger chips:** Inspection / Needs Review / Approved / Uncertain (AI) per parent 09 System Details, but styled with verified tokens: Approved Forest tint (if option c), Needs Review tape yellow #ffc93a (PROPOSAL, verify contrast), Uncertain rust #c43a31.
-- **Top bar:** DESIGN.md target: “Asset Intelligence • by ManageAssets.ca | DEMO-DRAIN-001 • 11¢ (mono)”. Keep text wordmark until brand commit. Cost honesty: priced estimate with ¢, unpriced “not yet priced”.
+- **Top bar:** DESIGN.md target: “Asset Intelligence • by ManageAssets.ca | DEMO-DRAIN-001 • $0.11 (mono)”. Keep text wordmark until brand commit. Cost honesty: priced $X.XX estimate, unpriced “not yet priced”.
 - **Blueprint grid:** 1px #d4d4d8 24px intervals opacity 0.4 (shipped as rgba line wash on dropzone).
 - **Tab wayfinding (DECIDED 2026-10-29):** Demo Lake #4380B2, New inspection accent #1d4ed8, About Stone muted, Insights Forest #5BBC7A - 3px tab markers + tinted icons, navigation only, action buttons stay blue.
 - **Pill categories (DECIDED 2026-10-29):** mask refs + mask rail Lake tint, note refs neutral, missing + needs-review tape #ffc93a, accepted forest tint, rejected rust tint, cost pill forest (priced) / neutral (unpriced).

@@ -127,7 +127,7 @@ The prior draft described a codebase that does not exist. Corrected:
 
 ```
 +----------------------------------------------------------------------------------+
-| Header: Asset Intelligence • by ManageAssets.ca | DEMO-DRAIN-001 • 11¢ (mono)     |
+| Header: Asset Intelligence • by ManageAssets.ca | DEMO-DRAIN-001 • $0.11 (mono)     |
 | Tabs: Demo | New inspection | Insights | Settings | About                 |
 +------------------------------------------+---------------------------------------+
 | IMAGE CANVAS                             | LEDGER                                |
@@ -211,7 +211,7 @@ Conventions: no new npm dependencies; every item keeps `pytest`, `vitest run`, `
 - Do NOT add Tailwind, Framer Motion, chart libs, or webfont CDNs without owner sign-off.
 - Do NOT change the API contract (`human_review_required`, `model_trace`, cost shape). UI is a view layer.
 - Do NOT invent brand facts: logo shortlist lives in tracked `marketing/` (see BRAND_KIT.md v2.1); header keeps the text wordmark until the brand decision lands.
-- Do NOT restyle cost figures into false precision: priced = estimate with ¢, unpriced = “not yet priced,” everywhere.
+- Show priced costs as $X.XX estimates; unpriced shows “not yet priced,” everywhere.
 - Do NOT regress a11y: tablist ARIA, `:focus-visible`, chip keyboard paths, and tour coverage stay green.
 
 **Microcopy in product voice (active verbs, sentence case, no filler):**

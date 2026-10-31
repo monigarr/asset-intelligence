@@ -24,7 +24,7 @@ describe('buildDocument', () => {
     const lines = doc.text.split('\n');
     expect(lines[2]).toBe('**Recommended next step:** Re-photograph with a scale reference.');
     expect(doc.text).toContain(`Exported: ${AT}`);
-    expect(doc.text).toContain('$0.592 estimated');
+    expect(doc.text).toContain('$0.59 estimated');
     expect(doc.text).toContain('Crack <b>big</b>');
   });
 

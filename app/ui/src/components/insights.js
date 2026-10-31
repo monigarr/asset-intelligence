@@ -1,4 +1,4 @@
-﻿// Pure helpers for the Insights tab (tested; no React here).
+// Pure helpers for the Insights tab (tested; no React here).
 
 export function statusOf(item) {
   switch (item.review_status) {
@@ -21,16 +21,13 @@ export function toneClass(tone) {
 
 export function costText(item) {
   if (!item.cost_priced) return { text: 'not yet priced', priced: false };
-  return { text: `${Number(item.cost_cents).toFixed(2)}¢`, priced: true };
+  return { text: formatUSD(item.cost_cents), priced: true };
 }
 
 export function formatUSD(cents) {
   const dollars = Number(cents) / 100;
   if (!Number.isFinite(dollars)) return '$0.00';
-  let s = dollars.toFixed(6).replace(/0+$/, '');
-  if (s.endsWith('.')) return '$' + s + '00';
-  if (s.split('.')[1].length === 1) s += '0';
-  return '$' + s;
+  return '$' + dollars.toFixed(2);
 }
 
 export function formatLatency(ms) {
@@ -80,4 +77,41 @@ export function summarize(record) {
     if (!slowest || ms > slowest.ms) slowest = { stage, ms };
   }
   return { obs, disc, miss, slowest };
+}
+
+export function formatTokens(n) {
+  if (n == null) return '\u2014';
+  const v = Number(n);
+  if (!Number.isFinite(v)) return '\u2014';
+  return Math.max(0, Math.floor(v)).toLocaleString('en-US');
+}
+
+export function usageTotals(record) {
+  const legs = Array.isArray(record.model_usage) ? record.model_usage : [];
+  const durations = record.durations_ms || {};
+  const rows = legs.map((leg) => ({
+    stage: leg.stage,
+    model: leg.model,
+    prompt: Number(leg.prompt_tokens) || 0,
+    completion: Number(leg.completion_tokens) || 0,
+    images: Number(leg.images) || 0,
+    ms: durations[leg.stage] ?? null,
+    costCents: Number(leg.cost_cents) || 0,
+    priced: leg.cost_priced === true,
+  }));
+  const prompt = rows.reduce((a, r) => a + r.prompt, 0);
+  const completion = rows.reduce((a, r) => a + r.completion, 0);
+  const latencies = Object.values(durations)
+    .map(Number)
+    .filter((v) => Number.isFinite(v));
+  return {
+    rows,
+    prompt,
+    completion,
+    images: rows.reduce((a, r) => a + r.images, 0),
+    tokens: prompt + completion,
+    latencyMs: latencies.length ? latencies.reduce((a, b) => a + b, 0) : null,
+    costCents: Number(record.cost_cents) || 0,
+    priced: !!record.cost_priced,
+  };
 }

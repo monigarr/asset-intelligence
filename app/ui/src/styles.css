@@ -487,6 +487,8 @@ button.nav-icon { font: inherit; }
 .cta-group .model-usage li { color: #d4d4d8; }
 .usage-cell { display: flex; flex-direction: column; gap: 2px; }
 .usage-line { font-size: 11px; white-space: nowrap; }
+.usage-breakdown tfoot td { font-weight: 700; border-top: 2px solid var(--border); }
+.detail-row > td { padding: 12px; background: var(--card); }
 .detail-card h3 { font-size: 14px; font-weight: 700; color: var(--text); margin: 16px 0 8px; }
 .detail-card .discrepancy-banner h3 { color: var(--discrepancy); }
 .detail-card .review-note { font-weight: 700; font-size: 14px; }

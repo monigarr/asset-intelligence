@@ -1,14 +1,16 @@
-﻿import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   costText,
   formatLatency,
   formatTime,
+  formatTokens,
   formatUSD,
   sortRows,
   stageLabel,
   statusOf,
   summarize,
   toneClass,
+  usageTotals,
 } from './insights.js';
 
 describe('statusOf', () => {
@@ -33,17 +35,17 @@ describe('costText', () => {
       priced: false,
     });
     expect(costText({ cost_cents: 12.5, cost_priced: true })).toEqual({
-      text: '12.50¢',
+      text: '$0.13',
       priced: true,
     });
   });
 });
 
 describe('formatUSD', () => {
-  it('renders dollars with trimmed precision', () => {
-    expect(formatUSD(59.2)).toBe('$0.592');
-    expect(formatUSD(125.222)).toBe('$1.25222');
-    expect(formatUSD(75.23)).toBe('$0.7523');
+  it('renders dollars and cents', () => {
+    expect(formatUSD(59.2)).toBe('$0.59');
+    expect(formatUSD(125.222)).toBe('$1.25');
+    expect(formatUSD(75.23)).toBe('$0.75');
     expect(formatUSD(150)).toBe('$1.50');
     expect(formatUSD(0)).toBe('$0.00');
     expect(formatUSD(NaN)).toBe('$0.00');
@@ -107,5 +109,51 @@ describe('summarize', () => {
       slowest: { stage: 'wonder', ms: 500 },
     });
     expect(summarize({}).slowest).toBeNull();
+  });
+});
+
+describe('formatTokens', () => {
+  it('groups thousands and guards bad input', () => {
+    expect(formatTokens(0)).toBe('0');
+    expect(formatTokens(1234567)).toBe('1,234,567');
+    expect(formatTokens(null)).toBe('\u2014');
+    expect(formatTokens(NaN)).toBe('\u2014');
+  });
+});
+
+describe('usageTotals', () => {
+  it('merges legs with stage latencies and totals', () => {
+    const record = {
+      cost_cents: 6.66,
+      cost_priced: true,
+      durations_ms: { sam: 1000, vision: 2000, validate: 50 },
+      model_usage: [
+        { stage: 'sam', model: 'sam-3.1', images: 1, cost_cents: 0.25, cost_priced: true },
+        { stage: 'vision', model: 'muse-spark-1.3', prompt_tokens: 100, completion_tokens: 200, cost_cents: 1.0, cost_priced: true },
+      ],
+    };
+    expect(usageTotals(record)).toEqual({
+      rows: [
+        { stage: 'sam', model: 'sam-3.1', prompt: 0, completion: 0, images: 1, ms: 1000, costCents: 0.25, priced: true },
+        { stage: 'vision', model: 'muse-spark-1.3', prompt: 100, completion: 200, images: 0, ms: 2000, costCents: 1.0, priced: true },
+      ],
+      prompt: 100,
+      completion: 200,
+      images: 1,
+      tokens: 300,
+      latencyMs: 3050,
+      costCents: 6.66,
+      priced: true,
+    });
+    expect(usageTotals({})).toEqual({
+      rows: [],
+      prompt: 0,
+      completion: 0,
+      images: 0,
+      tokens: 0,
+      latencyMs: null,
+      costCents: 0,
+      priced: false,
+    });
   });
 });

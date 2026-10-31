@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import {
   fetchInspection,
   fetchInspections,
@@ -14,12 +14,14 @@ import ReviewActions from './ReviewActions.jsx';
 import {
   formatLatency,
   formatTime,
+  formatTokens,
   formatUSD,
   sortRows,
   stageLabel,
   statusOf,
   summarize,
   toneClass,
+  usageTotals,
 } from './insights.js';
 
 const STAGE_ORDER = ['sam', 'vision', 'spark', 'wonder', 'validate'];
@@ -76,11 +78,62 @@ function StageTimeline({ durations }) {
   );
 }
 
+function UsageBreakdown({ record }) {
+  const t = usageTotals(record);
+  if (t.rows.length === 0) {
+    return (
+      <p>
+        <CostLine item={record} />
+        {' - '}
+        {formatTokens((record.usage || {}).total_tokens || 0)} tokens
+      </p>
+    );
+  }
+  return (
+    <table className="data-table usage-breakdown">
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Model</th>
+          <th>Tokens in / out</th>
+          <th>Latency</th>
+          <th>Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        {t.rows.map((r, i) => (
+          <tr key={i}>
+            <td>{stageLabel(r.stage)}</td>
+            <td className="mono">{r.model}</td>
+            <td className="mono">
+              {r.stage === 'sam'
+                ? `${formatTokens(r.images)} img`
+                : `${formatTokens(r.prompt)} / ${formatTokens(r.completion)}`}
+            </td>
+            <td className="mono">{formatLatency(r.ms)}</td>
+            <td className="mono">{r.priced ? formatUSD(r.costCents) : 'not yet priced'}</td>
+          </tr>
+        ))}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Total</td>
+          <td className="mono">{'\u2014'}</td>
+          <td className="mono">
+            {formatTokens(t.tokens)}
+            {t.images > 0 ? ` + ${formatTokens(t.images)} img` : ''}
+          </td>
+          <td className="mono">{formatLatency(t.latencyMs)}</td>
+          <td className="mono">{t.priced ? `${formatUSD(t.costCents)} estimated` : 'not yet priced'}</td>
+        </tr>
+      </tfoot>
+    </table>
+  );
+}
+
 function DetailCard({ record, onClose, apiKey, onReviewed, profile }) {
   const status = statusOf({ review_status: record.review_status });
   const sum = summarize(record);
-  const trace = record.model_trace || {};
-  const usage = record.usage || {};
   const [overlays, setOverlays] = useState([]);
   const [overlayNote, setOverlayNote] = useState('');
   const [reviewStatus, setReviewStatus] = useState('');
@@ -149,15 +202,7 @@ function DetailCard({ record, onClose, apiKey, onReviewed, profile }) {
       <h3>Stage timeline</h3>
       <StageTimeline durations={record.durations_ms || {}} />
       <h3>Cost and usage</h3>
-      <p>
-        <CostLine item={record} />
-        {' - '}
-        {usage.total_tokens || 0} tokens
-        {' - '}
-        models: {trace.sam}, {trace.vision}
-        {trace.vision_fallback_used ? ' (fallback)' : ''}, {trace.reasoning},{' '}
-        {trace.planning}
-      </p>
+      <UsageBreakdown record={record} />
       {overlays.length > 0 && (
         <div>
           <h3>Segmentation overlays</h3>
@@ -203,6 +248,7 @@ export default function InsightsPanel({ apiKey, onApiKey, profile }) {
   const [selectedId, setSelectedId] = useState(null);
   const [detail, setDetail] = useState(null);
   const [detailError, setDetailError] = useState('');
+  const loadToken = useRef(0);
 
   const load = useCallback(async () => {
     if (!apiKey) return;
@@ -212,7 +258,7 @@ export default function InsightsPanel({ apiKey, onApiKey, profile }) {
       const [s, h] = await Promise.all([
         fetchStats(apiKey),
         fetchInspections(apiKey, {
-          limit: 100,
+          limit: 200,
           reviewStatus: statusFilter,
           assetId: assetFilter,
         }),
@@ -231,9 +277,26 @@ export default function InsightsPanel({ apiKey, onApiKey, profile }) {
   }, [load]);
 
   async function selectRow(id) {
+    loadToken.current += 1;
+    const token = loadToken.current;
+    if (id === selectedId) {
+      setSelectedId(null);
+      setDetail(null);
+      setDetailError('');
+      return;
+    }
     setSelectedId(id);
     setDetail(null);
     setDetailError('');
+    try {
+      const rec = await fetchInspection(id, apiKey);
+      if (loadToken.current === token) setDetail(rec);
+    } catch (e) {
+      if (loadToken.current === token) setDetailError(e.message || String(e));
+    }
+  }
+
+  async function refreshDetail(id) {
     try {
       setDetail(await fetchInspection(id, apiKey));
     } catch (e) {
@@ -320,15 +383,18 @@ export default function InsightsPanel({ apiKey, onApiKey, profile }) {
             <Stat
               label="estimated cost"
               value={
-                stats.cost_priced_cents > 0
-                  ? `${stats.cost_priced_cents.toFixed(2)}¢`
-                  : '—'
+                stats.cost_priced_cents > 0 ? formatUSD(stats.cost_priced_cents) : '\u2014'
               }
               hint={
                 stats.cost_unpriced_count > 0
                   ? `${stats.cost_unpriced_count} calls not yet priced`
                   : 'metered at Meta rate card'
               }
+            />
+            <Stat
+              label="tokens metered"
+              value={formatTokens(rows.reduce((a, r) => a + (r.usage_total_tokens || 0), 0))}
+              hint={`across ${rows.length} loaded inspections`}
             />
             <Stat
               label="slowest typical call (p95)"
@@ -348,11 +414,14 @@ export default function InsightsPanel({ apiKey, onApiKey, profile }) {
           onSubmit={(e) => {
             e.preventDefault();
             setAssetFilter(assetDraft.trim());
+            setSelectedId(null);
+            setDetail(null);
+            setDetailError('');
           }}
         >
           <label>
             Review status
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setSelectedId(null); setDetail(null); setDetailError(''); }}>;
               <option value="">All</option>
               <option value="pending">Needs review</option>
               <option value="accept">Accepted</option>
@@ -376,6 +445,11 @@ export default function InsightsPanel({ apiKey, onApiKey, profile }) {
             </button>
           </div>
         </form>
+        {stats && rows.length < stats.n && (
+          <p className="hint">
+            Showing {rows.length} of {stats.n} inspections (refine filters to narrow).
+          </p>
+        )}
         {visible.length === 0 && !loading ? (
           <p className="hint">No inspections match these filters.</p>
         ) : (
@@ -407,12 +481,14 @@ export default function InsightsPanel({ apiKey, onApiKey, profile }) {
                 const status = statusOf(item);
                 const selected = item.request_id === selectedId;
                 return (
-                  <tr key={item.request_id}>
+                  <Fragment key={item.request_id}>
+                    <tr>
                     <td>
                       <button
                         type="button"
                         className="linklike"
                         aria-current={selected ? 'true' : undefined}
+                        aria-expanded={selected}
                         onClick={() => selectRow(item.request_id)}
                       >
                         <span className="mono">{formatTime(item.created_at)}</span>
@@ -431,7 +507,31 @@ export default function InsightsPanel({ apiKey, onApiKey, profile }) {
                     <td className="mono">
                       {item.cost_priced ? formatUSD(item.cost_cents) : 'not yet priced'}
                     </td>
-                  </tr>
+                    </tr>
+                    {selected && (
+                      <tr className="detail-row">
+                        <td colSpan={6}>
+                          {detailError && <div className="error">{detailError}</div>}
+                          {!detail && !detailError && <p>Loading inspection...</p>}
+                          {detail && (
+                            <DetailCard
+                              record={detail}
+                              apiKey={apiKey}
+                              profile={profile}
+                              onClose={() => {
+                                setDetail(null);
+                                setSelectedId(null);
+                              }}
+                              onReviewed={() => {
+                                refreshDetail(detail.request_id);
+                                load();
+                              }}
+                            />
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })}
             </tbody>
@@ -439,26 +539,7 @@ export default function InsightsPanel({ apiKey, onApiKey, profile }) {
         )}
       </div>
 
-      {detailError && (
-        <div className="panel">
-          <div className="error">{detailError}</div>
-        </div>
-      )}
-      {detail && (
-        <DetailCard
-          record={detail}
-          apiKey={apiKey}
-          profile={profile}
-          onClose={() => {
-            setDetail(null);
-            setSelectedId(null);
-          }}
-          onReviewed={() => {
-            selectRow(detail.request_id);
-            load();
-          }}
-        />
-      )}
+
     </div>
   );
 }
