@@ -1,6 +1,6 @@
 # Asset Intelligence — Documentation
 
-> Doc version: 1.3 | Updated: 2026-10-29 | Verified against: `5a83c3e`
+> Doc version: 1.4 | Updated: 2026-10-31 | Verified against: `2b6e515`
 
 Start here if you just joined the team. These guides get the repo running on your machine
 and explain how to work in it day to day.
@@ -15,6 +15,7 @@ and explain how to work in it day to day.
 | 4 | [Testing](TESTING.md) | Test suite, coverage gate, lint, CI |
 | 5 | [Troubleshooting](TROUBLESHOOTING.md) | Known gotchas and fixes (read when stuck) |
 | 6 | [Versions](VERSIONS.md) | Pinned versions: language, models, packages, ports |
+| 7 | [Deployment](DEPLOYMENT.md) | Local stack, HF Space demo, production pointer |
 
 ## Source-of-truth documents (repo root, read after onboarding)
 

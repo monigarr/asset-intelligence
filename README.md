@@ -63,6 +63,8 @@ checklist → human approve/reject. Run from a local drive, not a UNC path (Dock
 **Video:** the 90-second end-to-end demo video is an owner action in progress — the compose
 path above reproduces every beat of it live.
 
+Live demo and production paths: see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) (Hugging Face Space demo, production plan pointer).
+
 ## Architecture — Five Meta Stages, One Verifiable Pipeline
 
 ```mermaid

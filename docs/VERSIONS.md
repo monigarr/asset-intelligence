@@ -1,6 +1,6 @@
 # Versions
 
-> Doc version: 1.6 | Updated: 2026-10-29 | Verified against: `5a83c3e`
+> Doc version: 1.7 | Updated: 2026-10-31 | Verified against: `2b6e515`
 
 Single reference for every version that matters in this repo. When you change a pinned
 version, update this file in the same commit.
@@ -16,6 +16,7 @@ version, update this file in the same commit.
 | 1.4 | 2026-10-29 | Verified against `42211b5`: CI live/skip-gates, compose `$$` unescape, JWT escaping docs |
 | 1.5 | 2026-10-29 | Verified against `bc663e4`: Insights tab (history/stats endpoints, filterable UI); 178 tests |
 | 1.6 | 2026-10-29 | Verified against `5a83c3e`: marketing/ tracked, BRAND_KIT v2.1, DESIGN v1.1, version cross-refs synced |
+| 1.7 | 2026-10-31 | New DEPLOYMENT.md 1.0 (local, HF Space, production pointer); deploy/hf single-container image; docs README 1.4 |
 
 Guide docs carry their own `Doc version` headers; bump MINOR on content changes, MAJOR on
 restructuring, and add a row here.
