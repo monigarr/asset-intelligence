@@ -1,6 +1,6 @@
 # Architecture — Asset Intelligence (Winner Edition)
 
-- **Status:** Production-Ready Prototype for Meta Global AI Hackathon
+- **Status:** Production-Ready Prototype for [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon)
 - **Track:** Startup / Push the Frontier
 - **Version:** 1.2 (2026-10-29: Valkey/request-id errata; see §16)
 - **Date:** 2026-10-29

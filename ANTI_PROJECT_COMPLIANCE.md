@@ -1,7 +1,7 @@
 # ANTI-PROJECT COMPLIANCE VERIFICATION
 
 - **Project:** Asset Intelligence — Production Multimodal Infrastructure Intelligence
-- **Hackathon:** Meta Global AI Developer Hackathon — Startup / Push the Frontier
+- **Hackathon:** [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) — Startup / Push the Frontier
 - **Verification Date:** 2026-10-26
 - **Status:** ✅ PASS — Not considered overdone / anti-project
 

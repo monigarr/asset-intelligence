@@ -1,7 +1,7 @@
 # Asset Intelligence — PRD
 
 - **Project:** Asset Intelligence — Production Multimodal Infrastructure Intelligence Platform
-- **Hackathon:** Meta Global AI Developer Hackathon — Oct 26-Nov 4, 2026
+- **Hackathon:** [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) — Oct 26-Nov 4, 2026
 - **Track:** Startup / Push the Frontier
 - **Version:** 1.1 (2026-10-27: Wave-3 conformance sync; see §15) — Optimized for Judging
 - **Owner:** MoniGarr

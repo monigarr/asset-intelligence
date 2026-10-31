@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](Dockerfile)
 
-> **Meta Global AI Developer Hackathon — Startup Track / Push the Frontier**
+> **[Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) — Startup Track / Push the Frontier**
 > README v2.4 · Updated 2026-10-29 · Verified against `5a83c3e` · Meta-only stack, no OpenAI
 
 **One-liner:** Asset Intelligence gives machines a new capability — seeing infrastructure
@@ -295,7 +295,7 @@ via the authenticated API.
 
 ---
 
-Built for the Meta Global AI Developer Hackathon — Startup / Push the Frontier.
+Built for the [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) — Startup / Push the Frontier.
 100% Meta stack. Production-ready. No OpenAI.
 
 Copyright 2026 Monica Peters

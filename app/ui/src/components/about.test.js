@@ -4,7 +4,7 @@ import { ABOUT, SECTIONS, TAGLINE, YOUTUBE_URL } from './about.js';
 describe('about content', () => {
   it('links to the repo, hackathon, and product', () => {
     expect(ABOUT.githubUrl).toBe('https://github.com/monigarr/asset-intelligence');
-    expect(ABOUT.hackathonUrl).toBe('https://dev.meta.ai/');
+    expect(ABOUT.hackathonUrl).toBe('https://dev.meta.ai/events/global-hackathon');
     expect(ABOUT.contactUrl).toBe('https://manageassets.ca/contact/');
     expect(ABOUT.companyUrl).toBe('https://manageassets.ca/');
   });

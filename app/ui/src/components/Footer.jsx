@@ -14,7 +14,9 @@ export default function Footer() {
         {sep}
         {FOOTER.middle}
         {sep}
-        {FOOTER.event}
+        <a href={FOOTER.eventUrl} target="_blank" rel="noreferrer">
+          {FOOTER.event}
+        </a>
       </p>
       <p>
         <strong>{FOOTER.product}</strong> {FOOTER.dash} {FOOTER.promise}

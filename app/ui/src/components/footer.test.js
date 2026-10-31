@@ -8,7 +8,8 @@ describe('FOOTER', () => {
     expect(FOOTER.company).toBe('Manage Assets Inc.');
     expect(FOOTER.companyUrl).toBe('https://manageassets.ca/');
     expect(FOOTER.middle).toBe('Open-Source AI Extension');
-    expect(FOOTER.event).toBe('Meta Global AI Hackathon');
+    expect(FOOTER.event).toBe('Meta Global AI Developer Hackathon');
+    expect(FOOTER.eventUrl).toBe('https://dev.meta.ai/events/global-hackathon');
     expect(FOOTER.separator).toBe('\u00b7');
   });
 

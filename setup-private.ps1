@@ -2,7 +2,7 @@
 # PowerShell 5.1+ / PowerShell 7+ compatible
 param()
 
-Write-Host "🔧 Setting up private dev pack for Meta Global AI Hackathon — Startup Track" -ForegroundColor Cyan
+Write-Host "🔧 Setting up private dev pack for Meta Global AI Developer Hackathon — Startup Track" -ForegroundColor Cyan
 $repoRoot = Get-Location
 Write-Host "📁 Repo root: $repoRoot" -ForegroundColor Gray
 

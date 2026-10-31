@@ -1,6 +1,6 @@
 # PRIVATE_DEV_GUIDE — Startup Track Private Development Playbook
 
-- **Project:** Asset Intelligence — Meta Global AI Hackathon
+- **Project:** Asset Intelligence — [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon)
 - **Mode:** Private Development → Public Submission
 - **Track:** Startup / Push the Frontier
 - **Goal:** Build privately without disqualifying, leaking secrets, or mixing proprietary Manage Assets code
@@ -335,7 +335,7 @@ cp ARCHITECTURE.md ARCHITECTURE.md
 rm -rf .git
 git init
 git add .
-git commit -m "feat: initial public submission - Meta Global AI Hackathon - 5-model pipeline - production ready"
+git commit -m "feat: initial public submission - Meta Global AI Developer Hackathon - 5-model pipeline - production ready"
 # 4. Push to public
 gh repo create monigarr/asset-intelligence --public --source=. --push
 # OR manually: git remote add origin ... && git push -u origin main
