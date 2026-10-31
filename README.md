@@ -18,6 +18,19 @@ validate) with a 50-case live eval harness, cost metering, OTEL tracing, and CI.
 track is judged on technical execution and whether it holds up in production — this README
 shows the receipts.
 
+**Need a customized implementation?**
+
+Asset Intelligence is open source, but you don't have to build alone.
+
+Developed by Monica Peters, Founder of Manage Assets Inc. and the original Applied AI Architect and Engineer behind this extension, Asset Intelligence is available for customization, integration, and further development.
+
+**Manage Assets Inc. offers professional engineering services**, including custom software development, applied AI engineering, platform integration, software architecture consulting, and technical collaboration with your engineering team.
+
+**Looking for the complete commercial platform?** Visit [ManageAssets.ca](https://manageassets.ca/) to explore and purchase our proprietary, self-hosted asset-management software.
+
+**Custom engineering & consulting:** [monica@ManageAssets.net](mailto:monica@ManageAssets.net)  
+**Commercial software:** [ManageAssets.ca](https://manageassets.ca/)
+
 ## Why This Wins — Judging Alignment
 
 Finished projects are scored on impact (30%), creative use of Meta tools (25%), demo (25%),
@@ -208,6 +221,53 @@ UI are open; paid tiers add hosted API, SSO, audit logs, SLAs, and air-gapped on
 auditable property captioning tools and closed SaaS cannot offer.
 **Why now:** SAM 3.1 + Muse Spark make zero-shot physical-defect understanding possible
 without labeled data — a market that did not exist 12 months ago.
+
+## Commercial Platform & Professional Engineering Services
+
+### Extend. Integrate. Engineer.
+
+Asset Intelligence is an open-source extension developed by **Monica Peters, Founder and Applied AI Architect / Engineer at [Manage Assets Inc.](https://manageassets.ca/)**.
+
+It is designed to extend our proprietary **Manage Assets** enterprise asset-management platform, providing self-hosted software solutions for organizations across the United States and Canada.
+
+### Need Custom Development or Engineering Support?
+
+**The Manage Assets Inc. team is available for professional engineering engagements.**
+
+We work with organizations and their engineering teams to customize, integrate, and extend open-source software for their operational and technical requirements.
+
+Our services include:
+
+- **Custom software development:** Adapt Asset Intelligence and develop additional capabilities for your organization's workflows.
+- **Applied AI engineering:** Build and customize AI pipelines, image analysis, evidence extraction, and human-review workflows.
+- **Platform integration:** Connect open-source extensions with the proprietary Manage Assets platform, APIs, and customer systems.
+- **Software architecture:** Technical architecture, system design, engineering reviews, and implementation planning.
+- **Engineering-team consulting:** Collaborate directly with your developers on customization, integration, implementation, and technical knowledge transfer.
+- **Self-hosted deployment:** Technical assistance with installation, configuration, integrations, and deployment.
+
+Engagements can be scoped around a specific extension, integration, engineering project, or longer-term technical collaboration.
+
+### Get the Manage Assets Platform
+
+Looking for the complete commercial asset-management solution?
+
+**[Visit ManageAssets.ca](https://manageassets.ca/)** to explore and purchase Manage Assets, our proprietary self-hosted enterprise asset-management software.
+
+Organizations can deploy the platform on infrastructure they control and extend its capabilities through compatible open-source extensions and custom engineering.
+
+### Work With Manage Assets Inc.
+
+Manage Assets Inc. was founded by **Monica Peters**, who architected and independently engineered Asset Intelligence.
+
+Our company brings together applied AI, software architecture, engineering, and infrastructure-management expertise to help organizations build and extend their operational technology.
+
+**Company:** [Manage Assets Inc.](https://manageassets.ca/)
+**Professional Services:** monica@ManageAssets.net
+**Software:** [ManageAssets.ca](https://manageassets.ca/)
+**Founder & Technical Architect:** [MoniGarr.com](https://monigarr.com/)
+**GitHub:** [github.com/monigarr](https://github.com/monigarr)
+
+*Open-source extensions. Proprietary self-hosted software. Professional engineering services.*
 
 ## Responsible Use & Safety
 
