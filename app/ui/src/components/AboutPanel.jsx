@@ -1,15 +1,14 @@
-﻿import { ABOUT, SECTIONS, YOUTUBE_URL } from './about.js';
+import { ABOUT, SECTIONS, YOUTUBE_URL } from './about.js';
 
 export default function AboutPanel() {
   return (
-    <div className="panel">
+    <div className="panel about-panel">
       <h2>{ABOUT.title}</h2>
       <nav className="about-nav" aria-label="About sections">
-        {SECTIONS.map((s, i) => (
-          <span key={s.id}>
-            {i > 0 && <span aria-hidden="true">{' \u00b7 '}</span>}
-            <a href={`#${s.id}`}>{s.label}</a>
-          </span>
+        {SECTIONS.map((s) => (
+          <a key={s.id} href={`#${s.id}`}>
+            {s.label}
+          </a>
         ))}
       </nav>
       <section id="about-product" aria-label="About">

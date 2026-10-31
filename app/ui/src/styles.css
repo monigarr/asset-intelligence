@@ -496,5 +496,18 @@ button.nav-icon { font: inherit; }
 .app-footer p { margin: 4px 0; }
 .app-footer a { color: inherit; }
 
-.about-nav { font-size: 13px; margin: 0 0 12px; color: var(--muted); }
-.about-nav a { color: inherit; }
+.about-panel h2 { font-size: 20px; }
+.about-panel h3 { font-size: 18px; }
+.about-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+.about-nav a {
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff;
+  background: var(--accent);
+  padding: 6px 14px;
+  border-radius: 999px;
+}
+.about-nav a:hover { text-decoration: underline; }
+:root[data-theme="dark"] .about-nav a { color: #18181b; }
+:root[data-theme="contrast"] .about-nav a { color: #18181b; }
