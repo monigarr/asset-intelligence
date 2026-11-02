@@ -276,6 +276,6 @@ Start at [`docs/README.md`](docs/README.md). Apache 2.0 - see [`LICENSE`](LICENS
 
 ---
 
-Built for the [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) - Startup / Push the Frontier.
-100% Meta stack. No OpenAI.
+Built during the [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) - Startup / Push the Frontier for Manage Assets Inc.
+100% Meta stack. 
 Copyright 2026 Monica Peters
