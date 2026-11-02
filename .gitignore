@@ -153,3 +153,6 @@ docs/PRIVATE_AUDIT.md
 
 # Production deployment plan (owner-only, never commit)
 DEPLOYMENT_PRODUCTION_PLAN.md
+
+# Private timestamped reports (owner-only, never commit)
+private_reports/
