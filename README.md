@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](Dockerfile)
 
 > Built for the [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) - Startup Track / Push the Frontier
-> README v2.6 | Updated 2026-11-02 | Verified against `e110201` | Meta-only stack
+> README v2.7 | Updated 2026-11-02 | Verified against `ffd16da` | Meta-only stack
 
 Asset Intelligence turns field photos plus crew notes into auditable maintenance intelligence: SAM 3.1 segments defects, Muse Spark 1.3 Vision fuses image and note, Spark 1.3 reasons with cited evidence, and Muse Wonder 1.0 drafts next steps - with a human review gate on every output.
 
@@ -96,6 +96,8 @@ Abridged real response shape:
   "durations_ms": {"sam": 5944.1, "vision": 12092.9, "spark": 10450.6, "wonder": 6853.6, "validate": 0.4}
 }
 ```
+
+New to the API? Start with [`README_FAST_API.md`](README_FAST_API.md) for the team onboarding guide.
 
 ## Configuration
 
@@ -197,6 +199,8 @@ python -m eval.run --mode live --cases-dir eval/cases/synthetic --out live_repor
 |__ Dockerfile          # python:3.12-slim, single worker, healthcheck
 |__ Makefile            # dev, run, test, verify-meta-only, lint
 |__ PRD.md / ARCHITECTURE.md / SECURITY.md / AUDIT.md
+|__ PRD_BASETEN.md / PRD_MODAL.md  # draft optional plans (unapproved)
+|__ README_FAST_API.md            # FastAPI team onboarding
 |__ README.md           # this file
 ```
 

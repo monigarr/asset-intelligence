@@ -1,6 +1,6 @@
 # Versions
 
-> Doc version: 1.8 | Updated: 2026-10-31 | Verified against: `379af51`
+> Doc version: 1.9 | Updated: 2026-11-02 | Verified against: `ffd16da`
 
 Single reference for every version that matters in this repo. When you change a pinned
 version, update this file in the same commit.
@@ -18,6 +18,7 @@ version, update this file in the same commit.
 | 1.6 | 2026-10-29 | Verified against `5a83c3e`: marketing/ tracked, BRAND_KIT v2.1, DESIGN v1.1, version cross-refs synced |
 | 1.7 | 2026-10-31 | New DEPLOYMENT.md 1.0 (local, HF Space, production pointer); deploy/hf single-container image; docs README 1.4 |
 | 1.8 | 2026-10-31 | Live Space URL in README (v2.5) and DEPLOYMENT.md 1.1 |
+| 1.9 | 2026-11-02 | README v2.7 (hash sync, API guide pointer, tree sync), README_FAST_API.md new, PRD_BASETEN/MODAL drafts, docs README 1.5 |
 
 Guide docs carry their own `Doc version` headers; bump MINOR on content changes, MAJOR on
 restructuring, and add a row here.

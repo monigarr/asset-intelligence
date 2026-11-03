@@ -1,6 +1,6 @@
 # Asset Intelligence — Documentation
 
-> Doc version: 1.4 | Updated: 2026-10-31 | Verified against: `2b6e515`
+> Doc version: 1.5 | Updated: 2026-11-02 | Verified against: `ffd16da`
 
 Start here if you just joined the team. These guides get the repo running on your machine
 and explain how to work in it day to day.
@@ -25,6 +25,8 @@ and explain how to work in it day to day.
 - `BRAND_KIT.md` v2.1 — logos, tokens, usage law.
 - `SECURITY.md` — threat model, auth, secret handling.
 - `AUDIT.md` — known gaps and risks.
+- `README_FAST_API.md` - FastAPI team onboarding (repo root).
+- `PRD_BASETEN.md` / `PRD_MODAL.md` - draft optional-integration plans (repo root, unapproved).
 - `AGENT_BUILD_GUIDE.md` / `PRIVATE_DEV_GUIDE.md` — maintainer-owned build notes.
 
 ## Conventions
