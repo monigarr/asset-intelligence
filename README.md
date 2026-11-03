@@ -127,7 +127,7 @@ pre-commit install
 Copy-Item .env.example .env   # META_API_KEY only needed for live calls
 
 python -m eval.run --mode mocked --out eval/report.json   # 50/50 green, no key
-python -m pytest tests/ -q --cov=app --cov-fail-under=70  # 178 tests, ~89%
+python -m pytest tests/ -q --cov=app --cov-fail-under=70  # 181 tests, ~89%
 ruff check app/ eval/ tests/                              # must be clean
 python -m uvicorn --factory app.api.main:create_app --host 127.0.0.1 --port 8000
 ```
@@ -192,7 +192,7 @@ python -m eval.run --mode live --cases-dir eval/cases/synthetic --out live_repor
 |   |__ synthetic/      # Muse Image case generator (50 eval cases)
 |__ eval/               # 50-case harness: mocked + live, gates, report.json
 |__ eval/cases/         # 50 JSONs + 50 PNGs committed (~205 MB)
-|__ tests/              # 178 tests incl. Meta-only + cert-pattern drift tests
+|__ tests/              # 181 tests incl. Meta-only + cert-pattern drift tests
 |__ docs/               # Onboarding guides with version matrix
 |__ live_reports/       # Timestamped live eval reports (local-only, gitignored)
 |__ docker-compose.yml  # API :8000, UI :3000, OTEL, Prometheus, Valkey (MinIO returns with M3)

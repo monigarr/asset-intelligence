@@ -95,4 +95,4 @@ per the private build plan.)
 | mask IoU | ≥ 0.55 (mocked only) | n/a live |
 | ECE | ≤ 0.15 (needs labels) | n/a (unlabeled cases) |
 
-Unit suite: 178 tests, coverage gate 70% (currently ~89%). Report: `live_reports/`.
+Unit suite: 181 tests, coverage gate 70% (currently ~89%). Report: `live_reports/`.

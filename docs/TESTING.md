@@ -8,7 +8,7 @@
 python -m pytest tests/ -q --cov=app --cov-fail-under=70
 ```
 
-Current state: 178 tests, ~89% coverage, gate is 70%. Relevant test file or package must pass
+Current state: 181 tests, ~89% coverage, gate is 70%. Relevant test file or package must pass
 for any area you touch; never narrow a failing run (`-k 'not ...'`, `--deselect`, skips) to
 make it green.
 
