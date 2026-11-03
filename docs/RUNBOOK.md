@@ -117,7 +117,7 @@ images + note → SAM segment → Vision fuse → Spark draft → Wonder plan �
 
 Per-stage wall-clock timings are recorded in `durations_ms` on every result and aggregated
 as `stage_p95_ms` in eval reports. The chain is serial by design (each stage consumes the
-previous stage's output); see `ARCHITECTURE.md` before attempting to parallelize it.
+previous stage's output); parallelizing needs a latency-architecture decision (see the Roadmap in README.md).
 
 ## Data handling and retention (operators)
 

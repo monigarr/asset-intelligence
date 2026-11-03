@@ -17,17 +17,11 @@ and explain how to work in it day to day.
 | 6 | [Versions](VERSIONS.md) | Pinned versions: language, models, packages, ports |
 | 7 | [Deployment](DEPLOYMENT.md) | Local stack, HF Space demo, production pointer |
 
-## Source-of-truth documents (repo root, read after onboarding)
+## Key documents (repo root)
 
-- `PRD.md` v1.1 — product requirements.
-- `ARCHITECTURE.md` v1.2 — system design and module contracts.
-- `DESIGN.md` v1.1 — UI/UX design law + polish plan.
-- `BRAND_KIT.md` v2.1 — logos, tokens, usage law.
 - `SECURITY.md` — threat model, auth, secret handling.
-- `AUDIT.md` — known gaps and risks.
 - `README_FAST_API.md` - FastAPI team onboarding (repo root).
-- `PRD_BASETEN.md` / `PRD_MODAL.md` - draft optional-integration plans (repo root, unapproved).
-- `AGENT_BUILD_GUIDE.md` / `PRIVATE_DEV_GUIDE.md` — maintainer-owned build notes.
+Internal build specs (PRD, architecture, agent guides) are maintained privately and are not part of the public repo.
 
 ## Conventions
 

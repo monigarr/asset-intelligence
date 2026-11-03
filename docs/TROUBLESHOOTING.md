@@ -102,5 +102,5 @@ It is a runtime dependency (`meta_sam_parser>=0.1.0` in `requirements.txt`) used
 ## Still stuck?
 
 1. Re-run the [Getting Started](GETTING_STARTED.md) verification steps to isolate the layer.
-2. Check `AUDIT.md` (repo root) — your issue may be a documented known gap.
+2. Re-check `docs/RUNBOOK.md` for operator notes, then capture logs (step 3) and file an Issue.
 3. Capture the exact command, exit code, and last ~20 lines of output before asking for help.

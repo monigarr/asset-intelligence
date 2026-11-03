@@ -156,3 +156,16 @@ DEPLOYMENT_PRODUCTION_PLAN.md
 
 # Private timestamped reports (owner-only, never commit)
 private_reports/
+
+# Builder-only docs (maintained privately, not part of the public repo)
+PRD.md
+ARCHITECTURE.md
+AGENT_BUILD_GUIDE.md
+PRIVATE_DEV_GUIDE.md
+ANTI_PROJECT_COMPLIANCE.md
+PRD_BASETEN.md
+PRD_MODAL.md
+AUDIT.md
+DESIGN.md
+BRAND_KIT.md
+setup-private.ps1

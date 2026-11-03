@@ -71,7 +71,7 @@ starlette==1.10.0
 ```
 
 (Full transitive freeze: run `pip freeze` in your venv. A committed `sbom.txt` is planned
-per `PRIVATE_DEV_GUIDE.md`.)
+per the private build plan.)
 
 ## Compose image pins
 

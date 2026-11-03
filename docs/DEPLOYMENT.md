@@ -82,7 +82,7 @@ endpoint behind your Meta key attracts abuse.
 
 Production (managed Postgres, object storage, CD, SSO, SLOs) follows the
 owner-only plan `DEPLOYMENT_PRODUCTION_PLAN.md`, which is gitignored and
-never committed. Direction matches ARCHITECTURE.md section 8: gateway on
+never committed. Direction: gateway on
 Fly.io or Render, SAM work on serverless GPUs, R2 storage, managed Postgres.
 Team members: do not improvise a production deploy - ask the owner for the
 current phase and the staging URL.
@@ -92,5 +92,5 @@ current phase and the staging URL.
 - [Configuration](CONFIGURATION.md) - every variable, safe defaults.
 - [Runbook](RUNBOOK.md) - API, stack, evals, case generation.
 - [Troubleshooting](TROUBLESHOOTING.md) - ports, keys, compose, 413s.
-- Repo root: PRD.md v1.1 (requirements), ARCHITECTURE.md v1.2 (design),
-  SECURITY.md (auth and secrets), DESIGN.md (UI law).
+- Repo root: README.md (start here), README_FAST_API.md (API onboarding),
+  SECURITY.md (auth and secrets).

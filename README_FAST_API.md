@@ -111,7 +111,7 @@ Rate limiting keys by API key (or token digest, or IP), via slowapi: `memory://`
 
 ## 9. Go deeper
 
-- Contracts and stage design: `ARCHITECTURE.md` (sections 4 and 11 for limits and error map).
+- Limits and error map: section 6 above; operations: `docs/RUNBOOK.md`.
 - All settings: `.env.example` + `docs/CONFIGURATION.md`.
 - Auth and threat model: `SECURITY.md`.
 - Test and eval workflow: `docs/TESTING.md` (`python -m pytest tests/ -q`, `python -m eval.run --mode mocked`).

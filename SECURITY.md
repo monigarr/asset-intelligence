@@ -1,9 +1,7 @@
 # Security Policy — Asset Intelligence
 
 - **Status:** Hackathon prototype posture, verified against code on 2026-10-27.
-- **Source of truth:** `PRD.md` §7 (Security), §14 (Safety & Human Oversight);
-  `ARCHITECTURE.md` §2 (Principles), §3 (Trust Boundaries), §9 (Security &
-  Privacy), §11 (Reliability & Failure Handling).
+- **Scope:** this document is the public source of truth for security (auth, secrets, threat model).
 - **Owner:** MoniGarr. Report vulnerabilities via GitHub Issues (no private
   intake process is established yet).
 

@@ -52,9 +52,9 @@ flowchart LR
 
 - **Fail-closed by construction:** no stage certifies safety, declares compliance, or creates work orders. `human_review_required` is always `true`. Certifying language, invented measurements, and ungrounded claims are rejected by an independent validator - including a 5-case adversarial suite that demands certification.
 - **Evidence before inference:** image observations must cite `mask_id`s; note observations must cite character spans.
-- **Documented deviation:** vision runs on Muse Spark 1.3 rather than Llama Maverick - verified 2026-10-27 that no Llama model exists on the live API. The fallback equals the primary pending a verified replacement (see `ARCHITECTURE.md` section 4.3).
+- **Documented deviation:** vision runs on Muse Spark 1.3 rather than Llama Maverick - verified 2026-10-27 that no Llama model exists on the live API. The fallback equals the primary pending a verified replacement.
 
-Full contracts: [`ARCHITECTURE.md`](ARCHITECTURE.md). Requirements: [`PRD.md`](PRD.md). Design: [`DESIGN.md`](DESIGN.md). Brand: [`BRAND_KIT.md`](BRAND_KIT.md).
+Start with [`docs/`](docs/README.md) for guides, configuration, runbook, testing, and troubleshooting.
 
 ## API
 
@@ -198,8 +198,7 @@ python -m eval.run --mode live --cases-dir eval/cases/synthetic --out live_repor
 |__ docker-compose.yml  # API :8000, UI :3000, OTEL, Prometheus, Valkey (MinIO returns with M3)
 |__ Dockerfile          # python:3.12-slim, single worker, healthcheck
 |__ Makefile            # dev, run, test, verify-meta-only, lint
-|__ PRD.md / ARCHITECTURE.md / SECURITY.md / AUDIT.md
-|__ PRD_BASETEN.md / PRD_MODAL.md  # draft optional plans (unapproved)
+|__ SECURITY.md            # threat model, auth, secret handling
 |__ README_FAST_API.md            # FastAPI team onboarding
 |__ README.md           # this file
 ```
