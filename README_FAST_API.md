@@ -57,7 +57,7 @@ Invoke-RestMethod http://127.0.0.1:8000/v1/auth/refresh -Method POST -ContentTyp
 Privacy note: every image is orientation-normalized and re-encoded with EXIF (GPS included) stripped before anything downstream sees it.
 
 ```powershell
-curl.exe -X POST http://127.0.0.1:8000/v1/inspections -H "X-API-Key: local-dev-key-123" -F "images=@culvert.jpg" -F "note=crack near top edge with seepage" -F "asset_meta={`"asset_id`":`"DEMO-001"}"
+curl.exe -X POST http://127.0.0.1:8000/v1/inspections -H "X-API-Key: <your-key>" -F "images=@culvert.jpg" -F "note=crack near top edge with seepage" -F "asset_meta={`"asset_id`":`"DEMO-001"}"
 ```
 
 The response is the stored record JSON, including `request_id`, `segmentations` (RLE masks), `observations` with evidence pointers, `discrepancies`, `missing_information`, `recommended_next_step`, `human_review_required: true`, `model_trace`, `cost_cents` / `cost_priced`, and per-stage `durations_ms`. Expect tens of seconds on live mode (four serial model calls).
