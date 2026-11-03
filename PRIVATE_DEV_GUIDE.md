@@ -2,7 +2,7 @@
 
 - **Project:** Asset Intelligence — [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon)
 - **Mode:** Private Development → Public Submission
-- **Track:** Startup / Push the Frontier
+- **Track:** Startup / Build for Your World
 - **Goal:** Build privately without disqualifying, leaking secrets, or mixing proprietary Manage Assets code
 
 ## 1. Why Private Dev is Allowed & Recommended

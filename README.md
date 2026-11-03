@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](Dockerfile)
 
-> Built for the [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) - Startup Track / Push the Frontier
+> Built for the [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) - Startup Track / Build for Your World
 > README v2.7 | Updated 2026-11-02 | Verified against `ffd16da` | Meta-only stack
 
 Asset Intelligence turns field photos plus crew notes into auditable maintenance intelligence: SAM 3.1 segments defects, Muse Spark 1.3 Vision fuses image and note, Spark 1.3 reasons with cited evidence, and Muse Wonder 1.0 drafts next steps - with a human review gate on every output.
@@ -280,6 +280,6 @@ Start at [`docs/README.md`](docs/README.md). Apache 2.0 - see [`LICENSE`](LICENS
 
 ---
 
-Built during the [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) - Startup / Push the Frontier for Manage Assets Inc.
+Built during the [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) - Startup / Build for Your World for Manage Assets Inc.
 100% Meta stack. 
 Copyright 2026 Monica Peters

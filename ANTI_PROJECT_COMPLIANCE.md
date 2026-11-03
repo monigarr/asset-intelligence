@@ -1,7 +1,7 @@
 # ANTI-PROJECT COMPLIANCE VERIFICATION
 
 - **Project:** Asset Intelligence — Production Multimodal Infrastructure Intelligence
-- **Hackathon:** [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) — Startup / Push the Frontier
+- **Hackathon:** [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) — Startup / Build for Your World
 - **Verification Date:** 2026-10-26
 - **Status:** ✅ PASS — Not considered overdone / anti-project
 
@@ -26,9 +26,9 @@ AI generated medical advice, basic RAG apps, simple image analyzers, streamlit a
 | Personality Analyzers | MBTI from text / social media — low utility, high bias risk | No personality, no psychometrics. Observations are physical: "Visible linear crack near top edge with active seepage" linked to SAM mask, not personality traits. | PRD Output Example: physical defect, not personality |
 | Sports Analyzers or Coaches | Game analysis, fitness coach — overdone | No sports. Asset types: drainage structure, culvert, pavement, bridge component. Use case is public works inspection, not athletic performance. | PRD §4 Primary Use Case: field worker records condition affecting infrastructure asset |
 
-## Why This Project is Push the Frontier (Opposite of Overdone)
+## Why This Project is Build for Your World (Opposite of Overdone)
 
-Judging guidance for Push the Frontier: "Give a machine a new capability, accelerate a scientific experiment, or unlock a better way to understand and control a physical system. Show us what becomes possible when these models meet the real world."
+Judging guidance for Build for Your World: "Bring Meta's models into your domain. Solve a problem you know firsthand, free up time and mental space, and make something possible that wasn't before."
 
 Asset Intelligence does exactly that:
 
@@ -60,7 +60,7 @@ Use keywords judges scan for:
 - "Human review required"
 - "Production-ready FastAPI + OTEL + cost metering"
 - "Meta-only: 5 models via Meta Model API"
-- "Push the Frontier: physical system understanding"
+- "Build for Your World: physical system understanding"
 
 **Avoid These Phrases (trigger overdone filter):**
 
@@ -86,4 +86,4 @@ Asset Intelligence is NOT an overdone project: it is not medical advice, RAG, si
 - [ ] README first paragraph mentions 5 Meta models + evidence traceability
 - [ ] Demo shows mask overlay click → evidence highlight
 
-Result: ✅ PASS — Project is classified as novel Push the Frontier infrastructure intelligence, not overdone.
+Result: ✅ PASS — Project is classified as novel Build for Your World infrastructure intelligence, not overdone.

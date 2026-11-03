@@ -2,7 +2,7 @@
 
 - **Project:** Asset Intelligence — Production Multimodal Infrastructure Intelligence Platform
 - **Hackathon:** [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon) — Oct 26-Nov 4, 2026
-- **Track:** Startup / Push the Frontier
+- **Track:** Startup / Build for Your World
 - **Version:** 1.1 (2026-10-27: Wave-3 conformance sync; see §15) — Optimized for Judging
 - **Owner:** MoniGarr
 - **Stack Mandate:** Meta-Only (No OpenAI / Direct Competitors)
@@ -17,7 +17,7 @@ Finished projects are scored on impact (30%), how creatively they use Meta's AI 
 
 | Judging Criterion | How We Ace It | Weight |
 | --- | --- | --- |
-| Impact 30% | Addresses $2.3T US deferred infrastructure maintenance backlog. Directly enables municipal crews, utilities, public works. Push the Frontier: "Give a machine a new capability... unlock a better way to understand and control a physical system." | 30% |
+| Impact 30% | Addresses $2.3T US deferred infrastructure maintenance backlog. Directly enables municipal crews, utilities, public works. Build for Your World: "Bring Meta's models into your domain. Solve a problem you know firsthand, free up time and mental space, and make something possible that wasn't before." | 30% |
 | Creative Meta Use 25% | Orchestrates 5 stages over 4 Meta models: SAM 3.1 for defect segmentation, Muse Spark 1.3 for vision fusion, Muse Spark 1.3 for structured reasoning, Muse Wonder 1.0 for multi-step maintenance planning, Muse Image 1.0 for synthetic eval data. All via Meta Model API; open-weights fallback deferred (no Llama model on the live API, verified 2026-10-27). | 25% |
 | Demo + Video 25% | 90-second end-to-end: upload cracked culvert photo + field note → SAM mask → structured JSON → uncertainty flags → draft work order. One-click docker compose up. No proprietary deps. | 25% |
 | Technical Depth 20% + Startup Track | Production checklist: FastAPI + Pydantic v2 validation, JWT auth, OTEL tracing, bounded retries, cost metering, evaluation harness, CI/CD, SBOM. Judged on technical execution and whether it holds up in production | 20% |

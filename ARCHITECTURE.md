@@ -1,7 +1,7 @@
 # Architecture — Asset Intelligence (Winner Edition)
 
 - **Status:** Production-Ready Prototype for [Meta Global AI Developer Hackathon](https://dev.meta.ai/events/global-hackathon)
-- **Track:** Startup / Push the Frontier
+- **Track:** Startup / Build for Your World
 - **Version:** 1.2 (2026-10-29: Valkey/request-id errata; see §16)
 - **Date:** 2026-10-29
 - **Mandate:** Meta-Only Stack — Zero OpenAI Dependency
@@ -12,7 +12,7 @@ Asset Intelligence transforms physical infrastructure inspection evidence (photo
 
 **Judging:** impact 30%, creative use of Meta's tools 25%, demo+video 25%, technical depth 20%. Startup track judged on technical execution and whether it holds up in production.
 
-**Theme:** Push the Frontier — "Give a machine a new capability... unlock a better way to understand and control a physical system". We give vision models physical defect understanding + evidence-grounded reasoning.
+**Theme:** Build for Your World — "Bring Meta's models into your domain. Solve a problem you know firsthand, free up time and mental space, and make something possible that wasn't before." We give vision models physical defect understanding + evidence-grounded reasoning.
 
 ## 2. Principles
 
